@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Dati locali / runtime
+*.sqlite3
+*.db
+data/cache/
+.env
+.env.*
+!.env.example
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Playwright
+test-results/
+playwright-report/

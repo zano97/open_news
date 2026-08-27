@@ -1,0 +1,300 @@
+/* Open News — foglio di stile scritto a mano, nessun framework.
+   Estetica: quotidiano di inizio Novecento; leggibilità e accessibilità prima di tutto
+   (WCAG 2.1 AA: contrasto >= 4.5:1, focus visibile, prefers-reduced-motion). */
+
+/* ---------- Font self-hosted (OFL) — scaricati con `make fonts` ---------- */
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/static/fonts/PlayfairDisplay-Bold.woff2") format("woff2"),
+       url("/static/fonts/PlayfairDisplay-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Playfair Display";
+  src: url("/static/fonts/PlayfairDisplay-Black.woff2") format("woff2"),
+       url("/static/fonts/PlayfairDisplay-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("/static/fonts/EBGaramond-Regular.woff2") format("woff2"),
+       url("/static/fonts/EBGaramond-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("/static/fonts/EBGaramond-Italic.woff2") format("woff2"),
+       url("/static/fonts/EBGaramond-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("/static/fonts/EBGaramond-Bold.woff2") format("woff2"),
+       url("/static/fonts/EBGaramond-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Special Elite";
+  src: url("/static/fonts/SpecialElite-Regular.woff2") format("woff2"),
+       url("/static/fonts/SpecialElite-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* ---------- Palette: carta e inchiostro, un solo accento ---------- */
+:root {
+  --carta: #f4ecd8;
+  --carta-scura: #eadfc4;      /* riquadri, schede */
+  --inchiostro: #1a1a1a;
+  --seppia: #5f5142;           /* metadati: contrasto 6.2:1 su carta */
+  --accento: #8b2e2e;          /* rosso mattone: link e interattivi */
+  --accento-vivo: #6f2424;
+  --filetto: #b5a68a;
+
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-corpo: "EB Garamond", "Georgia", "Times New Roman", serif;
+  --font-macchina: "Special Elite", "Courier New", monospace;
+
+  --misura: 34rem;             /* larghezza colonna di lettura */
+}
+
+/* Edizione notturna: carta scura, inchiostro chiaro. Stessi ruoli, ruoli invertiti. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="giorno"]) {
+    --carta: #201d17;
+    --carta-scura: #2a2620;
+    --inchiostro: #e8e0cd;
+    --seppia: #b0a38c;
+    --accento: #d98f6f;
+    --accento-vivo: #e5a88d;
+    --filetto: #4d463a;
+  }
+}
+:root[data-theme="notte"] {
+  --carta: #201d17;
+  --carta-scura: #2a2620;
+  --inchiostro: #e8e0cd;
+  --seppia: #b0a38c;
+  --accento: #d98f6f;
+  --accento-vivo: #e5a88d;
+  --filetto: #4d463a;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+
+html {
+  font-size: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--carta);
+  color: var(--inchiostro);
+  font-family: var(--font-corpo);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  /* grana leggera della carta, solo decorativa */
+  background-image: radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+a {
+  color: var(--accento);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--accento-vivo); }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--accento);
+  outline-offset: 2px;
+}
+
+.salta {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--inchiostro);
+  color: var(--carta);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+.salta:focus { left: 0.5rem; top: 0.5rem; }
+
+code {
+  font-family: var(--font-macchina);
+  font-size: 0.85em;
+  background: var(--carta-scura);
+  padding: 0.05em 0.3em;
+}
+
+hr.filetto {
+  border: 0;
+  border-top: 1px solid var(--filetto);
+  margin: 1.5rem 0;
+}
+
+/* ---------- Testata (masthead) ---------- */
+.masthead {
+  text-align: center;
+  padding: 1rem 1rem 0.5rem;
+  border-bottom: 3px double var(--inchiostro);
+  max-width: 75rem;
+  margin: 0 auto;
+}
+
+.masthead-sopra {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--seppia);
+  border-bottom: 1px solid var(--filetto);
+  padding-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.masthead-edizione { font-family: var(--font-macchina); }
+
+.masthead-titolo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.4rem, 8vw, 5rem);
+  letter-spacing: 0.06em;
+  margin: 0.4rem 0 0;
+  line-height: 1.05;
+}
+.masthead-titolo a {
+  color: var(--inchiostro);
+  text-decoration: none;
+}
+
+.masthead-motto {
+  font-style: italic;
+  color: var(--seppia);
+  margin: 0.2rem 0 0.6rem;
+  font-size: 1rem;
+}
+
+.masthead-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--inchiostro);
+  border-bottom: 1px solid var(--inchiostro);
+  padding: 0.35rem 0;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 1.05rem;
+}
+.masthead-nav a {
+  color: var(--inchiostro);
+  text-decoration: none;
+}
+.masthead-nav a:hover { color: var(--accento); }
+
+.masthead-stato {
+  font-size: 0.85rem;
+  color: var(--seppia);
+  padding: 0.35rem 0;
+}
+
+.tema-toggle {
+  font: inherit;
+  font-size: 0.85rem;
+  background: none;
+  border: 1px solid var(--filetto);
+  color: var(--seppia);
+  padding: 0.1rem 0.5rem;
+  cursor: pointer;
+}
+.tema-toggle:hover { color: var(--accento); border-color: var(--accento); }
+
+/* ---------- Contenuto ---------- */
+.contenuto {
+  max-width: 75rem;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.vuoto {
+  max-width: var(--misura);
+  margin: 3rem auto;
+  text-align: center;
+}
+.vuoto h2 { font-family: var(--font-display); }
+
+/* Griglia broadsheet: colonne multiple su desktop, singola su mobile */
+.broadsheet {
+  column-count: 1;
+  column-gap: 2.5rem;
+  column-rule: 1px solid var(--filetto);
+}
+@media (min-width: 44rem) { .broadsheet { column-count: 2; } }
+@media (min-width: 66rem) { .broadsheet { column-count: 3; } }
+
+.story-card {
+  break-inside: avoid;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--filetto);
+}
+
+.story-titolo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.15;
+  margin: 0 0 0.4rem;
+}
+.story-titolo a { color: var(--inchiostro); text-decoration: none; }
+.story-titolo a:hover { color: var(--accento); }
+
+.story-meta {
+  color: var(--seppia);
+  font-size: 0.9rem;
+  margin: 0.3rem 0;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-macchina);
+  font-size: 0.72rem;
+  border: 1px solid currentcolor;
+  padding: 0 0.4em;
+  margin-left: 0.4em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.badge-lampo { color: var(--accento); }
+
+/* ---------- Piè di pagina ---------- */
+.pie {
+  max-width: 75rem;
+  margin: 2rem auto 1rem;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+  color: var(--seppia);
+}
+.pie-note { font-size: 0.8rem; }
+
+/* ---------- Movimento ridotto ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

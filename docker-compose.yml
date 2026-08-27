@@ -1,0 +1,105 @@
+# Open News — stack completo riproducibile su una macchina modesta (4 core / 8 GB, senza GPU).
+# Avvio: `docker compose up --build -d` oppure `make up`, poi `make seed`.
+# Tutti i componenti sono open source; nessun servizio a pagamento.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: opennews
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opennews}
+      POSTGRES_DB: opennews
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opennews -d opennews"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.15
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-opennews-dev-key-change-me}
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: production
+    volumes:
+      - meilidata:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:7700/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: .
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --workers 2"
+    environment: &app_env
+      DATABASE_URL: postgresql+asyncpg://opennews:${POSTGRES_PASSWORD:-opennews}@db:5432/opennews
+      MEILI_URL: http://meilisearch:7700
+      MEILI_KEY: ${MEILI_MASTER_KEY:-opennews-dev-key-change-me}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-hashing}
+      ENABLE_LLM: ${ENABLE_LLM:-false}
+      OLLAMA_URL: http://ollama:11434
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: python -m apps.worker.main
+    environment: *app_env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Imposta DOMAIN=esempio.org per HTTPS automatico Let's Encrypt; default: solo http su localhost.
+      DOMAIN: ${DOMAIN:-:80}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Opzionale: RSSHub per generare feed di siti che non ne hanno (profilo `rsshub`).
+  rsshub:
+    image: diygod/rsshub:latest
+    profiles: ["rsshub"]
+    environment:
+      NODE_ENV: production
+      CACHE_EXPIRE: "3600"
+    restart: unless-stopped
+
+  # Opzionale: LLM locale via Ollama (profilo `llm`). Mai usato come giudice del bias:
+  # solo estrattore strutturato e riassuntore di cluster, sempre marcato nell'interfaccia.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["llm"]
+    volumes:
+      - ollamadata:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  meilidata:
+  caddydata:
+  caddyconfig:
+  ollamadata:

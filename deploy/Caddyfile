@@ -1,0 +1,16 @@
+# Reverse proxy per Open News.
+# Con DOMAIN=esempio.org Caddy ottiene e rinnova da solo i certificati HTTPS (Let's Encrypt).
+# Con il default DOMAIN=":80" serve in chiaro su localhost (sviluppo).
+{$DOMAIN} {
+	encode gzip zstd
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		# CSP severa: tutto self-hosted, niente CDN esterni.
+		Content-Security-Policy "default-src 'self'; img-src 'self' https: data:; style-src 'self'; script-src 'self'; font-src 'self'"
+	}
+
+	reverse_proxy api:8000
+}

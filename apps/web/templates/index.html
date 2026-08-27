@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if stories %}
+<section class="broadsheet" aria-label="Le notizie di oggi">
+  {% for story in stories %}
+  <article class="story-card">
+    <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ story.title_neutral }}</a></h2>
+    <p class="story-meta">
+      Coperta da {{ story.source_count }} testat{{ "a" if story.source_count == 1 else "e" }}
+      · prima apparizione {{ story.first_seen | data_breve }}
+      {% if story.is_flash %}<span class="badge badge-lampo">lampo</span>{% endif %}
+    </p>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<section class="vuoto">
+  <h2>Prima edizione in preparazione</h2>
+  <p>
+    Il sistema non ha ancora raccolto notizie. Avvia il worker oppure esegui
+    <code>make seed</code> per popolare il giornale con le fonti del catalogo
+    e le ultime 24 ore di notizie.
+  </p>
+</section>
+{% endif %}
+{% endblock %}

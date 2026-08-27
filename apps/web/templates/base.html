@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="it" data-theme="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ app_name }} — chi finanzia l'informazione, come ogni testata racconta le notizie, e che cosa ciascuna ignora.">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+  <script src="/static/js/htmx.min.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+<a class="salta" href="#contenuto">Salta al contenuto</a>
+
+<header class="masthead" role="banner">
+  <div class="masthead-sopra">
+    <span class="masthead-edizione">Edizione n. {{ story_count | default(0) }}</span>
+    <span class="masthead-data">{{ now() | data_lettere }}</span>
+    <button type="button" class="tema-toggle" data-tema-toggle
+            aria-label="Passa all'edizione notturna">Edizione notturna</button>
+  </div>
+  <h1 class="masthead-titolo"><a href="/">{{ app_name | upper }}</a></h1>
+  <p class="masthead-motto">Chi paga l'informazione · come la racconta · che cosa ignora</p>
+  <nav class="masthead-nav" aria-label="Sezioni">
+    <a href="/">Prima pagina</a>
+    <a href="/lampo">Edizione lampo</a>
+    <a href="/fonti">Le testate</a>
+    <a href="/metodo">Come lo calcoliamo</a>
+    <a href="/dati">Dati aperti</a>
+  </nav>
+  <div class="masthead-stato">
+    Fonti attive: {{ source_count | default("—") }}
+    · Ultimo aggiornamento: {{ last_update | ora_breve if last_update is defined else "—" }}
+    · <a href="/metodo">Metodo v.{{ method_version }}</a>
+  </div>
+</header>
+
+<main id="contenuto" class="contenuto">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="pie" role="contentinfo">
+  <hr class="filetto">
+  <p>
+    {{ app_name }} è software libero (<a href="https://www.gnu.org/licenses/agpl-3.0.html">AGPL-3.0</a>);
+    i dati derivati sono pubblicati in
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it">CC BY-SA 4.0</a>.
+    I titoli e gli snippet restano delle rispettive testate e sono mostrati nei limiti
+    della citazione con link alla fonte.
+  </p>
+  <p class="pie-note">
+    Contiene dati del <a href="https://www.gdeltproject.org/">GDELT Project</a> ·
+    fatti societari da <a href="https://www.wikidata.org/">Wikidata</a> (CC0),
+    <a href="https://media-ownership.eu/">EurOMo</a> (CC BY 4.0) e registri pubblici
+    (<a href="https://www.agcom.it/registro-degli-operatori-di-comunicazione">ROC AGCOM</a>,
+    <a href="https://informazioneeditoria.gov.it/">DIE</a>).
+    Ogni numero mostrato ha la sua <a href="/metodo">provenienza dichiarata</a>.
+  </p>
+</footer>
+</body>
+</html>
