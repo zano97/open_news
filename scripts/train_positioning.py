@@ -13,7 +13,6 @@ esporta comunque il dataset di addestramento in JSONL e si ferma.
 import asyncio
 import json
 from collections import defaultdict
-from pathlib import Path
 
 from sqlalchemy import select
 
