@@ -4,7 +4,7 @@ import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from apps.worker.jobs.analyze import cluster_job, signals_job
+from apps.worker.jobs.analyze import cluster_job, link_entities_job, signals_job
 from apps.worker.jobs.ingest import (
     fetch_fulltext_job,
     ingest_feeds_job,
@@ -35,6 +35,9 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     )
     scheduler.add_job(
         cluster_job, "interval", minutes=10, id="cluster", max_instances=1
+    )
+    scheduler.add_job(
+        link_entities_job, "interval", minutes=30, id="link_entities", max_instances=1
     )
     # Segnali dei livelli 2-3: ricalcolo settimanale, datato (metodologia §5).
     scheduler.add_job(

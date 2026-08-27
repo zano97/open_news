@@ -4,9 +4,10 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import Boolean, ForeignKey, Index, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.config import get_settings
+from core.models.article import Article
 from core.models.base import Base, utcnow
 from core.models.types import EmbeddingVector, JSONVariant, TZDateTime
 
@@ -35,6 +36,10 @@ class Story(Base):
     topics: Mapped[list[dict[str, Any]]] = mapped_column(JSONVariant, default=list)
     centroid: Mapped[list[float] | None] = mapped_column(
         EmbeddingVector(get_settings().embedding_dim)
+    )
+
+    articles: Mapped[list[Article]] = relationship(
+        lazy="selectin", order_by=Article.published_at
     )
 
 

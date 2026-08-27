@@ -1,17 +1,51 @@
 {% extends "base.html" %}
 
+{% macro badge_cieco(coverage) -%}
+  {%- if coverage and coverage.blindspot_for -%}
+  <span class="badge badge-cieco" title="Paesi con almeno 3 fonti attive in cui nessuna testata ha coperto questa story">
+    angolo cieco: {{ coverage.blindspot_for | map(attribute="group") | join(", ") | upper }}
+  </span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro card(story, coverage, lead=false) %}
+<article class="story-card {{ 'story-apertura' if lead }}">
+  {% if story.topic %}
+  <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
+  {% endif %}
+  <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ story.title_neutral }}</a></h2>
+  <p class="story-meta">
+    {{ story.source_count }} testat{{ "a" if story.source_count == 1 else "e" }}
+    · {{ story.article_count }} articoli
+    · {{ story.first_seen | data_breve }}
+    {% if story.is_flash %}<span class="badge badge-lampo">lampo</span>{% endif %}
+    {{ badge_cieco(coverage) }}
+  </p>
+  {% set versioni = story.articles[:4 if lead else 3] %}
+  {% if versioni | length > 1 %}
+  <ul class="story-versioni">
+    {% for a in versioni %}
+    <li><span class="versione-testata">{{ a.source.name }}</span>
+      <a href="{{ a.url }}" rel="noopener">{{ a.title }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if coverage and coverage.by_country and coverage.by_country | length > 1 %}
+  <p class="story-copertura">
+    {% for paese, n in coverage.by_country.items() %}{{ paese | upper }} {{ n }}{{ " · " if not loop.last }}{% endfor %}
+  </p>
+  {% endif %}
+</article>
+{% endmacro %}
+
 {% block content %}
 {% if stories %}
+{% set apertura = stories[0] %}
+{{ card(apertura, coverages.get(apertura.id), lead=true) }}
+<hr class="filetto filetto-doppio">
 <section class="broadsheet" aria-label="Le notizie di oggi">
-  {% for story in stories %}
-  <article class="story-card">
-    <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ story.title_neutral }}</a></h2>
-    <p class="story-meta">
-      Coperta da {{ story.source_count }} testat{{ "a" if story.source_count == 1 else "e" }}
-      · prima apparizione {{ story.first_seen | data_breve }}
-      {% if story.is_flash %}<span class="badge badge-lampo">lampo</span>{% endif %}
-    </p>
-  </article>
+  {% for story in stories[1:] %}
+  {{ card(story, coverages.get(story.id)) }}
   {% endfor %}
 </section>
 {% else %}

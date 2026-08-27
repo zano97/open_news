@@ -27,10 +27,13 @@ Attribuzioni di dati e servizi di terze parti usati dal progetto:
   (https://informazioneeditoria.gov.it/) — elenchi pubblici dei contributi
   diretti all'editoria (Fondo per il pluralismo).
 
-- Font (self-hosted, licenza SIL Open Font License 1.1):
-  Playfair Display (Claus Eggers Sørensen), EB Garamond (Georg Duffner),
-  Special Elite (Astigmatic). I file OFL.txt accompagnano i font in
-  apps/web/static/fonts/.
+- Font (self-hosted in apps/web/static/fonts/ con le rispettive licenze):
+  Playfair Display (Claus Eggers Sørensen, SIL OFL 1.1),
+  EB Garamond (Georg Duffner / Octavio Pardo, SIL OFL 1.1),
+  Special Elite (Astigmatic, Apache License 2.0).
+
+- HTMX (https://htmx.org/) — vendorizzato in apps/web/static/js/htmx.min.js,
+  licenza BSD Zero Clause (0BSD).
 
 I contenuti delle testate aggregate (titoli, brevi snippet, immagini di
 anteprima) restano dei rispettivi editori e sono mostrati nei limiti della

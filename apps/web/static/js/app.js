@@ -42,4 +42,28 @@
     }
     applica(nuovo);
   });
+
+  // Edizione lampo: navigazione con i tasti freccia (miglioramento progressivo;
+  // senza JS il reel resta una lista verticale scorrevole).
+  var reel = document.getElementById("reel");
+  if (reel) {
+    var schede = Array.prototype.slice.call(reel.querySelectorAll(".reel-scheda"));
+    function corrente() {
+      var top = reel.scrollTop;
+      var best = 0;
+      schede.forEach(function (s, i) {
+        if (Math.abs(s.offsetTop - top) < Math.abs(schede[best].offsetTop - top)) best = i;
+      });
+      return best;
+    }
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
+      if (/^(input|textarea|select)$/i.test(document.activeElement.tagName)) return;
+      ev.preventDefault();
+      var i = corrente() + (ev.key === "ArrowDown" ? 1 : -1);
+      if (i >= 0 && i < schede.length) {
+        schede[i].scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
 })();

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ story.title_neutral }} — {{ app_name }}{% endblock %}
+
+{% block content %}
+<article class="pagina-storia">
+  <header>
+    {% if story.topic %}
+    <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
+    {% endif %}
+    <h2 class="storia-titolo">{{ story.title_neutral }}</h2>
+    <p class="story-meta">
+      Titolo neutro: {{ "il più vicino al centroide del gruppo" if story.title_method == "centroide" else "riassunto automatico (LLM locale), marcato" }}
+      · prima apparizione {{ story.first_seen | data_breve }} alle {{ story.first_seen | ora_breve }}
+      · {{ story.source_count }} testate in {{ story.article_count }} articoli
+      {% if story.is_flash %}<span class="badge badge-lampo">lampo</span>{% endif %}
+    </p>
+    {% if coverage and coverage.blindspot_for %}
+    <p class="avviso-cieco">
+      <strong>Angolo cieco:</strong> nessuna fonte attiva di
+      {{ coverage.blindspot_for | map(attribute="group") | join(", ") | upper }}
+      ha coperto questa story (soglia {{ (coverage.blindspot_for[0].threshold * 100) | round | int }}%,
+      paesi con ≥3 fonti attive).
+    </p>
+    {% endif %}
+  </header>
+
+  <section class="scheda-sezione">
+    <h3>Come la raccontano le testate</h3>
+    <div class="versioni-griglia">
+      {% for a in story.articles %}
+      <article class="versione-card">
+        <p class="versione-testata">
+          <a href="/fonte/{{ a.source.slug }}">{{ a.source.name }}</a>
+          <span class="fonte-meta">{{ a.source.country | upper }}
+            {%- if owners.get(a.source_id) %} · {{ owners[a.source_id] }}{% endif %}</span>
+        </p>
+        <h4 class="versione-titolo"><a href="{{ a.url }}" rel="noopener">{{ a.title }}</a></h4>
+        {% if a.snippet %}<p class="versione-snippet">{{ a.snippet }}</p>{% endif %}
+        {% if a.image_url %}<img class="versione-immagine" src="{{ a.image_url }}" alt="" loading="lazy">{% endif %}
+        <p class="versione-meta">{{ a.published_at | data_breve }} {{ a.published_at | ora_breve }}
+          · <a href="{{ a.url }}" rel="noopener">leggi alla fonte →</a></p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Chi l'ha pubblicata per prima</h3>
+    <ol class="storia-timeline">
+      {% for a in timeline %}
+      <li>
+        <span class="timeline-ora">{{ (a.published_at or a.fetched_at) | data_breve }}
+          {{ (a.published_at or a.fetched_at) | ora_breve }}</span>
+        {{ a.source.name }}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Dove se ne parla</h3>
+    {% if paesi_svg %}
+    {{ paesi_svg | safe }}
+    {% else %}
+    <p class="dato-mancante">Copertura per paese: dato non ancora calcolato.</p>
+    {% endif %}
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Entità</h3>
+    {% if story.entities %}
+    <ul class="elenco-entita">
+      {% for e in story.entities %}
+      <li>
+        {% if e.qid %}
+        <a href="https://www.wikidata.org/wiki/{{ e.qid }}">{{ e.label }}</a>
+        <small>({{ e.qid }}, secondo Wikidata)</small>
+        {% else %}
+        {{ e.label }} <small>(non collegata)</small>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="fonte-meta">Entità rilevate con euristica dichiarata (entities-heuristic-v1);
+      il collegamento a Wikidata è mostrato solo quando verificato.</p>
+    {% else %}
+    <p class="dato-mancante">Nessuna entità rilevata.</p>
+    {% endif %}
+  </section>
+
+  <footer class="scheda-piede">
+    <h4>Da dove vengono questi dati?</h4>
+    <ul class="elenco-provenienze">
+      {% for p in provenances[:10] %}
+      <li><code>{{ p.field }}</code> — metodo {{ p.method }} v.{{ p.method_version }},
+        calcolato il {{ p.computed_at | data_breve }}</li>
+      {% endfor %}
+    </ul>
+    <p><a href="/metodo">Come lo calcoliamo →</a></p>
+  </footer>
+</article>
+{% endblock %}

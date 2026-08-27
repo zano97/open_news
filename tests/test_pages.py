@@ -1,0 +1,151 @@
+"""Fase 5: prima pagina broadsheet, pagina story, edizione lampo, entità."""
+
+import html
+from datetime import UTC, datetime, timedelta
+
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.models import Article, Coverage, Owner, Ownership, Source, Story
+from core.nlp.entities import extract_entities
+
+ORA = datetime(2026, 8, 27, 9, 0, tzinfo=UTC)
+
+TITOLI = [
+    "Vertice europeo sull'energia: intesa raggiunta a notte fonda",
+    "Energia, i leader europei trovano l'accordo dopo una notte di trattative",
+    "Accordo al vertice europeo sull'energia: cosa prevede l'intesa",
+    "Energia: fumata bianca al vertice europeo",
+    "I leader europei firmano l'intesa sull'energia",
+]
+
+
+async def _mini_giornale(session: AsyncSession) -> Story:
+    fonti = []
+    for i, country in enumerate(["it", "it", "fr", "de", "gb"]):
+        fonte = Source(
+            slug=f"testata-{i}", name=f"Testata {i}", domain=f"t{i}.test",
+            country=country, language="it" if country == "it" else "en",
+            region="europe", feed_urls=[], terms_note="",
+        )
+        session.add(fonte)
+        fonti.append(fonte)
+    await session.flush()
+
+    proprietario = Owner(name="Editrice di Prova S.p.A.", type="società")
+    session.add(proprietario)
+    await session.flush()
+    session.add(
+        Ownership(
+            source_id=fonti[0].id, owner_id=proprietario.id,
+            evidence_name="Wikidata", evidence_url=None,
+        )
+    )
+
+    story = Story(
+        title_neutral=TITOLI[0],
+        first_seen=ORA,
+        last_seen=ORA + timedelta(minutes=90),
+        article_count=5,
+        source_count=5,
+        is_flash=True,
+        topic="energia",
+        entities=[{"label": "Consiglio Europeo", "qid": None, "type": None}],
+    )
+    session.add(story)
+    await session.flush()
+    for fonte, titolo in zip(fonti, TITOLI, strict=True):
+        session.add(
+            Article(
+                source_id=fonte.id,
+                url=f"https://{fonte.domain}/vertice",
+                title=titolo,
+                snippet="Un breve estratto dell'articolo per la prova.",
+                published_at=ORA + timedelta(minutes=10 * fonte.id),
+                language=fonte.language,
+                story_id=story.id,
+            )
+        )
+    session.add(
+        Coverage(
+            story_id=story.id,
+            by_country={"it": 2, "fr": 1, "de": 1, "gb": 1},
+            by_language={"it": 2, "en": 3},
+            blindspot_for=[{"group": "us", "kind": "country", "threshold": 0.5}],
+            method_version="0.1.0",
+        )
+    )
+    await session.commit()
+    return story
+
+
+async def test_prima_pagina(client: AsyncClient, session: AsyncSession) -> None:
+    await _mini_giornale(session)
+    resp = await client.get("/")
+    assert resp.status_code == 200
+    testo = resp.text
+    assert "story-apertura" in testo  # la story più coperta apre il giornale
+    assert "Testata 0" in testo  # le versioni delle testate sono a confronto
+    assert "angolo cieco: US" in testo
+    assert "lampo" in testo
+
+
+async def test_pagina_storia(client: AsyncClient, session: AsyncSession) -> None:
+    story = await _mini_giornale(session)
+    resp = await client.get(f"/storia/{story.id}")
+    assert resp.status_code == 200
+    testo = html.unescape(resp.text)
+    # Tutte le versioni affiancate con testata e proprietario.
+    for titolo in TITOLI:
+        assert titolo in testo
+    assert "Editrice di Prova" in testo
+    assert "Chi l'ha pubblicata per prima" in testo
+    assert "Angolo cieco" in testo
+    assert "Consiglio Europeo" in testo
+    assert "non collegata" in testo  # QID assente dichiarato, mai inventato
+    assert "Da dove vengono questi dati?" in testo
+
+
+async def test_storia_inesistente(client: AsyncClient) -> None:
+    resp = await client.get("/storia/99999")
+    assert resp.status_code == 404
+
+
+async def test_edizione_lampo(client: AsyncClient, session: AsyncSession) -> None:
+    await _mini_giornale(session)
+    resp = await client.get("/lampo")
+    assert resp.status_code == 200
+    testo = resp.text
+    assert "reel-scheda" in testo
+    assert "Coperta da" in testo
+    assert "5" in testo and "paesi" in testo
+    assert "Leggi le fonti" in testo
+    assert "Angolo cieco per: US" in testo
+    # Tre versioni a confronto, con la proprietà in piccolo.
+    assert testo.count("reel-versione-titolo") == 3
+    assert "proprietà: Editrice di Prova S.p.A." in testo
+
+
+async def test_lampo_vuoto(client: AsyncClient) -> None:
+    resp = await client.get("/lampo")
+    assert resp.status_code == 200
+    assert "Nessuna notizia lampo" in resp.text
+
+
+class TestEntities:
+    def test_entita_ricorrenti(self) -> None:
+        titoli = [
+            "Il presidente Mario Draghi incontra i sindacati a Roma",
+            "Sindacati, l'incontro con Mario Draghi finisce senza accordo",
+        ]
+        labels = {e["label"] for e in extract_entities(titoli)}
+        assert "Mario Draghi" in labels
+
+    def test_titolo_singolo(self) -> None:
+        labels = {e["label"] for e in extract_entities(["Elezioni in Baviera, vince la Csu"])}
+        assert "Baviera" in labels
+
+    def test_inizio_frase_non_basta(self) -> None:
+        # Parole capitalizzate solo perché a inizio frase non diventano entità.
+        entities = extract_entities(["Domani si vota", "Domani sciopero dei treni"])
+        assert all(e["label"] != "Domani" for e in entities)

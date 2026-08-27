@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Edizione lampo — {{ app_name }}{% endblock %}
+
+{% block content %}
+{% if schede %}
+<section class="reel" id="reel" aria-label="Edizione lampo: le notizie coperte da almeno 5 testate in meno di 2 ore, ultime 12 ore">
+  {% for scheda in schede %}
+  <article class="reel-scheda" id="lampo-{{ loop.index }}" aria-roledescription="scheda {{ loop.index }} di {{ schede | length }}">
+    <p class="reel-timbro">Edizione lampo · {{ loop.index }} / {{ schede | length }}</p>
+    <h2 class="reel-titolo telegramma">{{ scheda.story.title_neutral }}</h2>
+    <p class="reel-copertura">
+      Coperta da <strong>{{ scheda.story.source_count }}</strong> testate
+      in <strong>{{ scheda.countries }}</strong> paes{{ "e" if scheda.countries == 1 else "i" }}
+      {% if scheda.coverage and scheda.coverage.by_country %}
+      <span class="reel-minibarra" aria-hidden="true">
+        {%- for paese, n in scheda.coverage.by_country.items() -%}
+        <span class="minibarra-seg" style="flex-grow: {{ n }}" title="{{ paese | upper }}: {{ n }}"></span>
+        {%- endfor -%}
+      </span>
+      {% endif %}
+    </p>
+
+    <div class="reel-versioni">
+      {% for a in scheda.versions %}
+      <blockquote class="reel-versione">
+        <p class="reel-versione-titolo">«{{ a.title }}»</p>
+        <footer>
+          <a href="/fonte/{{ a.source.slug }}">{{ a.source.name }}</a>
+          <small>{{ a.source.country | upper }}
+            {%- if owners.get(a.source_id) %} · proprietà: {{ owners[a.source_id] }}{% endif %}</small>
+        </footer>
+      </blockquote>
+      {% endfor %}
+    </div>
+
+    {% if scheda.coverage and scheda.coverage.blindspot_for %}
+    <p class="badge badge-cieco">
+      Angolo cieco per: {{ scheda.coverage.blindspot_for | map(attribute="group") | join(", ") | upper }}
+    </p>
+    {% endif %}
+
+    <p class="reel-azioni">
+      <a class="bottone" href="/storia/{{ scheda.story.id }}">Leggi le fonti</a>
+    </p>
+  </article>
+  {% endfor %}
+</section>
+<p class="reel-istruzioni" aria-hidden="true">Scorri, oppure usa i tasti ↑ ↓</p>
+{% else %}
+<section class="vuoto">
+  <h2>Nessuna notizia lampo nelle ultime 12 ore</h2>
+  <p>Una story diventa «lampo» quando almeno {{ flash_min }} testate la coprono
+    in meno di {{ flash_window }} ore. Torna più tardi, oppure sfoglia la
+    <a href="/">prima pagina</a>.</p>
+</section>
+{% endif %}
+{% endblock %}

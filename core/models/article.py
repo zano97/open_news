@@ -48,4 +48,6 @@ class Article(Base):
     simhash: Mapped[str | None] = mapped_column(String(16), index=True)  # 64 bit in esadecimale
     story_id: Mapped[int | None] = mapped_column(ForeignKey("stories.id"))
 
-    source: Mapped[Source] = relationship()
+    # lazy="selectin": i template accedono a article.source senza lazy-load
+    # sincrono (vietato in async); il caricamento avviene in batch.
+    source: Mapped[Source] = relationship(lazy="selectin")

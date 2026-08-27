@@ -2,47 +2,31 @@
    Estetica: quotidiano di inizio Novecento; leggibilità e accessibilità prima di tutto
    (WCAG 2.1 AA: contrasto >= 4.5:1, focus visibile, prefers-reduced-motion). */
 
-/* ---------- Font self-hosted (OFL) — scaricati con `make fonts` ---------- */
+/* ---------- Font self-hosted, committati nel repo con le loro licenze ----------
+   Playfair Display (OFL), EB Garamond (OFL): font variabili.
+   Special Elite (Apache 2.0): solo per piccoli dettagli "a macchina". */
 @font-face {
   font-family: "Playfair Display";
-  src: url("/static/fonts/PlayfairDisplay-Bold.woff2") format("woff2"),
-       url("/static/fonts/PlayfairDisplay-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Playfair Display";
-  src: url("/static/fonts/PlayfairDisplay-Black.woff2") format("woff2"),
-       url("/static/fonts/PlayfairDisplay-Black.ttf") format("truetype");
-  font-weight: 900;
+  src: url("/static/fonts/PlayfairDisplay-Variable.ttf") format("truetype-variations");
+  font-weight: 400 900;
   font-display: swap;
 }
 @font-face {
   font-family: "EB Garamond";
-  src: url("/static/fonts/EBGaramond-Regular.woff2") format("woff2"),
-       url("/static/fonts/EBGaramond-Regular.ttf") format("truetype");
-  font-weight: 400;
+  src: url("/static/fonts/EBGaramond-Variable.ttf") format("truetype-variations");
+  font-weight: 400 800;
   font-display: swap;
 }
 @font-face {
   font-family: "EB Garamond";
-  src: url("/static/fonts/EBGaramond-Italic.woff2") format("woff2"),
-       url("/static/fonts/EBGaramond-Italic.ttf") format("truetype");
-  font-weight: 400;
+  src: url("/static/fonts/EBGaramond-Italic-Variable.ttf") format("truetype-variations");
+  font-weight: 400 800;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
-  font-family: "EB Garamond";
-  src: url("/static/fonts/EBGaramond-Bold.woff2") format("woff2"),
-       url("/static/fonts/EBGaramond-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
   font-family: "Special Elite";
-  src: url("/static/fonts/SpecialElite-Regular.woff2") format("woff2"),
-       url("/static/fonts/SpecialElite-Regular.ttf") format("truetype");
+  src: url("/static/fonts/SpecialElite-Regular.ttf") format("truetype");
   font-weight: 400;
   font-display: swap;
 }
@@ -425,6 +409,203 @@ hr.filetto {
 .cop-d { fill: var(--filetto); }
 .cop-e { fill: var(--carta-scura); stroke: var(--seppia); stroke-width: 0.5; }
 .cop-f { fill: var(--inchiostro); opacity: 0.55; }
+
+/* ---------- Prima pagina: apertura e versioni ---------- */
+.story-apertura {
+  border-bottom: none;
+  text-align: center;
+  max-width: 46rem;
+  margin: 0 auto 0.5rem;
+}
+.story-apertura .story-titolo {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  font-weight: 900;
+  line-height: 1.08;
+}
+.story-apertura .story-versioni { text-align: left; }
+.filetto-doppio { border-top: 3px double var(--inchiostro); }
+
+.story-occhiello {
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: var(--accento);
+  margin: 0 0 0.15rem;
+  font-size: 0.85rem;
+}
+
+.story-versioni {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  font-size: 0.95rem;
+  border-top: 1px dotted var(--filetto);
+}
+.story-versioni li {
+  padding: 0.25rem 0;
+  border-bottom: 1px dotted var(--filetto);
+}
+.versione-testata {
+  font-family: var(--font-macchina);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.4rem;
+  color: var(--seppia);
+}
+.story-versioni a { color: var(--inchiostro); text-decoration: none; }
+.story-versioni a:hover { color: var(--accento); }
+.story-copertura { font-size: 0.8rem; color: var(--seppia); }
+
+.badge-cieco { color: var(--seppia); }
+.avviso-cieco {
+  border: 1px dashed var(--seppia);
+  padding: 0.4rem 0.8rem;
+  color: var(--seppia);
+}
+
+/* ---------- Pagina story ---------- */
+.pagina-storia { max-width: 60rem; margin: 0 auto; }
+.storia-titolo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.7rem, 4vw, 2.8rem);
+  line-height: 1.1;
+  margin: 0.2rem 0;
+}
+.versioni-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 1.2rem;
+}
+.versione-card {
+  border: 1px solid var(--filetto);
+  padding: 0.8rem 1rem;
+  background: var(--carta-scura);
+}
+.versione-titolo {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  margin: 0.3rem 0;
+}
+.versione-titolo a { color: var(--inchiostro); text-decoration: none; }
+.versione-titolo a:hover { color: var(--accento); }
+/* Capolettera nel primo snippet, come da composizione d'epoca. */
+.versione-card:first-child .versione-snippet::first-letter {
+  font-family: var(--font-display);
+  font-size: 2.6em;
+  float: left;
+  line-height: 0.8;
+  padding-right: 0.08em;
+}
+.versione-snippet { font-size: 0.95rem; margin: 0.3rem 0; }
+.versione-immagine { max-width: 100%; height: auto; filter: sepia(0.25); }
+.versione-meta { font-size: 0.8rem; color: var(--seppia); margin: 0.3rem 0 0; }
+
+.storia-timeline { list-style: none; padding: 0; }
+.storia-timeline li {
+  padding: 0.2rem 0;
+  border-bottom: 1px dotted var(--filetto);
+}
+.timeline-ora {
+  font-family: var(--font-macchina);
+  font-size: 0.8rem;
+  margin-right: 0.6rem;
+  color: var(--seppia);
+}
+.elenco-entita { list-style: none; padding: 0; }
+.elenco-entita li { display: inline-block; margin: 0 0.8rem 0.3rem 0; }
+
+/* ---------- Edizione lampo: reel di carta ---------- */
+/* Funziona anche senza JavaScript: è una semplice lista verticale con
+   scroll-snap; i tasti freccia sono un miglioramento progressivo. */
+.reel {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  height: calc(100vh - 1rem);
+  scroll-behavior: smooth;
+}
+.reel-scheda {
+  scroll-snap-align: start;
+  min-height: calc(100vh - 1rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 0.8rem;
+  padding: 1.5rem 1rem;
+  border-bottom: 3px double var(--inchiostro);
+}
+.reel-timbro {
+  font-family: var(--font-macchina);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--seppia);
+}
+.reel-titolo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 5vw, 3.2rem);
+  line-height: 1.1;
+  max-width: 18ch;
+  margin: 0;
+}
+/* Effetto "telegramma": l'inchiostro appare. Disattivato con reduced-motion. */
+@keyframes telegramma {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .telegramma { animation: telegramma 1.2s steps(24, end) both; }
+}
+.reel-copertura { color: var(--seppia); }
+.reel-minibarra {
+  display: flex;
+  width: 12rem;
+  height: 8px;
+  margin: 0.3rem auto 0;
+  border: 1px solid var(--seppia);
+  gap: 1px;
+}
+.minibarra-seg { background: var(--seppia); }
+.minibarra-seg:nth-child(odd) { background: var(--accento); }
+
+.reel-versioni {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  max-width: 60rem;
+  width: 100%;
+}
+.reel-versione {
+  border: 1px solid var(--filetto);
+  background: var(--carta-scura);
+  margin: 0;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  text-align: left;
+}
+.reel-versione-titolo { font-style: italic; margin: 0 0 0.4rem; }
+.reel-versione footer small { display: block; color: var(--seppia); }
+
+.bottone {
+  display: inline-block;
+  border: 2px solid var(--accento);
+  color: var(--accento);
+  padding: 0.4rem 1.2rem;
+  text-decoration: none;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+}
+.bottone:hover { background: var(--accento); color: var(--carta); }
+.reel-istruzioni {
+  text-align: center;
+  color: var(--seppia);
+  font-size: 0.8rem;
+  font-family: var(--font-macchina);
+}
 
 /* ---------- Piè di pagina ---------- */
 .pie {
