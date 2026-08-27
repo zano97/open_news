@@ -30,34 +30,60 @@ spagnolo — si cambia dalla testata):
 
 ---
 
-## Installazione in una riga (e aggiornamento in una riga)
+## Installazione in una riga — senza Docker
 
-Su una macchina con [Docker](https://docs.docker.com/engine/install/)
-(4 core / 8 GB bastano; va bene anche ARM: Oracle Free, Raspberry Pi 5):
+**Linux / macOS:**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-Lo script clona il progetto, genera da solo i segreti, avvia lo stack e
-scarica le ultime 24 ore di notizie dalle testate reali (~10-15 minuti).
-Alla fine apri **<http://localhost:8000>**: quello è il giornale. Da lì in
-poi si aggiorna da solo (feed ogni 10 minuti, segnali di bias ogni lunedì).
+**Windows** (PowerShell):
 
-Vuoi solo **provare l'interfaccia subito, senza scaricare notizie vere**?
-Modalità demo (30 secondi, crea testate dimostrative dichiarate come tali —
-mai un titolo inventato attribuito a una testata reale):
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zano97/open_news/main/install.ps1 | iex"
+```
+
+Lo script fa tutto da solo: scarica l'app, si procura Python
+(via [uv](https://github.com/astral-sh/uv) — niente da preinstallare), crea
+**l'icona «Open News»** (menu applicazioni su Linux, `~/Applications` su
+macOS, menu Start su Windows) e il comando `opennews` per il terminale,
+scarica le ultime 24 ore di notizie dalle testate reali (~10-15 minuti,
+solo la prima volta) e apre il giornale nel browser.
+
+Da lì in poi: **clic sull'icona, oppure `opennews` nel terminale.** Finché
+è aperto, le notizie si aggiornano da sole ogni 10 minuti. I tuoi dati
+vivono in `~/.opennews`.
+
+Vuoi solo **vedere l'interfaccia subito, senza scaricare notizie vere**?
+Modalità demo (30 secondi, testate dimostrative dichiarate come tali):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-Anche **l'aggiornamento** è una riga, dalla cartella d'installazione
-(i dati restano; le migrazioni del database girano da sole):
+In questa modalità senza Docker i riassunti funzionano subito con l'Ollama
+del tuo computer (`http://localhost:11434`, il predefinito).
+
+Anche **l'aggiornamento** è una riga — riconosce da solo il tipo di
+installazione e i dati restano:
 
 ```bash
-./update.sh        # oppure: make update
+curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/update.sh | bash
 ```
+
+<details>
+<summary><strong>Modalità server con Docker</strong> (per un'istanza pubblica: PostgreSQL+pgvector, Meilisearch, Caddy con HTTPS automatico)</summary>
+
+```bash
+OPENNEWS_DOCKER=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+Vedi [docs/DEPLOY.md](docs/DEPLOY.md) per dominio/HTTPS, Oracle Free ARM,
+Raspberry Pi, backup. In modalità Docker l'URL predefinito di Ollama è
+`http://host.docker.internal:11434` (Ollama sulla macchina host).
+
+</details>
 
 **Riassunti con l'AI, su richiesta («Il fatto in breve»).** Nella pagina di
 una notizia il lettore può premere un pulsante e vedere comparire in

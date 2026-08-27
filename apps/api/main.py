@@ -1,6 +1,7 @@
 """Punto d'ingresso dell'API e del sito Open News."""
 
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -25,7 +26,23 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logging.getLogger("opennews.api").info(
             "override impostazioni non caricati (DB non pronto)"
         )
+    # Modalità personale (launcher `opennews`, senza Docker): il raccoglitore
+    # gira nello stesso processo. Richiede un solo worker uvicorn.
+    scheduler = None
+    if os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1":
+        from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+        from apps.worker.jobs import register_jobs
+
+        scheduler = AsyncIOScheduler(timezone="UTC")
+        register_jobs(scheduler)
+        scheduler.start()
+        logging.getLogger("opennews.api").info(
+            "raccoglitore incorporato avviato (%d job)", len(scheduler.get_jobs())
+        )
     yield
+    if scheduler is not None:
+        scheduler.shutdown(wait=False)
 
 
 def create_app() -> FastAPI:

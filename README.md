@@ -31,35 +31,59 @@ English, French, German, Spanish — switchable from the masthead):
 
 ---
 
-## One-line install (and one-line updates)
+## One-line install — no Docker needed
 
-On any machine with [Docker](https://docs.docker.com/engine/install/)
-(4 cores / 8 GB is plenty; ARM works too: Oracle Free tier, Raspberry Pi 5):
+**Linux / macOS:**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-The script clones the project, generates the secrets by itself, starts the
-stack and downloads the last 24 hours of news from the real outlets
-(~10–15 minutes). When it finishes, open **<http://localhost:8000>**: that
-is the newspaper. From then on it updates itself (feeds every 10 minutes,
-bias signals every Monday).
+**Windows** (PowerShell):
 
-Just want to **try the interface right away, without fetching real news**?
-Demo mode (30 seconds; it creates demo outlets clearly declared as such —
-an invented headline is never attributed to a real outlet):
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zano97/open_news/main/install.ps1 | iex"
+```
+
+The script does everything by itself: downloads the app, fetches its own
+Python (via [uv](https://github.com/astral-sh/uv) — nothing to preinstall),
+creates the **“Open News” icon** (applications menu on Linux,
+`~/Applications` on macOS, Start menu on Windows) and the `opennews`
+terminal command, downloads the last 24 hours of news from the real outlets
+(~10–15 minutes, first time only) and opens the newspaper in your browser.
+
+From then on: **click the icon, or type `opennews`.** While it is open, the
+news refreshes by itself every 10 minutes. Your data lives in `~/.opennews`.
+
+Just want to **see the interface right away, without fetching real news**?
+Demo mode (30 seconds; demo outlets clearly declared as such):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-**Updating** is one line too, from the install folder (data is preserved;
-database migrations run automatically):
+In this no-Docker mode the summaries work with the Ollama on your computer
+out of the box (`http://localhost:11434`, the default).
+
+**Updating** is one line too — it detects your install type by itself and
+preserves all data:
 
 ```bash
-./update.sh        # or: make update
+curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/update.sh | bash
 ```
+
+<details>
+<summary><strong>Server mode with Docker</strong> (for a public instance: PostgreSQL+pgvector, Meilisearch, Caddy with automatic HTTPS)</summary>
+
+```bash
+OPENNEWS_DOCKER=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) for domains/HTTPS, Oracle Free ARM,
+Raspberry Pi, backups. In Docker mode the default Ollama URL is
+`http://host.docker.internal:11434` (Ollama on the host machine).
+
+</details>
 
 **AI summaries, on request ("The story in brief").** On a story page the
 reader can press a button and watch a neutral summary stream in — generated
