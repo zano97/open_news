@@ -138,7 +138,15 @@ async def _try_autodiscovery(
         if url != original_url
         and (urlsplit(url).hostname or "").lower().endswith(domain.lower())
     ]
-    for candidate in candidates[:2]:
+    if not candidates:
+        # Nessun <link rel="alternate"> in homepage (capita con i siti
+        # renderizzati via JS): si provano i percorsi convenzionali.
+        candidates = [
+            f"https://{domain}{percorso}"
+            for percorso in ("/feed/", "/feed", "/rss", "/rss.xml", "/feed.xml")
+            if f"https://{domain}{percorso}" != original_url
+        ]
+    for candidate in candidates[:3]:
         if not await robots.can_fetch(candidate):
             continue
         await limiter.wait(urlsplit(candidate).hostname or domain)

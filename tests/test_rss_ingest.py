@@ -261,3 +261,32 @@ async def test_backoff_dopo_errori_ripetuti(session: AsyncSession) -> None:
         )
         assert not stats.backoff
         assert len(route.calls) == chiamate + 1
+
+
+@respx.mock
+async def test_autodiscovery_percorsi_convenzionali(session: AsyncSession) -> None:
+    """Homepage senza <link rel="alternate"> (siti renderizzati via JS):
+    si provano i percorsi convenzionali (/feed/, /rss, ...)."""
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    respx.get(FEED_URL).mock(return_value=httpx.Response(404))
+    respx.get("https://esempio.test/").mock(
+        return_value=httpx.Response(200, text="<html><body>niente link</body></html>")
+    )
+    respx.get("https://esempio.test/feed/").mock(
+        return_value=httpx.Response(200, content=FIXTURE)
+    )
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.created == 2
+    stato = (
+        await session.execute(select(FeedState).where(FeedState.feed_url == FEED_URL))
+    ).scalar_one()
+    assert stato.resolved_url == "https://esempio.test/feed/"

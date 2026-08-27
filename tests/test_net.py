@@ -65,3 +65,27 @@ def test_host_docker_internal_ammesso() -> None:
     assert host_allowed("host.docker.internal")
     assert host_allowed("gateway.docker.internal")
     assert not host_allowed("host.docker.internal.evil.com")
+
+
+def test_client_senza_proxy_forza_ipv4_e_retry(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Senza proxy: transport con retry di connessione e socket IPv4
+    (httpx non ha l'happy-eyeballs; vedi Settings.http_ipv4_only)."""
+    for k in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy",
+              "ALL_PROXY", "all_proxy"):
+        monkeypatch.delenv(k, raising=False)
+    client = build_client()
+    assert isinstance(client._transport, httpx.AsyncHTTPTransport)
+    assert client._transport._pool._retries == 2
+    assert client._transport._pool._local_address == "0.0.0.0"
+
+
+def test_client_con_proxy_resta_proxy_aware(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Con un proxy configurato non montiamo il transport custom: httpx
+    deve continuare a instradare attraverso il proxy."""
+    monkeypatch.setenv("HTTPS_PROXY", "http://proxy.test:8080")
+    client = build_client()
+    assert client._mounts  # proxy montato da httpx via trust_env

@@ -177,8 +177,12 @@ async def seed_online() -> None:
         print(f"catalogo: {cat} · assetti: {own}")
 
     def stampa_feed(slug: str, feed_url: str, stats: IngestStats) -> None:
-        esito = stats.error or f"+{stats.created} articoli"
-        print(f"  {slug}: {esito}")
+        # Solo le righe informative: errori e articoli nuovi. I "+0" (feed
+        # invariato o già scaricato: è il dedup al lavoro) restano muti.
+        if stats.error:
+            print(f"  {slug}: {stats.error}")
+        elif stats.created:
+            print(f"  {slug}: +{stats.created} articoli")
 
     def stampa_gdelt(slug: str, created: int) -> None:
         if created:
@@ -191,7 +195,7 @@ async def seed_online() -> None:
         # database in sequenza tramite un lock condiviso; RSS e GDELT
         # girano insieme perché parlano con host diversi.
         db_lock = asyncio.Lock()
-        await asyncio.gather(
+        da_feed, da_gdelt = await asyncio.gather(
             ingest_all_feeds(
                 maker,
                 client=client,
@@ -210,6 +214,11 @@ async def seed_online() -> None:
                 progress=stampa_gdelt,
             ),
         )
+    print(
+        f"raccolta: +{sum(da_feed.values())} articoli dai feed, "
+        f"+{sum(da_gdelt.values())} da GDELT "
+        f"({len({*da_feed, *da_gdelt})} testate con novità)"
+    )
 
     await run_pipeline()
 

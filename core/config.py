@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     robots_user_agent: str = "OpenNewsBot"
     rate_limit_seconds: float = 2.0
     http_timeout_seconds: float = 20.0
+    # httpx non ha l'happy-eyeballs: se il provider annuncia IPv6 ma il
+    # percorso IPv6 è rotto (comune sulle reti domestiche), le connessioni
+    # scadono in ConnectTimeout senza mai provare IPv4. Forzare IPv4 evita
+    # il problema; su una rete solo-IPv6 impostare HTTP_IPV4_ONLY=false.
+    http_ipv4_only: bool = True
     # Un feed che fallisce ripetutamente viene riprovato con calma, non a
     # ogni ciclo: dopo `feed_backoff_failures` errori consecutivi si attende
     # `feed_backoff_hours` prima del tentativo successivo.

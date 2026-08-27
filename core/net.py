@@ -8,7 +8,9 @@ fonti del catalogo. Il test `tests/test_net.py` verifica il comportamento.
 """
 
 import ipaddress
+import os
 from functools import lru_cache
+from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
@@ -97,6 +99,26 @@ def build_client(
     Tutto il codice del progetto che parla con l'esterno DEVE passare da qui.
     """
     settings = get_settings()
+    base = timeout if timeout is not None else settings.http_timeout_seconds
+    extra: dict[str, Any] = {}
+    # Un transport esplicito disattiverebbe il supporto proxy di httpx
+    # (HTTPS_PROXY & co.): lo usiamo solo quando NON c'è un proxy. Dà due
+    # cose: retries=2 sui tentativi di CONNESSIONE (DNS+TCP+TLS) e, di
+    # default, socket IPv4 — httpx non ha l'happy-eyeballs e su reti con
+    # IPv6 annunciato ma rotto le connessioni scadrebbero in ConnectTimeout
+    # senza mai provare IPv4 (vedi Settings.http_ipv4_only).
+    proxy_attivo = any(
+        os.environ.get(k)
+        for k in (
+            "HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy",
+            "ALL_PROXY", "all_proxy",
+        )
+    )
+    if not proxy_attivo:
+        extra["transport"] = httpx.AsyncHTTPTransport(
+            retries=2,
+            local_address="0.0.0.0" if settings.http_ipv4_only else None,
+        )
     return httpx.AsyncClient(
         headers={
             "User-Agent": settings.user_agent,
@@ -107,9 +129,10 @@ def build_client(
                 "application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5"
             ),
         },
-        timeout=timeout if timeout is not None else settings.http_timeout_seconds,
+        timeout=httpx.Timeout(base, connect=min(10.0, base)),
         follow_redirects=follow_redirects,
         event_hooks={"request": [_guard_request]},
+        **extra,
     )
 
 

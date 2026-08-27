@@ -123,3 +123,31 @@ async def test_gdelt_batch_e_fonti_solo_gdelt(maker: async_sessionmaker) -> None
     assert creati == {"solo": 2, "alfa": 2, "beta": 2}
     query_batch = str(route.calls[1].request.url.params["query"])
     assert query_batch == "(domain:alfa.test OR domain:beta.test)"
+
+
+@respx.mock
+async def test_gdelt_secondo_passaggio_sui_falliti(maker: async_sessionmaker) -> None:
+    """Connessioni perse verso GDELT: il gruppo fallito viene ritentato a
+    fine giro invece di perdere la copertura."""
+    async with maker() as session:
+        session.add(_fonte("solo", "solo.test", [], "solo.test"))
+        await session.commit()
+
+    route = respx.get(GDELT_DOC_URL)
+    route.side_effect = [
+        httpx.ConnectTimeout("persa"),
+        httpx.ConnectTimeout("persa"),
+        httpx.ConnectTimeout("persa"),
+        httpx.Response(200, json=_gdelt_payload("solo.test")),
+    ]
+
+    async def niente_attesa(_secondi: float) -> None:
+        return None
+
+    async with httpx.AsyncClient() as client:
+        creati = await ingest_gdelt_all(
+            maker, client=client, limiter=_limiter(), sleep=niente_attesa
+        )
+
+    assert len(route.calls) == 4  # 3 tentativi + 1 del secondo passaggio
+    assert creati == {"solo": 2}

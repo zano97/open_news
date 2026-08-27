@@ -12,7 +12,7 @@ girare in parallelo alla raccolta RSS: host diversi, rate limit diversi.
 
 import asyncio
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 
 import httpx
 from sqlalchemy import select
@@ -22,7 +22,6 @@ from core.ingest.gdelt import (
     GdeltArticle,
     GdeltFormatError,
     error_text,
-    fetch_domain_articles,
     fetch_domains_articles,
     match_source,
     store_gdelt_articles,
@@ -144,11 +143,14 @@ async def ingest_gdelt_all(
     batch_size: int = GDELT_BATCH_SIZE,
     db_lock: asyncio.Lock | None = None,
     progress: GdeltProgress | None = None,
+    sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
 ) -> dict[str, int]:
     """Complemento GDELT per tutte le fonti abilitate, a batch di domini.
 
     Le fonti SENZA feed (Reuters, AP, …) hanno una richiesta dedicata: GDELT
     è la loro unica copertura e non deve competere nel batch con le altre.
+    I gruppi falliti (l'API GDELT sotto carico perde connessioni) vengono
+    ritentati con un secondo passaggio a fine giro.
     """
     async with maker() as session:
         sources = [
@@ -172,19 +174,8 @@ async def ingest_gdelt_all(
         if progress is not None:
             progress(source.slug, n)
 
-    for source in solo:
-        assert source.gdelt_domain is not None
-        try:
-            items = await fetch_domain_articles(
-                client, limiter, source.gdelt_domain, timespan=timespan
-            )
-        except (httpx.HTTPError, GdeltFormatError) as exc:
-            log.warning("GDELT %s: %s", source.gdelt_domain, error_text(exc))
-            continue
-        await store(source, items, f"domain:{source.gdelt_domain}")
-
-    for batch in _chunk(complement, batch_size):
-        domains = [s.gdelt_domain for s in batch if s.gdelt_domain]
+    async def attempt(gruppo: list[Source]) -> bool:
+        domains = [s.gdelt_domain for s in gruppo if s.gdelt_domain]
         query = (
             f"domain:{domains[0]}"
             if len(domains) == 1
@@ -192,16 +183,27 @@ async def ingest_gdelt_all(
         )
         try:
             items = await fetch_domains_articles(
-                client, limiter, domains, timespan=timespan
+                client, limiter, domains,
+                timespan=timespan,
+                max_records=100 if len(domains) == 1 else 250,
+                sleep=sleep,
             )
         except (httpx.HTTPError, GdeltFormatError) as exc:
-            log.warning("GDELT batch %s: %s", ", ".join(domains), error_text(exc))
-            continue
+            log.warning("GDELT %s: %s", ", ".join(domains), error_text(exc))
+            return False
         by_source: dict[int, list[GdeltArticle]] = {}
         for item in items:
-            matched = match_source(item, batch)
+            matched = match_source(item, gruppo)
             if matched is not None:
                 by_source.setdefault(matched.id, []).append(item)
-        for source in batch:
+        for source in gruppo:
             await store(source, by_source.get(source.id, []), query)
+        return True
+
+    gruppi = [[s] for s in solo] + _chunk(complement, batch_size)
+    falliti = [g for g in gruppi if not await attempt(g)]
+    if falliti:
+        log.info("GDELT: secondo passaggio su %d gruppi falliti", len(falliti))
+        for gruppo in falliti:
+            await attempt(gruppo)
     return created

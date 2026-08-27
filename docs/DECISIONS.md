@@ -214,3 +214,24 @@ costo è un modulo di orchestrazione in più e uno stato per-feed più ricco
 progetto senza informare nessuno: l'identità resta dichiarata nel nuovo
 formato); imitare un browser vero (disonesto); un fetch multi-processo
 (inutile: il collo è l'attesa di rete, non la CPU).
+
+## ADR-0019 — IPv4 forzato e secondo passaggio GDELT (secondo seed reale)
+
+**Contesto.** Il seed su macOS mostrava `ConnectTimeout` intermittenti verso
+GDELT (e cbc.ca) nonostante i retry: httpx/httpcore non implementa
+l'happy-eyeballs (RFC 8305), quindi su reti con IPv6 annunciato ma rotto il
+connect scade sull'AAAA senza mai provare l'A record.
+
+**Decisione.** Il client di `core/net.py` monta un transport con
+`local_address="0.0.0.0"` (socket IPv4; disattivabile con
+`HTTP_IPV4_ONLY=false`) e `retries=2` sui tentativi di connessione, MA solo
+quando non c'è un proxy configurato: un transport esplicito disattiverebbe
+il supporto `HTTPS_PROXY` di httpx, e dietro proxy è il proxy a connettersi.
+Timeout di connessione a 10 s (il totale resta 20). In più
+`ingest_gdelt_all` ritenta i gruppi falliti con un secondo passaggio a fine
+giro, e l'autodiscovery dei feed prova i percorsi convenzionali (/feed/,
+/rss, …) quando la homepage non dichiara `<link rel="alternate">`.
+
+**Alternative scartate.** Implementare l'happy-eyeballs in casa (fuori
+scala); aumentare i timeout (allunga l'attesa senza cambiare l'esito sul
+percorso IPv6 rotto).
