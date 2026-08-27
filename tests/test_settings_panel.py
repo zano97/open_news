@@ -131,3 +131,118 @@ async def test_override_corrotto_ignorato(session: AsyncSession) -> None:
         assert settings.flash_min_sources == originale  # mai un crash, mai spazzatura
     finally:
         settings.flash_min_sources = originale
+
+
+class TestStatoLLM:
+    """Il pannello diagnostica Ollama in diretta: mai un fallimento silenzioso."""
+
+    async def test_spento_mostra_suggerimento(self, client: AsyncClient) -> None:
+        await _registra(client, "admin-llm-0")
+        pagina = await client.get("/impostazioni")
+        assert "disattivati" in pagina.text
+
+    async def test_ollama_giu_mostra_errore_e_comando(
+        self, client: AsyncClient
+    ) -> None:
+        import respx as respx_mod
+
+        settings = get_settings()
+        originale = settings.enable_llm
+        settings.enable_llm = True
+        try:
+            await _registra(client, "admin-llm-1")
+            with respx_mod.mock:
+                respx_mod.get("http://localhost:11434/api/tags").mock(
+                    side_effect=__import__("httpx").ConnectError("connessione rifiutata")
+                )
+                pagina = await client.get("/impostazioni")
+            assert "NON raggiungibile" in pagina.text
+            assert "docker compose --profile llm up -d" in pagina.text
+        finally:
+            settings.enable_llm = originale
+
+    async def test_modello_mancante_indica_il_pull(
+        self, client: AsyncClient
+    ) -> None:
+        import httpx as httpx_mod
+        import respx as respx_mod
+
+        settings = get_settings()
+        originale = settings.enable_llm
+        settings.enable_llm = True
+        try:
+            await _registra(client, "admin-llm-2")
+            with respx_mod.mock:
+                respx_mod.get("http://localhost:11434/api/tags").mock(
+                    return_value=httpx_mod.Response(
+                        200, json={"models": [{"name": "llama3:8b"}]}
+                    )
+                )
+                pagina = await client.get("/impostazioni")
+            assert "NON è installato" in pagina.text
+            assert "ollama pull qwen2.5:7b" in pagina.text
+            assert "llama3:8b" in pagina.text
+        finally:
+            settings.enable_llm = originale
+
+    async def test_genera_ora_produce_riassunti(
+        self, client: AsyncClient, session: AsyncSession
+    ) -> None:
+        import httpx as httpx_mod
+        import respx as respx_mod
+
+        from core.models import Article, Source, Story, utcnow
+
+        settings = get_settings()
+        originale = settings.enable_llm
+        settings.enable_llm = True
+        try:
+            story = Story(
+                title_neutral="Evento da riassumere subito",
+                first_seen=utcnow(), last_seen=utcnow(),
+                article_count=2, source_count=2,
+            )
+            session.add(story)
+            await session.flush()
+            for i in range(2):
+                fonte = Source(
+                    slug=f"ora-{i}", name=f"Ora {i}", domain=f"ora{i}.test",
+                    country="it", language="it", region="italy",
+                    feed_urls=[], terms_note="",
+                )
+                session.add(fonte)
+                await session.flush()
+                session.add(
+                    Article(
+                        source_id=fonte.id, url=f"https://ora{i}.test/1",
+                        title=f"Evento, versione {i}", language="it",
+                        story_id=story.id,
+                    )
+                )
+            await session.commit()
+
+            await _registra(client, "admin-llm-3")
+            with respx_mod.mock:
+                respx_mod.post("http://localhost:11434/api/generate").mock(
+                    return_value=httpx_mod.Response(
+                        200,
+                        json={"response": (
+                            "Le testate riferiscono lo stesso evento con due "
+                            "formulazioni diverse; nessuna vittima segnalata."
+                        )},
+                    )
+                )
+                resp = await client.post(
+                    "/impostazioni/riassunti-prova", follow_redirects=False
+                )
+            assert resp.status_code == 303
+            assert resp.headers["location"] == "/impostazioni?riassunti=1"
+            await session.refresh(story)
+            assert story.summary_neutral is not None
+            assert story.summary_method == "llm"
+        finally:
+            settings.enable_llm = originale
+
+    async def test_genera_ora_negato_ai_non_admin(self, client: AsyncClient) -> None:
+        resp = await client.post("/impostazioni/riassunti-prova")
+        assert resp.status_code == 403

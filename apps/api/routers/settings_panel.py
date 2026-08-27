@@ -9,14 +9,22 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.routers.annotate import current_annotator
 from apps.api.routers.pages import page_context, request_locale
 from apps.api.templating import templates
+from core.config import get_settings
 from core.db import get_session
 from core.i18n import make_translator
-from core.models import AnnotatorProfile
+from core.models import AnnotatorProfile, Story
+from core.net import build_client
+from core.nlp.summarize import (
+    check_ollama,
+    stories_needing_summary,
+    summarize_story,
+)
 from core.runtime_settings import (
     EDITABLE,
     current_values,
@@ -27,6 +35,23 @@ from core.runtime_settings import (
 router = APIRouter(prefix="/impostazioni")
 
 
+async def _llm_panel(session: AsyncSession) -> dict[str, object]:
+    """Diagnosi in diretta del generatore di riassunti, per il pannello."""
+    status = None
+    if get_settings().enable_llm:
+        async with build_client(timeout=6) as client:
+            status = await check_ollama(client)
+    fatti = (
+        await session.execute(
+            select(func.count())
+            .select_from(Story)
+            .where(Story.summary_neutral.is_not(None))
+        )
+    ).scalar_one()
+    in_attesa = len(await stories_needing_summary(session, limit=50))
+    return {"llm_status": status, "riassunti_fatti": fatti, "riassunti_attesa": in_attesa}
+
+
 async def _render(
     request: Request,
     session: AsyncSession,
@@ -34,6 +59,7 @@ async def _render(
     errors: dict[str, str],
     saved: bool,
     status_code: int = 200,
+    esito_riassunti: int | None = None,
 ) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
@@ -45,6 +71,8 @@ async def _render(
             "errors": errors,
             "saved": saved,
             "ultima": await last_update(session),
+            "esito_riassunti": esito_riassunti,
+            **await _llm_panel(session),
         },
         status_code=status_code,
     )
@@ -65,10 +93,33 @@ async def impostazioni(
     session: Annotated[AsyncSession, Depends(get_session)],
     annotator: Annotated[AnnotatorProfile | None, Depends(current_annotator)],
     salvate: int = 0,
+    riassunti: int | None = None,
 ) -> HTMLResponse:
     if annotator is None or not annotator.is_admin:
         return _forbidden(request, annotator)
-    return await _render(request, session, errors={}, saved=bool(salvate))
+    return await _render(
+        request, session, errors={}, saved=bool(salvate), esito_riassunti=riassunti
+    )
+
+
+@router.post("/riassunti-prova", response_model=None)
+async def riassunti_prova(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    annotator: Annotated[AnnotatorProfile | None, Depends(current_annotator)],
+) -> HTMLResponse | RedirectResponse:
+    """Genera subito fino a 3 riassunti, senza aspettare il worker."""
+    if annotator is None or not annotator.is_admin:
+        return _forbidden(request, annotator)
+    done = 0
+    if get_settings().enable_llm:
+        stories = await stories_needing_summary(session, limit=3)
+        async with build_client(timeout=200) as client:
+            for story in stories:
+                if await summarize_story(session, story, client=client):
+                    done += 1
+        await session.commit()
+    return RedirectResponse(f"/impostazioni?riassunti={done}", status_code=303)
 
 
 @router.post("", response_class=HTMLResponse, response_model=None)

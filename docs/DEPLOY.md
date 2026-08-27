@@ -170,3 +170,12 @@ l'originale dichiarato accanto.
 - **Meilisearch non parte su ARM a 32 bit**: usa un OS a 64 bit (aarch64).
 - **Certificato non emesso**: verifica che `DOMAIN` punti all'IP della
   macchina e che le porte 80/443 siano aperte end-to-end.
+- **Non vedo i riassunti («Il fatto in breve»)**: apri `/impostazioni` da
+  amministratore — la sezione «Stato del generatore» ti dice in diretta se
+  Ollama è raggiungibile e se il modello è installato, con il comando esatto
+  per rimediare; il pulsante «Genera 3 riassunti ora» produce subito i primi
+  senza aspettare il worker (che passa ogni 15 minuti). Ricorda i tre
+  requisiti: Ollama avviato (`docker compose --profile llm up -d`), modello
+  scaricato (`docker compose exec ollama ollama pull qwen2.5:7b`),
+  interruttore attivo nel pannello. La prima generazione può richiedere
+  1-2 minuti (caricamento del modello su CPU).

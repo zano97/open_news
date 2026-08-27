@@ -37,11 +37,38 @@
         {% endif %}
       </div>
       {% endfor %}
+      {% if gruppo == "llm" %}
+      <div class="llm-stato">
+        <h4>{{ t('imp.llm_stato') }}</h4>
+        {% if llm_status is none %}
+        <p class="dato-mancante">{{ t('imp.llm_spento') }}</p>
+        {% elif not llm_status.reachable %}
+        <p class="impostazione-errore">{{ t('imp.llm_irraggiungibile', url=llm_status.url, errore=llm_status.error or "—") }}</p>
+        {% elif not llm_status.model_present %}
+        <p class="impostazione-errore">{{ t('imp.llm_no_modello', url=llm_status.url, model=llm_status.model, modelli=llm_status.models | join(", ") or "—") }}</p>
+        {% else %}
+        <p class="avviso-salvato">{{ t('imp.llm_ok', url=llm_status.url, model=llm_status.model) }}</p>
+        {% endif %}
+        <p class="fonte-meta">{{ t('imp.llm_conteggi', fatti=riassunti_fatti, in_attesa=riassunti_attesa) }}</p>
+        {% if esito_riassunti is not none %}
+        <p class="{{ 'avviso-salvato' if esito_riassunti > 0 else 'impostazione-errore' }}" role="status">
+          {{ t('imp.llm_prova_ok', n=esito_riassunti) if esito_riassunti > 0
+             else (t('imp.llm_nessuna_story') if riassunti_attesa == 0 else t('imp.llm_prova_zero')) }}
+        </p>
+        {% endif %}
+      </div>
+      {% endif %}
     </fieldset>
     {% endfor %}
 
     <button type="submit" class="bottone">{{ t('imp.salva') }}</button>
   </form>
+
+  {% if llm_status is not none %}
+  <form method="post" action="/impostazioni/riassunti-prova" class="modulo-campi">
+    <button type="submit" class="bottone">{{ t('imp.llm_prova') }}</button>
+  </form>
+  {% endif %}
 
   <p class="fonte-meta">{{ t('imp.nota_env') }}</p>
   <p class="fonte-meta">{{ t('imp.nota_metodologia') | safe }}</p>
