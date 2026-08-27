@@ -1,8 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Come lo calcoliamo — {{ app_name }}{% endblock %}
+{% block title %}{{ t('nav.metodo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <article class="prosa">
+  {% if fallback_lingua %}
+  <p class="avviso-cieco">{{ t('metodo.fallback', lingua=fallback_lingua) }}</p>
+  {% endif %}
   {{ contenuto | safe }}
 </article>
 {% endblock %}

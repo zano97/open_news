@@ -2,8 +2,8 @@
 
 {% macro badge_cieco(coverage) -%}
   {%- if coverage and coverage.blindspot_for -%}
-  <span class="badge badge-cieco" title="Paesi con almeno 3 fonti attive in cui nessuna testata ha coperto questa story">
-    angolo cieco: {{ coverage.blindspot_for | map(attribute="group") | join(", ") | upper }}
+  <span class="badge badge-cieco" title="{{ t('badge.angolo_cieco_title') }}">
+    {{ t('badge.angolo_cieco', gruppi=coverage.blindspot_for | map(attribute="group") | join(", ") | upper) }}
   </span>
   {%- endif -%}
 {%- endmacro %}
@@ -15,10 +15,10 @@
   {% endif %}
   <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ story.title_neutral }}</a></h2>
   <p class="story-meta">
-    {{ story.source_count }} testat{{ "a" if story.source_count == 1 else "e" }}
-    · {{ story.article_count }} articoli
+    {{ story.source_count }} {{ t('comune.testata') if story.source_count == 1 else t('comune.testate') }}
+    · {{ story.article_count }} {{ t('comune.articoli') }}
     · {{ story.first_seen | data_breve }}
-    {% if story.is_flash %}<span class="badge badge-lampo">lampo</span>{% endif %}
+    {% if story.is_flash %}<span class="badge badge-lampo">{{ t('badge.lampo') }}</span>{% endif %}
     {{ badge_cieco(coverage) }}
   </p>
   {% set versioni = story.articles[:4 if lead else 3] %}
@@ -43,19 +43,15 @@
 {% set apertura = stories[0] %}
 {{ card(apertura, coverages.get(apertura.id), lead=true) }}
 <hr class="filetto filetto-doppio">
-<section class="broadsheet" aria-label="Le notizie di oggi">
+<section class="broadsheet" aria-label="{{ t('index.aria') }}">
   {% for story in stories[1:] %}
   {{ card(story, coverages.get(story.id)) }}
   {% endfor %}
 </section>
 {% else %}
 <section class="vuoto">
-  <h2>Prima edizione in preparazione</h2>
-  <p>
-    Il sistema non ha ancora raccolto notizie. Avvia il worker oppure esegui
-    <code>make seed</code> per popolare il giornale con le fonti del catalogo
-    e le ultime 24 ore di notizie.
-  </p>
+  <h2>{{ t('index.vuoto_titolo') }}</h2>
+  <p>{{ t('index.vuoto_testo') | safe }}</p>
 </section>
 {% endif %}
 {% endblock %}

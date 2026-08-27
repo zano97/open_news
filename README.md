@@ -1,181 +1,196 @@
 # Open News
 
-**Chi paga l'informazione · come la racconta · che cosa ignora.**
+**Who pays for the news · how they tell it · what they ignore.**
 
-Open News è un aggregatore di notizie open source che non pretende di
-"eliminare il bias" dei giornali: lo **misura, lo documenta e lo mostra**,
-citando sempre la provenienza di ogni dato. Per ogni notizia vedi chi l'ha
-coperta e con quali titoli; per ogni testata vedi chi la possiede, quanti
-soldi pubblici riceve, quali temi copre più della media e quali storie ignora.
+*Leggilo in italiano: [README.it.md](README.it.md)*
 
-L'interfaccia è un **giornale nel browser**, in stile quotidiano d'inizio
-Novecento:
+Open News is an open-source news aggregator that does not claim to
+"remove bias" from the news: it **measures it, documents it and shows it**,
+always citing the provenance of every figure. For every piece of news you
+see who covered it and with which headlines; for every outlet you see who
+owns it, how much public money it receives, which topics it covers more
+than average and which stories it ignores.
+
+The interface is a **newspaper in your browser**, styled like an
+early-20th-century broadsheet, and speaks **five languages** (Italian,
+English, French, German, Spanish — switchable from the masthead):
 
 | | |
 |---|---|
-| ![Prima pagina](docs/screenshots/01-prima-pagina.png) | ![Scheda di una testata](docs/screenshots/04-fonte-libero.png) |
-| *La prima pagina: titoli delle testate a confronto per ogni notizia* | *La scheda di una testata: proprietari, cariche politiche, soldi pubblici* |
-| ![Edizione lampo](docs/screenshots/02-lampo.png) | ![Mobile, edizione notturna](docs/screenshots/07-mobile-notte.png) |
-| *L'«edizione lampo»: il reel di carta delle notizie più calde* | *Su telefono, con l'edizione notturna* |
+| ![Front page](docs/screenshots/01-prima-pagina.png) | ![Front page in English](docs/screenshots/06-front-page-en.png) |
+| *The front page: competing headlines side by side for every story* | *The same newspaper with the interface in English* |
+| ![Outlet record card](docs/screenshots/04-fonte-libero.png) | ![Story page in English](docs/screenshots/03-storia-en.png) |
+| *An outlet's record card: owners, political offices, public money* | *A story: every outlet's version, who published first* |
+| ![Flash edition](docs/screenshots/02-lampo.png) | ![Mobile, night edition](docs/screenshots/07-mobile-notte.png) |
+| *The "flash edition": a paper reel of the hottest stories* | *On a phone, in the night edition* |
 
-- Solo software open source e risorse gratuite: **nessuna API a pagamento**,
-  nessuna chiave di servizi commerciali (un test lo garantisce)
-- Ogni numero mostrato ha accanto **fonte, data del calcolo e metodo**
-- Licenza software: **AGPL-3.0** · dati derivati: **CC BY-SA 4.0**
+- Open-source software and free resources only: **no paid APIs**, no
+  commercial service keys (a test enforces it)
+- Every figure shown carries its **source, computation date and method**
+- Software licence: **AGPL-3.0** · derived data: **CC BY-SA 4.0**
 
 ---
 
-## Installazione in una riga
+## One-line install
 
-Su una macchina con [Docker](https://docs.docker.com/engine/install/)
-(4 core / 8 GB bastano; va bene anche ARM: Oracle Free, Raspberry Pi 5):
+On any machine with [Docker](https://docs.docker.com/engine/install/)
+(4 cores / 8 GB is plenty; ARM works too: Oracle Free tier, Raspberry Pi 5):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-Lo script clona il progetto, genera da solo i segreti, avvia lo stack e
-scarica le ultime 24 ore di notizie dalle testate reali (~10-15 minuti).
-Alla fine apri **<http://localhost:8000>**: quello è il giornale. Da lì in
-poi si aggiorna da solo (feed ogni 10 minuti, segnali di bias ogni lunedì).
+The script clones the project, generates the secrets by itself, starts the
+stack and downloads the last 24 hours of news from the real outlets
+(~10–15 minutes). When it finishes, open **<http://localhost:8000>**: that
+is the newspaper. From then on it updates itself (feeds every 10 minutes,
+bias signals every Monday).
 
-Vuoi solo **provare l'interfaccia subito, senza scaricare notizie vere**?
-Modalità demo (30 secondi, crea testate dimostrative dichiarate come tali —
-mai un titolo inventato attribuito a una testata reale):
+Just want to **try the interface right away, without fetching real news**?
+Demo mode (30 seconds; it creates demo outlets clearly declared as such —
+an invented headline is never attributed to a real outlet):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
 <details>
-<summary><strong>Installazione manuale</strong> (se preferisci vedere ogni passo)</summary>
+<summary><strong>Manual installation</strong> (if you prefer to see every step)</summary>
 
 ```bash
 git clone https://github.com/zano97/open_news.git
 cd open_news
-cp .env.example .env            # 1. configura (vedi sotto)
-docker compose up --build -d    # 2. avvia lo stack completo
-docker compose exec api python -m scripts.verify_feeds   # 3. verifica i feed reali
-docker compose exec api python -m scripts.seed           # 4. popola (~10-15 minuti)
+cp .env.example .env            # 1. configure (see below)
+docker compose up --build -d    # 2. start the full stack
+docker compose exec api python -m scripts.verify_feeds   # 3. verify the real feeds
+docker compose exec api python -m scripts.seed           # 4. populate (~10-15 minutes)
 ```
 
-Nel file `.env` imposta almeno:
+In `.env` set at least:
 
-| Variabile | A cosa serve |
+| Variable | Purpose |
 |---|---|
-| `POSTGRES_PASSWORD` | password del database (generane una: `openssl rand -hex 32`) |
-| `MEILI_MASTER_KEY` | chiave di Meilisearch |
-| `SECRET_KEY` | firma dei cookie di sessione degli annotatori |
-| `DOMAIN` | (solo in produzione) il tuo dominio: Caddy ottiene da solo l'HTTPS |
-| `EMBEDDING_BACKEND` | `hashing` (default, zero download) o `e5` (multilingue, consigliato in produzione — vedi [docs/DEPLOY.md](docs/DEPLOY.md)) |
+| `POSTGRES_PASSWORD` | database password (generate one: `openssl rand -hex 32`) |
+| `MEILI_MASTER_KEY` | Meilisearch key |
+| `SECRET_KEY` | signs the annotators' session cookies |
+| `DOMAIN` | (production only) your domain: Caddy fetches HTTPS certificates by itself |
+| `EMBEDDING_BACKEND` | `hashing` (default, zero downloads) or `e5` (multilingual, recommended in production — see [docs/DEPLOY.md](docs/DEPLOY.md)) |
 
 </details>
 
-## Come si usa l'applicazione
+## How to use the application
 
-Non c'è niente da imparare: **l'interfaccia è il sito stesso**, si usa dal
-browser come un normale giornale online (anche da telefono). Il terminale
-serve solo per installare e amministrare. Le pagine:
+There is nothing to learn: **the interface is the website itself** — you
+use it from the browser like a normal online newspaper (phones included).
+The terminal is only for installing and administering. The interface
+language (IT · EN · FR · DE · ES) is switched from the masthead; news
+content stays in the language each outlet wrote it in. The pages:
 
-| Pagina | Che cosa ci trovi |
+| Page | What you find there |
 |---|---|
-| **/** — Prima pagina | Il giornale: le story del giorno in stile broadsheet. Ogni story mostra il titolo neutro, **i titoli delle diverse testate a confronto** (per vedere il framing a colpo d'occhio), la copertura per paese, i badge «lampo» e «angolo cieco». |
-| **/lampo** — Edizione lampo | Il "reel di carta": le notizie coperte da ≥5 testate in <2 ore, una scheda a schermo intero per notizia. Scorri, oppure usa i tasti ↑ ↓. Tre titoli a confronto scelti tra le testate più diverse tra loro, col proprietario in piccolo. Funziona anche senza JavaScript. |
-| **/storia/{id}** | Una notizia, tutte le versioni affiancate (titolo + snippet + link alla fonte), la timeline di chi l'ha pubblicata per prima, la copertura per paese, le entità collegate a Wikidata. |
-| **/fonti** | Il catalogo delle testate, comprese quelle disabilitate con la motivazione (es. ANSA per i suoi termini d'uso). |
-| **/fonte/{slug}** | La "scheda anagrafica" di una testata: grafo dei proprietari, cariche politiche, soldi pubblici per anno, linea auto-dichiarata, e i segnali dei 4 livelli (che cosa copre, come racconta, posizionamento). Dove i dati non bastano leggi "in valutazione", mai una stima nascosta. |
-| **/mappa** | La mappa di co-copertura: testate vicine = coprono le stesse story. Gli assi **emergono dai dati** e vanno letti con le story elencate sotto la mappa. |
-| **/metodo** | La metodologia completa, in italiano semplice: come si calcola ogni cosa, con i numeri di calibrazione e i limiti noti. |
-| **/dati** | Gli export aperti (CSV, CC BY-SA 4.0): story, coperture, segnali, annotazioni anonime. API JSON documentata su **/docs**. |
-| **/annota** | Diventa annotatore: valuti titoli **senza sapere da che testata vengono** (annotazione cieca) su due assi. Le etichette di posizionamento si pubblicano solo con ≥50 articoli, ≥3 annotatori con orientamenti dichiarati diversi e accordo α ≥ 0,6. |
+| **/** — Front page | The newspaper: today's stories in broadsheet style. Each story shows the neutral headline, **the different outlets' headlines side by side** (framing at a glance), coverage by country, and the "flash" and "blind spot" badges. |
+| **/lampo** — Flash edition | The "paper reel": stories covered by ≥5 outlets in <2 hours, one full-screen card per story. Scroll, or use the ↑ ↓ keys. Three contrasting headlines chosen from the most diverse outlets, with the owner in small print. Works without JavaScript too. |
+| **/storia/{id}** | One story, all versions side by side (headline + snippet + link to the source), the timeline of who published first, coverage by country, entities linked to Wikidata. |
+| **/fonti** | The outlet catalog, including disabled sources with their reason (e.g. ANSA, due to its terms of use). |
+| **/fonte/{slug}** | An outlet's "record card": ownership graph, political offices, public money per year, self-declared line, and the signals of the 4 levels (what it covers, how it tells it, positioning). Where data is insufficient you read "under evaluation" — never a hidden estimate. |
+| **/mappa** | The co-coverage map: outlets sit close together when they cover the same stories. The axes **emerge from the data** and must be read through the stories listed under the map. |
+| **/metodo** | The full methodology in plain language: how everything is computed, with the calibration figures and the known limits. |
+| **/dati** | The open exports (CSV, CC BY-SA 4.0): stories, coverage, signals, anonymous annotations. JSON API documented at **/docs**. |
+| **/annota** | Become an annotator: you judge headlines **without knowing which outlet they come from** (blind annotation) on two axes. Positioning labels are published only with ≥50 articles, ≥3 annotators with different declared orientations and agreement α ≥ 0.6. |
 
-In alto a destra trovi l'**edizione notturna** (tema scuro); tutto il sito è
-navigabile da tastiera e rispetta `prefers-reduced-motion`.
+Top right you find the **night edition** (dark theme); the whole site is
+keyboard-navigable and respects `prefers-reduced-motion`.
 
-### Il bias su quattro livelli (mai un punteggio unico)
+### Bias on four levels (never a single score)
 
-1. **Struttura (fatti):** proprietà, catene societarie, cariche politiche
-   dei proprietari, finanziamenti pubblici — da registri pubblici (ROC
-   AGCOM, EurOMo, Wikidata, DIE), sempre con evidenza e data.
-2. **Selezione (statistica):** profilo di agenda rispetto alla media (con
-   intervalli di confidenza), mappa di co-copertura, angoli ciechi.
-3. **Framing (lessicale):** lessico curato di termini connotati, chi viene
-   citato, distribuzione del tono dei titoli.
-4. **Posizionamento (giudizio umano con protocollo):** annotazione cieca con
-   accordo inter-annotatore misurato e regole di pubblicazione esplicite.
+1. **Structure (facts):** ownership, corporate chains, owners' political
+   offices, public subsidies — from public registers (ROC AGCOM, EurOMo,
+   Wikidata, DIE), always with evidence and date.
+2. **Selection (statistics):** agenda profile against the average (with
+   confidence intervals), co-coverage map, blind spots.
+3. **Framing (lexical):** a curated lexicon of connoted terms, who gets
+   quoted, headline tone distribution.
+4. **Positioning (human judgement with a protocol):** blind annotation
+   with measured inter-annotator agreement and explicit publication rules.
 
-I quattro livelli sono mostrati **separati** e non si sommano mai.
+The four levels are shown **separately** and are never summed.
 
-## Comandi utili
+## Useful commands
 
 ```bash
-make help          # elenco completo dei comandi
-make seed          # popola con le fonti reali (~24h di notizie; richiede rete)
-make seed-demo     # senza rete: testate dimostrative e notizie inventate
-make verify-feeds  # verifica HTTP reale di tutti i feed e aggiorna il catalogo
-make calibrate     # precision/recall della soglia di clustering sul set annotato
-make test          # test unit/integrazione con coverage (core >= 80%)
-make test-e2e      # test Playwright nel browser (desktop + mobile)
-make check         # ruff + mypy --strict + test
+make help          # full command list
+make seed          # populate with real sources (~24h of news; needs network)
+make seed-demo     # no network: declared demo outlets with invented news
+make verify-feeds  # real HTTP verification of every feed in the catalog
+make calibrate     # precision/recall of the clustering threshold on the annotated set
+make test          # unit/integration tests with coverage (core >= 80%)
+make test-e2e      # Playwright browser tests (desktop + mobile)
+make check         # ruff + mypy --strict + tests
 ```
 
-## Sviluppo locale senza Docker
+## Local development without Docker
 
 ```bash
-make install       # crea .venv e installa le dipendenze (Python 3.12+)
-make test          # 127 test su SQLite, nessun servizio esterno richiesto
-.venv/bin/python -m scripts.seed --offline-demo   # popola un DB locale
+make install       # creates .venv and installs dependencies (Python 3.12+)
+make test          # 140 tests on SQLite, no external service needed
+.venv/bin/python -m scripts.seed --offline-demo   # populate a local DB
 DATABASE_URL=sqlite+aiosqlite:///dev.sqlite3 \
-  .venv/bin/uvicorn apps.api.main:app --reload    # avvia su :8000
+  .venv/bin/uvicorn apps.api.main:app --reload    # serve on :8000
 ```
 
-(In sviluppo puoi usare SQLite; in produzione lo stack compose usa
-PostgreSQL 16 + pgvector.)
+(SQLite is fine for development; the compose stack uses PostgreSQL 16 +
+pgvector in production.)
 
-## Architettura
+## Architecture
 
 ```
 apps/
-  api/      FastAPI: pagine HTML (Jinja2+HTMX) e API JSON, OpenAPI su /docs
-  web/      template, CSS scritto a mano, font self-hosted, JS minimo
-  worker/   APScheduler: ingest RSS/GDELT, clustering, entità, segnali
+  api/      FastAPI: HTML pages (Jinja2+HTMX) and JSON API, OpenAPI at /docs
+  web/      templates, hand-written CSS, self-hosted fonts, minimal JS,
+            translation catalogs (it/en/fr/de/es)
+  worker/   APScheduler: RSS/GDELT ingestion, clustering, entities, signals
 core/
-  models/   SQLAlchemy 2 async (portabile PostgreSQL/SQLite)
-  ingest/   RSS con cache condizionale, robots.txt, rate limit, GDELT
-  extract/  URL canonici, SimHash, lingua, testo integrale (mai esposto)
-  nlp/      embedding, temi, lessico, attori citati, tono, entità
-  cluster/  clustering incrementale con soglia calibrata
-  bias/     i 4 livelli della metodologia + Krippendorff's alpha
-  net.py    UNICO punto di uscita rete, con allowlist (niente servizi a pagamento)
-data/       catalogo fonti, lessici, tassonomia temi, seed con evidenze
-docs/       METHODOLOGY · DECISIONS (ADR) · LEGAL · DEPLOY
+  models/   SQLAlchemy 2 async (portable PostgreSQL/SQLite)
+  ingest/   RSS with conditional caching, robots.txt, rate limiting, GDELT
+  extract/  canonical URLs, SimHash, language, full text (never exposed)
+  nlp/      embeddings, topics, lexicon, quoted actors, tone, entities
+  cluster/  incremental clustering with a calibrated threshold
+  bias/     the 4 levels of the methodology + Krippendorff's alpha
+  i18n.py   interface languages with per-key fallback
+  net.py    the ONLY network exit point, with an allowlist (no paid services)
+data/       source catalog, lexicons, topic taxonomy, evidence-backed seeds
+docs/       METHODOLOGY (it/en) · DECISIONS (ADR) · LEGAL · DEPLOY
 ```
 
-## Documentazione
+## Documentation
 
-- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — la metodologia completa,
-  leggibile da non tecnici (è la pagina pubblica `/metodo`)
-- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deploy su VPS, **Oracle Cloud Always
-  Free (ARM)**, **Raspberry Pi 5**, backup e monitoraggio
-- [`docs/LEGAL.md`](docs/LEGAL.md) — cosa mostriamo dei contenuti altrui,
-  robots/rate-limit, termini per fonte, dati personali
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — le decisioni architetturali (ADR)
+- [`docs/METHODOLOGY.en.md`](docs/METHODOLOGY.en.md) — the full methodology
+  in plain language (Italian original: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md));
+  it is the public `/metodo` page
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deployment on a VPS, **Oracle Cloud
+  Always Free (ARM)**, **Raspberry Pi 5**, backups and monitoring
+- [`docs/LEGAL.md`](docs/LEGAL.md) — what we show of others' content,
+  robots/rate limits, per-source terms, personal data
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — the architecture decision records
 
-## Contribuire
+## Contributing
 
-I file dati crescono via pull request, ogni voce con motivazione e fonte:
+The data files grow via pull request, every entry with a rationale and a
+source:
 
-- `data/sources.yaml` — nuove testate (con `terms_note` e feed verificati)
-- `data/lexicon_it.yaml` / `lexicon_en.yaml` — il lessico di framing
-- `data/topics.yaml` — le parole chiave della tassonomia dei temi
-- `data/seeds/ownership_it.yaml` — assetti proprietari **con evidenza**;
-  la regola è: mai un dato inventato, meglio `null` con una nota
+- `data/sources.yaml` — new outlets (with `terms_note` and verified feeds)
+- `data/lexicon_it.yaml` / `lexicon_en.yaml` — the framing lexicon
+- `data/topics.yaml` — the keywords of the topic taxonomy
+- `data/seeds/ownership_it.yaml` — ownership data **with evidence**;
+  the rule: never an invented figure, `null` with a note beats a guess
+- `apps/web/translations/*.yaml` — interface translations (same keys as
+  `it.yaml`; a test enforces parity)
 
-Qualità: `make check` deve passare (ruff, mypy `--strict`, coverage ≥ 80%).
+Quality bar: `make check` must pass (ruff, mypy `--strict`, coverage ≥ 80%).
 
-## Licenze
+## Licences
 
-Codice **AGPL-3.0-only** ([LICENSE](LICENSE)) · dati derivati **CC BY-SA
-4.0** (esportabili da `/dati`) · attribuzioni di terze parti in
-[NOTICE](NOTICE). I titoli e gli snippet restano delle rispettive testate e
-sono mostrati nei limiti della citazione con link alla fonte.
+Code **AGPL-3.0-only** ([LICENSE](LICENSE)) · derived data **CC BY-SA 4.0**
+(exportable from `/dati`) · third-party attributions in [NOTICE](NOTICE).
+Headlines and snippets remain the property of their outlets and are shown
+within the limits of quotation with a link to the source.

@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,11 +15,64 @@ from apps.api.templating import templates
 from core.bias.selection import cocoverage_map
 from core.bias.structure import source_profile
 from core.db import get_session
+from core.i18n import (
+    LOCALE_COOKIE,
+    LOCALE_NAMES,
+    SUPPORTED_LOCALES,
+    make_translator,
+    normalize_locale,
+    resolve_locale,
+)
 from core.models import Article, BiasSignal, Coverage, Owner, Ownership, Source, Story, utcnow
 from core.nlp.topics import load_topics
 from core.provenance import for_entity
 
 router = APIRouter()
+
+
+def topic_labels_for(locale: str) -> dict[str, str]:
+    """Etichette dei temi: italiano per 'it', inglese per le altre lingue."""
+    return {
+        t.id: (t.label_it if locale == "it" else t.label_en) for t in load_topics()
+    }
+
+
+def request_locale(request: Request) -> str:
+    """Lingua della richiesta: ?lang=xx > cookie > default (deterministico)."""
+    return resolve_locale(
+        request.query_params.get("lang"), request.cookies.get(LOCALE_COOKIE)
+    )
+
+
+async def page_context(
+    request: Request, session: AsyncSession
+) -> dict[str, Any]:
+    """Contesto comune a tutte le pagine: numeri di testata + lingua + t()."""
+    locale = request_locale(request)
+    return {
+        **await masthead_context(session),
+        "locale": locale,
+        "t": make_translator(locale),
+        "locales": [
+            (code, LOCALE_NAMES[code]) for code in SUPPORTED_LOCALES
+        ],
+        "current_path": request.url.path,
+    }
+
+
+@router.get("/lingua/{code}")
+async def cambia_lingua(code: str, next: str = "/") -> RedirectResponse:
+    """Imposta la lingua dell'interfaccia (cookie) e torna alla pagina."""
+    locale = normalize_locale(code)
+    if locale is None:
+        raise HTTPException(status_code=404, detail="lingua non supportata")
+    # Guardia anti open-redirect: solo percorsi interni.
+    destination = next if next.startswith("/") and not next.startswith("//") else "/"
+    response = RedirectResponse(destination, status_code=303)
+    response.set_cookie(
+        LOCALE_COOKIE, locale, max_age=60 * 60 * 24 * 365, samesite="lax"
+    )
+    return response
 
 
 async def _owners_by_source(
@@ -151,12 +204,12 @@ async def index(
         .all()
     )
     coverages = await _coverages_for(session, [s.id for s in stories])
-    topic_labels = {t.id: t.label_it for t in load_topics()}
+    topic_labels = topic_labels_for(request_locale(request))
     return templates.TemplateResponse(
         request,
         "index.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "stories": stories,
             "coverages": coverages,
             "topic_labels": topic_labels,
@@ -175,6 +228,7 @@ async def storia(
     ).scalar_one_or_none()
     if story is None:
         raise HTTPException(status_code=404, detail="story sconosciuta")
+    locale = request_locale(request)
     coverage = (
         await session.execute(select(Coverage).where(Coverage.story_id == story.id))
     ).scalar_one_or_none()
@@ -186,15 +240,16 @@ async def storia(
     if coverage and coverage.by_country:
         paesi_svg = coverage_bar_svg(
             coverage.by_country,
-            label=f"Copertura per paese della story {story.id}",
+            label=f"Coverage by country — story {story.id}",
+            locale=locale,
         )
     provenances = await for_entity(session, "story", story.id)
-    topic_labels = {t.id: t.label_it for t in load_topics()}
+    topic_labels = topic_labels_for(locale)
     return templates.TemplateResponse(
         request,
         "storia.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "story": story,
             "coverage": coverage,
             "owners": owners,
@@ -247,7 +302,7 @@ async def lampo(
         request,
         "lampo.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "schede": schede,
             "owners": owners,
             "flash_min": settings.flash_min_sources,
@@ -271,7 +326,7 @@ async def fonti(
     return templates.TemplateResponse(
         request,
         "fonti.html",
-        {**await masthead_context(session), "regioni": regioni},
+        {**await page_context(request, session), "regioni": regioni},
     )
 
 
@@ -291,8 +346,9 @@ async def fonte(
             )
         )
     ).scalar_one()
+    locale = request_locale(request)
     provenances = await for_entity(session, "source", profile.source.id)
-    topic_labels = {t.id: t.label_it for t in load_topics()}
+    topic_labels = topic_labels_for(locale)
     signal_views = shape_signals(profile.signals, topic_labels)
 
     mappa_svg = None
@@ -304,24 +360,25 @@ async def fonte(
                 for s in (await session.execute(select(Source))).scalars()
             }
             mappa_svg = cocoverage_scatter_svg(
-                mappa.positions, highlight=slug, names=nomi
+                mappa.positions, highlight=slug, names=nomi, locale=locale
             )
 
     tono_svg = None
     if "tone" in signal_views:
         tono_svg = coverage_bar_svg(
             signal_views["tone"].data["distribution"],
-            label=f"Distribuzione del tono dei titoli di {profile.source.name}",
+            label=f"Tone distribution — {profile.source.name}",
+            locale=locale,
         )
 
     return templates.TemplateResponse(
         request,
         "fonte.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "profile": profile,
             "article_count": article_count,
-            "grafo_svg": ownership_graph_svg(profile),
+            "grafo_svg": ownership_graph_svg(profile, locale),
             "provenances": provenances,
             "signal_views": signal_views,
             "mappa_svg": mappa_svg,
@@ -338,12 +395,14 @@ async def mappa(
     nomi = {
         s.slug: s.name for s in (await session.execute(select(Source))).scalars()
     }
-    svg = cocoverage_scatter_svg(result.positions, names=nomi)
+    svg = cocoverage_scatter_svg(
+        result.positions, names=nomi, locale=request_locale(request)
+    )
     return templates.TemplateResponse(
         request,
         "mappa.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "result": result,
             "mappa_svg": svg,
         },

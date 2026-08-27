@@ -1,21 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Annota — {{ app_name }}{% endblock %}
+{% block title %}{{ t('nav.annota') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="modulo">
-  <h2 class="titolo-sezione">Valutazione cieca</h2>
+  <h2 class="titolo-sezione">{{ t('annota.titolo') }}</h2>
   <p class="occhiello">
-    Hai davanti solo titolo e snippet: <strong>non sai da quale testata
-    provenga</strong>, ed è voluto. Valuta il contenuto sui due assi, oppure
-    scegli «non applicabile» se il testo non prende posizione.
-    Finora hai annotato {{ my_count }} articoli.
+    {{ t('annota.occhiello', n=my_count) | safe }}
     <form method="post" action="/annota/esci" class="esci-inline">
-      <button type="submit" class="tema-toggle">Esci ({{ annotator.display_name }})</button>
+      <button type="submit" class="tema-toggle">{{ t('annota.esci', nome=annotator.display_name) }}</button>
     </form>
   </p>
 
   {% if article %}
-  <article class="scheda-cieca" aria-label="Contenuto da valutare, testata nascosta">
+  <article class="scheda-cieca" aria-label="{{ t('annota.scheda_aria') }}">
     <h3 class="scheda-cieca-titolo">{{ article.title }}</h3>
     {% if article.snippet %}<p>{{ article.snippet }}</p>{% endif %}
   </article>
@@ -24,39 +21,38 @@
     <input type="hidden" name="article_id" value="{{ article.id }}">
 
     <fieldset>
-      <legend>Asse economico: −2 = più intervento pubblico · +2 = più mercato</legend>
+      <legend>{{ t('annota.eco_scala') }}</legend>
       <div class="scala">
         {% for v in ["-2", "-1", "0", "1", "2", "na"] %}
         <label class="scala-voce"><input type="radio" name="economic" required
-          value="{{ v }}">{{ "n/a" if v == "na" else v }}</label>
+          value="{{ v }}">{{ t('annota.na') if v == "na" else v }}</label>
         {% endfor %}
       </div>
     </fieldset>
 
     <fieldset>
-      <legend>Asse culturale: −2 = progressista · +2 = conservatore</legend>
+      <legend>{{ t('annota.cul_scala') }}</legend>
       <div class="scala">
         {% for v in ["-2", "-1", "0", "1", "2", "na"] %}
         <label class="scala-voce"><input type="radio" name="cultural" required
-          value="{{ v }}">{{ "n/a" if v == "na" else v }}</label>
+          value="{{ v }}">{{ t('annota.na') if v == "na" else v }}</label>
         {% endfor %}
       </div>
     </fieldset>
 
     <fieldset>
-      <legend>Quanto sei sicuro del giudizio?</legend>
+      <legend>{{ t('annota.confidenza') }}</legend>
       <div class="scala">
-        <label class="scala-voce"><input type="radio" name="confidence" value="1">poco</label>
-        <label class="scala-voce"><input type="radio" name="confidence" value="2" checked>abbastanza</label>
-        <label class="scala-voce"><input type="radio" name="confidence" value="3">molto</label>
+        <label class="scala-voce"><input type="radio" name="confidence" value="1">{{ t('annota.poco') }}</label>
+        <label class="scala-voce"><input type="radio" name="confidence" value="2" checked>{{ t('annota.abbastanza') }}</label>
+        <label class="scala-voce"><input type="radio" name="confidence" value="3">{{ t('annota.molto') }}</label>
       </div>
     </fieldset>
 
-    <button type="submit" class="bottone">Salva e passa al prossimo</button>
+    <button type="submit" class="bottone">{{ t('annota.salva') }}</button>
   </form>
   {% else %}
-  <p class="dato-mancante">Non ci sono articoli da annotare al momento: hai già
-    valutato tutto il campione disponibile. Grazie.</p>
+  <p class="dato-mancante">{{ t('annota.finito') }}</p>
   {% endif %}
 </section>
 {% endblock %}

@@ -1,30 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Diventa annotatore — {{ app_name }}{% endblock %}
+{% block title %}{{ t('annota.reg_titolo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="modulo">
-  <h2 class="titolo-sezione">Diventa annotatore</h2>
-  <p class="occhiello">
-    Gli annotatori valutano titoli e snippet <strong>senza sapere da quale
-    testata provengano</strong>. Dichiarare il proprio orientamento è parte del
-    protocollo: serve a garantire che le etichette pubblicate nascano
-    dall'accordo tra persone con orientamenti diversi, e a pesare i giudizi.
-    La dichiarazione è pubblica solo in forma aggregata e anonima.
-  </p>
+  <h2 class="titolo-sezione">{{ t('annota.reg_titolo') }}</h2>
+  <p class="occhiello">{{ t('annota.reg_occhiello') | safe }}</p>
   <form method="post" action="/annota/registrati" class="modulo-campi">
-    <label>Nome utente
+    <label>{{ t('annota.username') }}
       <input type="text" name="username" required minlength="3" maxlength="60" autocomplete="username">
     </label>
-    <label>Password (almeno 8 caratteri)
+    <label>{{ t('annota.password') }}
       <input type="password" name="password" required minlength="8" autocomplete="new-password">
     </label>
-    <label>Nome visibile (facoltativo)
+    <label>{{ t('annota.display') }}
       <input type="text" name="display_name" maxlength="120">
     </label>
 
     <fieldset>
-      <legend>Il tuo orientamento sull'asse economico
-        (−2 = più intervento pubblico · +2 = più mercato)</legend>
+      <legend>{{ t('annota.eco_legend') }}</legend>
       <div class="scala">
         {% for v in ["-2", "-1", "0", "1", "2"] %}
         <label class="scala-voce"><input type="radio" name="self_axis_economic"
@@ -34,8 +27,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>Il tuo orientamento sull'asse culturale
-        (−2 = progressista · +2 = conservatore)</legend>
+      <legend>{{ t('annota.cul_legend') }}</legend>
       <div class="scala">
         {% for v in ["-2", "-1", "0", "1", "2"] %}
         <label class="scala-voce"><input type="radio" name="self_axis_cultural"
@@ -44,8 +36,8 @@
       </div>
     </fieldset>
 
-    <button type="submit" class="bottone">Registrati</button>
+    <button type="submit" class="bottone">{{ t('annota.registrati') }}</button>
   </form>
-  <p>Hai già un profilo? <a href="/annota/entra">Entra</a>.</p>
+  <p>{{ t('annota.gia_profilo') }} <a href="/annota/entra">{{ t('annota.entra') }}</a>.</p>
 </section>
 {% endblock %}

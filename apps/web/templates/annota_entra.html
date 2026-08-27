@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Entra — {{ app_name }}{% endblock %}
+{% block title %}{{ t('annota.entra') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="modulo">
-  <h2 class="titolo-sezione">Entra</h2>
+  <h2 class="titolo-sezione">{{ t('annota.entra') }}</h2>
   <form method="post" action="/annota/entra" class="modulo-campi">
-    <label>Nome utente
+    <label>{{ t('annota.username') }}
       <input type="text" name="username" required autocomplete="username">
     </label>
-    <label>Password
+    <label>{{ t('annota.password_semplice') }}
       <input type="password" name="password" required autocomplete="current-password">
     </label>
-    <button type="submit" class="bottone">Entra</button>
+    <button type="submit" class="bottone">{{ t('annota.entra') }}</button>
   </form>
-  <p>Non hai un profilo? <a href="/annota/registrati">Diventa annotatore</a>.</p>
+  <p>{{ t('annota.no_profilo') }} <a href="/annota/registrati">{{ t('annota.reg_titolo') }}</a>.</p>
 </section>
 {% endblock %}

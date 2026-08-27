@@ -1,53 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Dati aperti — {{ app_name }}{% endblock %}
+{% block title %}{{ t('dati.titolo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <section class="prosa">
-  <h2>Dati aperti</h2>
-  <p>
-    I <strong>dati derivati</strong> prodotti da {{ app_name }} — le story, le
-    mappe di copertura, i segnali di selezione e framing, le annotazioni
-    anonime — sono pubblicati con licenza
-    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it">CC BY-SA 4.0</a>.
-    Ogni file dichiara la licenza e la versione del metodo nella prima riga;
-    la metodologia completa è in <a href="/metodo">Come lo calcoliamo</a>.
-  </p>
-  <p>
-    I titoli e gli snippet degli articoli restano delle rispettive testate e
-    <strong>non</strong> fanno parte di questi export.
-  </p>
+  <h2>{{ t('dati.titolo') }}</h2>
+  <p>{{ t('dati.intro', app=app_name) | safe }}</p>
+  <p>{{ t('dati.no_contenuti') | safe }}</p>
 
   <table class="tabella-archivio">
-    <caption>Export disponibili (CSV, UTF-8)</caption>
+    <caption>{{ t('dati.caption') }}</caption>
     <thead>
-      <tr><th scope="col">File</th><th scope="col">Contenuto</th></tr>
+      <tr><th scope="col">{{ t('dati.file') }}</th><th scope="col">{{ t('dati.contenuto') }}</th></tr>
     </thead>
     <tbody>
       <tr>
         <td><a href="/dati/story.csv">story.csv</a></td>
-        <td>Le story: titolo neutro, tema, prima/ultima apparizione, conteggi, flag lampo.</td>
+        <td>{{ t('dati.story_desc') }}</td>
       </tr>
       <tr>
         <td><a href="/dati/coperture.csv">coperture.csv</a></td>
-        <td>Copertura per paese e lingua di ogni story, con gli angoli ciechi.</td>
+        <td>{{ t('dati.coperture_desc') }}</td>
       </tr>
       <tr>
         <td><a href="/dati/segnali.csv">segnali.csv</a></td>
-        <td>Tutti i segnali datati per fonte (agenda, co-copertura, blind spot,
-            framing, attori, tono, annotazione) con metodo e versione.</td>
+        <td>{{ t('dati.segnali_desc') }}</td>
       </tr>
       <tr>
         <td><a href="/dati/annotazioni.csv">annotazioni.csv</a></td>
-        <td>Le annotazioni del livello 4, anonime (annotatore = a1, a2, …)
-            con l'orientamento dichiarato di ciascun annotatore.</td>
+        <td>{{ t('dati.annotazioni_desc') }}</td>
       </tr>
     </tbody>
   </table>
 
-  <p>
-    L'API JSON completa, con documentazione automatica, è su
-    <a href="/docs">/docs</a> (OpenAPI). Il software è libero (AGPL-3.0):
-    <a href="https://github.com/zano97/open_news">repository</a>.
-  </p>
+  <p>{{ t('dati.api') | safe }}</p>
 </section>
 {% endblock %}

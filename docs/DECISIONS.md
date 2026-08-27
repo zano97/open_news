@@ -135,6 +135,7 @@ Wikidata avviene in un job separato best-effort e l'interfaccia mostra
 "(non collegata)" finché il QID non è verificato. Con l'extra [ml]
 (spaCy/GLiNER) la qualità sale, il metodo resta dichiarato.
 
+
 ## ADR-0015 — Demo offline con testate dimostrative, mai titoli inventati su testate reali
 
 **Contesto.** Serve un modo per provare l'interfaccia senza rete
@@ -144,3 +145,18 @@ violerebbe la missione del progetto.
 "(demo)" con dominio `.invalid` e `terms_note` che dichiara l'origine
 inventata delle notizie; le testate reali del catalogo non ricevono mai
 contenuti inventati.
+
+## ADR-0016 — Interfaccia multilingua con cataloghi YAML e scelta esplicita
+
+**Contesto.** L'interfaccia deve parlare più lingue; i framework gettext/.po
+aggiungono una toolchain pesante per ~180 stringhe.
+**Decisione.** Cataloghi YAML piatti in `apps/web/translations/{it,en,fr,de,es}.yaml`
+con l'italiano come riferimento; `core/i18n.py` fornisce `t()` con fallback
+lingua → inglese → italiano → chiave (mai una pagina rotta). Un test
+garantisce parità di chiavi e di segnaposto tra le lingue. La lingua si
+sceglie SOLO esplicitamente dal selettore in testata (cookie, rotta
+`/lingua/{code}` con guardia anti open-redirect): niente auto-rilevamento
+dall'Accept-Language, per avere un comportamento deterministico e testabile.
+Le date della testata sono localizzate; i contenuti delle notizie restano
+nella lingua delle testate; i documenti lunghi (metodologia) esistono in
+it/en con fallback inglese dichiarato per le altre lingue.

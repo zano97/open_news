@@ -1,23 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Le testate — {{ app_name }}{% endblock %}
+{% block title %}{{ t('fonti.titolo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
-<h2 class="titolo-sezione">Le testate</h2>
-<p class="occhiello">
-  Ogni testata ha una scheda anagrafica: chi la possiede, quanti soldi pubblici
-  riceve, quale linea dichiara, che cosa copre e che cosa ignora.
-  Le fonti disabilitate restano nel catalogo con la motivazione.
-</p>
+<h2 class="titolo-sezione">{{ t('fonti.titolo') }}</h2>
+<p class="occhiello">{{ t('fonti.occhiello') }}</p>
 
-{% for regione, nome in [("italy", "Italia"), ("europe", "Europa"), ("world", "Mondo")] %}
+{% for regione in ["italy", "europe", "world"] %}
 <section aria-labelledby="reg-{{ regione }}">
-  <h3 id="reg-{{ regione }}" class="titolo-regione">{{ nome }}</h3>
+  <h3 id="reg-{{ regione }}" class="titolo-regione">{{ t('region.' + regione) }}</h3>
   <ul class="elenco-fonti">
     {% for src in regioni[regione] %}
     <li class="{{ 'fonte-disabilitata' if not src.enabled }}">
       <a href="/fonte/{{ src.slug }}">{{ src.name }}</a>
       <span class="fonte-meta">{{ src.domain }} · {{ src.country | upper }}
-        {%- if not src.enabled %} · <strong>disabilitata</strong>{% endif %}</span>
+        {%- if not src.enabled %} · <strong>{{ t('fonti.disabilitata') }}</strong>{% endif %}</span>
       {% if not src.enabled and src.disabled_reason %}
       <p class="fonte-motivo">{{ src.disabled_reason }}</p>
       {% endif %}

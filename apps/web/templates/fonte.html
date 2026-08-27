@@ -1,46 +1,46 @@
 {% extends "base.html" %}
-{% block title %}{{ profile.source.name }} — scheda anagrafica — {{ app_name }}{% endblock %}
+{% block title %}{{ profile.source.name }} — {{ app_name }}{% endblock %}
 
 {% block content %}
 <article class="scheda-archivio">
   <header class="scheda-testata">
-    <p class="scheda-timbro">Archivio delle testate · scheda n. {{ profile.source.id }}</p>
+    <p class="scheda-timbro">{{ t('fonte.timbro', n=profile.source.id) }}</p>
     <h2 class="scheda-nome">{{ profile.source.name }}</h2>
     <p class="scheda-sotto">
       {{ profile.source.domain }} · {{ profile.source.country | upper }} ·
-      lingua {{ profile.source.language }}
-      {% if profile.source.founded %} · fondata nel {{ profile.source.founded }}{% endif %}
+      {{ t('fonte.lingua', l=profile.source.language) }}
+      {% if profile.source.founded %} · {{ t('fonte.fondata', anno=profile.source.founded) }}{% endif %}
       {% if profile.source.wikidata_qid %}
       · <a href="https://www.wikidata.org/wiki/{{ profile.source.wikidata_qid }}">
-        {{ profile.source.wikidata_qid }}</a> <small>(secondo Wikidata)</small>
+        {{ profile.source.wikidata_qid }}</a> <small>({{ t('storia.secondo_wikidata') }})</small>
       {% endif %}
     </p>
     {% if not profile.source.enabled %}
-    <p class="avviso-disabilitata"><strong>Fonte disabilitata.</strong>
-      {{ profile.source.disabled_reason or "Motivo non registrato." }}</p>
+    <p class="avviso-disabilitata"><strong>{{ t('fonte.disabilitata') }}</strong>
+      {{ profile.source.disabled_reason or t('fonte.motivo_nd') }}</p>
     {% endif %}
   </header>
 
   {% if profile.source.self_declared_line %}
   <section class="scheda-sezione">
-    <h3>Linea dichiarata</h3>
+    <h3>{{ t('fonte.linea') }}</h3>
     <blockquote class="linea-dichiarata">
       «{{ profile.source.self_declared_line.quote }}»
-      <cite><a href="{{ profile.source.self_declared_line.url }}">fonte: la testata stessa</a></cite>
+      <cite><a href="{{ profile.source.self_declared_line.url }}">{{ t('fonte.linea_fonte') }}</a></cite>
     </blockquote>
   </section>
   {% endif %}
 
   <section class="scheda-sezione">
-    <h3>Chi la possiede</h3>
+    <h3>{{ t('fonte.chi_possiede') }}</h3>
     {{ grafo_svg | safe }}
     {% if profile.ownerships %}
     <table class="tabella-archivio">
-      <caption>Partecipazioni registrate, con evidenza e data di rilevamento</caption>
+      <caption>{{ t('fonte.partecipazioni_caption') }}</caption>
       <thead>
-        <tr><th scope="col">Proprietario</th><th scope="col">Tipo</th>
-            <th scope="col">Quota</th><th scope="col">Evidenza</th>
-            <th scope="col">Rilevato il</th></tr>
+        <tr><th scope="col">{{ t('tab.proprietario') }}</th><th scope="col">{{ t('tab.tipo') }}</th>
+            <th scope="col">{{ t('tab.quota') }}</th><th scope="col">{{ t('tab.evidenza') }}</th>
+            <th scope="col">{{ t('tab.rilevato') }}</th></tr>
       </thead>
       <tbody>
         {% for entry in profile.ownerships %}
@@ -51,7 +51,7 @@
             {% endif %}
           </td>
           <td>{{ entry.owner.type }}</td>
-          <td>{% if entry.ownership.share_pct is not none %}{{ entry.ownership.share_pct }}%{% else %}dato non disponibile{% endif %}</td>
+          <td>{% if entry.ownership.share_pct is not none %}{{ entry.ownership.share_pct }}%{% else %}{{ t('comune.dato_non_disponibile') }}{% endif %}</td>
           <td>{% if entry.ownership.evidence_url %}<a href="{{ entry.ownership.evidence_url }}">{{ entry.ownership.evidence_name }}</a>{% else %}{{ entry.ownership.evidence_name }}{% endif %}</td>
           <td>{{ entry.owner.retrieved_at | data_breve }}</td>
         </tr>
@@ -65,15 +65,15 @@
 
     {% set con_cariche = profile.ownerships | selectattr("owner.political_offices") | list %}
     {% if con_cariche %}
-    <h4>Cariche politiche dei proprietari</h4>
+    <h4>{{ t('fonte.cariche') }}</h4>
     <ul class="elenco-cariche">
       {% for entry in con_cariche %}
         {% for carica in entry.owner.political_offices %}
         <li>
           <strong>{{ entry.owner.name }}</strong>: {{ carica.office }}
-          ({{ carica.from_year or "?" }}–{{ carica.to_year or "in corso" }})
+          ({{ carica.from_year or "?" }}–{{ carica.to_year or t('comune.in_corso') }})
           — {{ carica.holder_note }}
-          {% if carica.evidence_url %}<a href="{{ carica.evidence_url }}">[evidenza]</a>{% endif %}
+          {% if carica.evidence_url %}<a href="{{ carica.evidence_url }}">{{ t('fonte.evidenza_link') }}</a>{% endif %}
         </li>
         {% endfor %}
       {% endfor %}
@@ -82,98 +82,93 @@
   </section>
 
   <section class="scheda-sezione">
-    <h3>Soldi pubblici</h3>
+    <h3>{{ t('fonte.soldi') }}</h3>
     {% if profile.fundings %}
     <table class="tabella-archivio">
-      <caption>Contributi pubblici registrati per anno</caption>
+      <caption>{{ t('fonte.contributi_caption') }}</caption>
       <thead>
-        <tr><th scope="col">Anno</th><th scope="col">Programma</th>
-            <th scope="col">Importo</th><th scope="col">Evidenza</th></tr>
+        <tr><th scope="col">{{ t('tab.anno') }}</th><th scope="col">{{ t('tab.programma') }}</th>
+            <th scope="col">{{ t('tab.importo') }}</th><th scope="col">{{ t('tab.evidenza') }}</th></tr>
       </thead>
       <tbody>
         {% for f in profile.fundings %}
         <tr>
           <td>{{ f.year }}</td>
           <td>{{ f.program }}</td>
-          <td>{% if f.amount_eur is not none %}{{ "%.0f" | format(f.amount_eur) }} €{% else %}importo non disponibile{% endif %}</td>
-          <td>{% if f.evidence_url %}<a href="{{ f.evidence_url }}">elenchi DIE</a>{% else %}—{% endif %}</td>
+          <td>{% if f.amount_eur is not none %}{{ "%.0f" | format(f.amount_eur) }} €{% else %}{{ t('fonte.importo_nd') }}{% endif %}</td>
+          <td>{% if f.evidence_url %}<a href="{{ f.evidence_url }}">{{ t('fonte.elenchi_die') }}</a>{% else %}—{% endif %}</td>
         </tr>
         {% if f.note %}<tr class="riga-nota"><td colspan="4"><small>{{ f.note }}</small></td></tr>{% endif %}
         {% endfor %}
       </tbody>
     </table>
     {% else %}
-    <p class="dato-mancante">Nessun contributo pubblico registrato per questa fonte
-      (o dato non ancora importato).</p>
+    <p class="dato-mancante">{{ t('fonte.nessun_contributo') }}</p>
     {% endif %}
   </section>
 
   <section class="scheda-sezione">
-    <h3>Termini d'uso della fonte</h3>
-    <p>{{ profile.source.terms_note or "nessuna restrizione nota" }}</p>
+    <h3>{{ t('fonte.termini') }}</h3>
+    <p>{{ profile.source.terms_note or t('fonte.nessuna_restrizione') }}</p>
   </section>
 
   <section class="scheda-sezione">
-    <h3>Che cosa copre (livello 2 — selezione)</h3>
+    <h3>{{ t('fonte.livello2') }}</h3>
     {% if signal_views.agenda %}
     {% set a = signal_views.agenda %}
-    <p class="fonte-meta">Periodo {{ a.signal.period_start }} → {{ a.signal.period_end }}
-      · {{ a.signal.n_articles }} articoli · metodo agenda-deviation-v1 con IC bootstrap 95%
-      · <a href="/metodo#agenda">da dove viene questo dato?</a></p>
+    <p class="fonte-meta">{{ t('fonte.periodo', da=a.signal.period_start, a=a.signal.period_end) }}
+      · {{ t('fonte.agenda_metodo', n=a.signal.n_articles) }}
+      · <a href="/metodo#agenda">{{ t('fonte.dadove') }}</a></p>
     <div class="agenda-colonne">
       <div>
-        <h4>Più della media delle fonti</h4>
+        <h4>{{ t('fonte.piu_media') }}</h4>
         <ul>
           {% for r in a.data.over %}
-          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> punti
-            <small>(IC {{ r.ci_low_pts }} … {{ r.ci_high_pts }}{{ "; solido" if r.significant else "; entro il rumore" }})</small></li>
+          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> {{ t('fonte.punti') }}
+            <small>({{ t('fonte.ic', lo=r.ci_low_pts, hi=r.ci_high_pts) }}; {{ t('fonte.solido') if r.significant else t('fonte.rumore') }})</small></li>
           {% endfor %}
         </ul>
       </div>
       <div>
-        <h4>Meno della media delle fonti</h4>
+        <h4>{{ t('fonte.meno_media') }}</h4>
         <ul>
           {% for r in a.data.under %}
-          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> punti
-            <small>(IC {{ r.ci_low_pts }} … {{ r.ci_high_pts }}{{ "; solido" if r.significant else "; entro il rumore" }})</small></li>
+          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> {{ t('fonte.punti') }}
+            <small>({{ t('fonte.ic', lo=r.ci_low_pts, hi=r.ci_high_pts) }}; {{ t('fonte.solido') if r.significant else t('fonte.rumore') }})</small></li>
           {% endfor %}
         </ul>
       </div>
     </div>
     {% else %}
-    <p class="dato-mancante">In valutazione: servono almeno 10 articoli con tema
-      nella finestra di 30 giorni ({{ article_count }} articoli raccolti finora).</p>
+    <p class="dato-mancante">{{ t('fonte.l2_valutazione', n=article_count) }}</p>
     {% endif %}
 
     {% if signal_views.blindspot %}
     {% set b = signal_views.blindspot %}
-    <h4>Angoli ciechi</h4>
+    <h4>{{ t('fonte.angoli') }}</h4>
     <p>
-      Nella finestra, <strong>{{ b.data.count }}</strong> story coperte da almeno il
-      {{ b.data.threshold_pct }}% delle altre {{ b.data.peers }} fonti attive dello stesso paese
-      non compaiono in questa testata.
-      {% if b.data.story_ids %}Le più recenti:
+      {{ t('fonte.angoli_testo', n=b.data.count, pct=b.data.threshold_pct, peers=b.data.peers) | safe }}
+      {% if b.data.story_ids %}{{ t('fonte.angoli_recenti') }}
         {% for sid in b.data.story_ids %}<a href="/storia/{{ sid }}">n.{{ sid }}</a>{{ ", " if not loop.last }}{% endfor %}.
       {% endif %}
     </p>
     {% endif %}
 
     {% if mappa_svg %}
-    <h4>Dove si colloca nella mappa di co-copertura</h4>
+    <h4>{{ t('fonte.mappa_titolo') }}</h4>
     {{ mappa_svg | safe }}
-    <p class="fonte-meta">Assi emergenti, nessuna etichetta assegnata:
-      <a href="/mappa">leggi la mappa completa con le story che separano gli assi</a>.</p>
+    <p class="fonte-meta">{{ t('fonte.mappa_nota') | safe }}</p>
     {% endif %}
   </section>
 
   <section class="scheda-sezione">
-    <h3>Come racconta (livello 3 — framing)</h3>
+    <h3>{{ t('fonte.livello3') }}</h3>
     {% if signal_views.framing %}
     {% set f = signal_views.framing %}
-    <p class="fonte-meta">Periodo {{ f.signal.period_start }} → {{ f.signal.period_end }}
-      · {{ f.signal.n_articles }} articoli · lessico pubblico ampliabile via pull request
-      · <a href="/metodo#framing">da dove viene questo dato?</a></p>
-    <h4>Lessico: quali parole sceglie</h4>
+    <p class="fonte-meta">{{ t('fonte.periodo', da=f.signal.period_start, a=f.signal.period_end) }}
+      · {{ t('fonte.lessico_metodo', n=f.signal.n_articles) }}
+      · <a href="/metodo#framing">{{ t('fonte.dadove') }}</a></p>
+    <h4>{{ t('fonte.lessico_titolo') }}</h4>
     <ul class="elenco-segnali">
       {% for g in f.data.top_groups %}
       <li><strong>{{ g.id | replace("_", " ") }}</strong>:
@@ -181,83 +176,74 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="dato-mancante">Lessico: in valutazione (servono almeno 5 articoli
-      in lingua coperta dal lessico).</p>
+    <p class="dato-mancante">{{ t('fonte.lessico_valutazione') }}</p>
     {% endif %}
 
     {% if signal_views.actors %}
     {% set act = signal_views.actors %}
-    <h4>Chi lascia parlare</h4>
+    <h4>{{ t('fonte.chi_parla') }}</h4>
     <p>
       {% for role, n in act.data.roles[:6] %}
       {{ role }} {{ act.data.roles_percent[role] }}%{{ " · " if not loop.last }}
       {% endfor %}
-      <small>(euristica dichiarata actors-heuristic-v1, su {{ act.signal.n_articles }} articoli)</small>
+      <small>{{ t('fonte.chi_parla_metodo', n=act.signal.n_articles) }}</small>
     </p>
     {% if act.data.top_speakers %}
-    <p class="fonte-meta">Voci più citate:
+    <p class="fonte-meta">{{ t('fonte.voci') }}
       {% for sp in act.data.top_speakers %}{{ sp.name }} ({{ sp.count }}){{ ", " if not loop.last }}{% endfor %}</p>
     {% endif %}
     {% endif %}
 
     {% if signal_views.tone %}
-    <h4>Tono dei titoli (solo distribuzione)</h4>
+    <h4>{{ t('fonte.tono') }}</h4>
     {{ tono_svg | safe }}
     <p class="fonte-meta">
       {% for label, pct in signal_views.tone.data.percent.items() %}{{ label }} {{ pct }}%{{ " · " if not loop.last }}{% endfor %}
-      — metodo tone-lexicon-v1: mai un giudizio sul singolo articolo.
+      {{ t('fonte.tono_metodo') }}
     </p>
     {% endif %}
 
     {% if not signal_views.framing and not signal_views.actors and not signal_views.tone %}
-    <p class="dato-mancante">In valutazione: i segnali del livello 3 arrivano con
-      il job settimanale quando ci sono abbastanza articoli.</p>
+    <p class="dato-mancante">{{ t('fonte.l3_valutazione') }}</p>
     {% endif %}
   </section>
 
   <section class="scheda-sezione">
-    <h3>Posizionamento (livello 4 — giudizio umano)</h3>
+    <h3>{{ t('fonte.livello4') }}</h3>
     {% if signal_views.annotation %}
     {% for axis, v in signal_views.annotation.data.items() %}
-    <h4>{{ "Asse economico (−2 pubblico ↔ +2 mercato)" if axis == "economic"
-          else "Asse culturale (−2 progressista ↔ +2 conservatore)" }}</h4>
+    <h4>{{ t('fonte.asse_economico') if axis == "economic" else t('fonte.asse_culturale') }}</h4>
     {% if v.status == "pubblicata" %}
     <p>
-      Etichetta: <strong>{{ "%+.2f" | format(v.label) }}</strong>
-      <small>(α = {{ v.alpha }}, {{ v.n_articles }} articoli,
-        {{ v.n_annotators }} annotatori in {{ v.buckets | length }} fasce di
-        orientamento dichiarato — <a href="/metodo#livello4">protocollo</a>)</small>
+      {{ t('fonte.etichetta') }} <strong>{{ "%+.2f" | format(v.label) }}</strong>
+      <small>{{ t('fonte.etichetta_dettagli', alpha=v.alpha, articoli=v.n_articles, annotatori=v.n_annotators, fasce=v.buckets | length) | safe }}</small>
     </p>
     {% else %}
     <p class="dato-mancante">
-      In valutazione ({{ v.n_articles }}/50 articoli, {{ v.n_annotators }} annotatori
-      {%- if v.alpha is not none %}, α = {{ v.alpha }}{% endif %}):
-      {{ v.missing | join("; ") }}.
+      {{ t('fonte.l4_valutazione',
+           n=v.n_articles, k=v.n_annotators,
+           alpha=(", α = " ~ v.alpha) if v.alpha is not none else "",
+           mancante=v.missing | join("; ")) }}
     </p>
     {% endif %}
     {% endfor %}
     {% else %}
-    <p class="dato-mancante">In valutazione: l'etichetta di posizionamento viene
-      pubblicata solo con ≥50 articoli annotati da ≥3 annotatori con orientamenti
-      dichiarati diversi e accordo α ≥ 0,6
-      (<a href="/metodo#livello4">protocollo</a>). Nessuna annotazione ancora:
-      <a href="/annota/registrati">diventa annotatore</a>.</p>
+    <p class="dato-mancante">{{ t('fonte.l4_nessuna') | safe }}</p>
     {% endif %}
   </section>
 
   <footer class="scheda-piede">
-    <h4>Da dove vengono questi dati?</h4>
+    <h4>{{ t('provenienza.titolo') }}</h4>
     <ul class="elenco-provenienze">
       {% for p in provenances[:20] %}
-      <li><code>{{ p.field }}</code> — metodo {{ p.method }} v.{{ p.method_version }},
-        calcolato il {{ p.computed_at | data_breve }}
-        {% if p.source_name %} · fonte: {% if p.source_url %}<a href="{{ p.source_url }}">{{ p.source_name }}</a>{% else %}{{ p.source_name }}{% endif %}{% endif %}
+      <li><code>{{ p.field }}</code> — {{ t('provenienza.riga', metodo=p.method, v=p.method_version, data=p.computed_at | data_breve) }}
+        {% if p.source_name %} · {{ t('provenienza.fonte') }}: {% if p.source_url %}<a href="{{ p.source_url }}">{{ p.source_name }}</a>{% else %}{{ p.source_name }}{% endif %}{% endif %}
       </li>
       {% else %}
-      <li>Nessun dato derivato registrato per questa fonte.</li>
+      <li>{{ t('provenienza.nessuna') }}</li>
       {% endfor %}
     </ul>
-    <p><a href="/metodo">Come lo calcoliamo →</a></p>
+    <p><a href="/metodo">{{ t('provenienza.come') }}</a></p>
   </footer>
 </article>
 {% endblock %}

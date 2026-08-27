@@ -14,7 +14,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.routers.pages import masthead_context
+from apps.api.routers.pages import page_context
 from apps.api.templating import templates
 from core.auth import (
     SESSION_COOKIE,
@@ -62,7 +62,7 @@ async def registrati_form(
     request: Request, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> HTMLResponse:
     return templates.TemplateResponse(
-        request, "annota_registrati.html", {**await masthead_context(session)}
+        request, "annota_registrati.html", {**await page_context(request, session)}
     )
 
 
@@ -101,7 +101,7 @@ async def entra_form(
     request: Request, session: Annotated[AsyncSession, Depends(get_session)]
 ) -> HTMLResponse:
     return templates.TemplateResponse(
-        request, "annota_entra.html", {**await masthead_context(session)}
+        request, "annota_entra.html", {**await page_context(request, session)}
     )
 
 
@@ -202,7 +202,7 @@ async def annota(
         request,
         "annota.html",
         {
-            **await masthead_context(session),
+            **await page_context(request, session),
             "annotator": annotator,
             "article": article,
             "my_count": my_count,

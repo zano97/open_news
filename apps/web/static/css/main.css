@@ -205,6 +205,27 @@ hr.filetto {
 }
 .tema-toggle:hover { color: var(--accento); border-color: var(--accento); }
 
+.masthead-comandi {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.lingue {
+  display: inline-flex;
+  gap: 0.45rem;
+  font-family: var(--font-macchina);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+.lingue a { color: var(--seppia); text-decoration: none; }
+.lingue a:hover { color: var(--accento); }
+.lingue .lingua-attiva {
+  color: var(--accento);
+  border-bottom: 2px solid var(--accento);
+  font-weight: 700;
+}
+
 /* ---------- Contenuto ---------- */
 .contenuto {
   max-width: 75rem;

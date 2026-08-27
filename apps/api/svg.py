@@ -8,6 +8,7 @@ Ogni funzione ritorna una stringa SVG da inserire inline nei template con
 from html import escape
 
 from core.bias.structure import SourceProfile
+from core.i18n import DEFAULT_LOCALE, translate
 
 
 def _box(x: int, y: int, w: int, h: int, cls: str) -> str:
@@ -17,7 +18,7 @@ def _box(x: int, y: int, w: int, h: int, cls: str) -> str:
     )
 
 
-def ownership_graph_svg(profile: SourceProfile) -> str:
+def ownership_graph_svg(profile: SourceProfile, locale: str = DEFAULT_LOCALE) -> str:
     """Grafo delle partecipazioni: proprietari a sinistra, testata a destra.
 
     Le quote note compaiono sull'arco; quelle ignote sono dichiarate
@@ -25,10 +26,7 @@ def ownership_graph_svg(profile: SourceProfile) -> str:
     """
     owners = profile.ownerships
     if not owners:
-        return (
-            '<p class="dato-mancante">Assetto proprietario: dato non disponibile '
-            "(nessuna evidenza importata).</p>"
-        )
+        return f'<p class="dato-mancante">{escape(translate(locale, "svg.assetto_nd"))}</p>'
 
     row_h = 64
     gap = 18
@@ -62,7 +60,11 @@ def ownership_graph_svg(profile: SourceProfile) -> str:
             f'<text x="{10 + box_w / 2}" y="{y + 24}" text-anchor="middle" '
             f'class="grafo-etichetta">{nome}</text>'
         )
-        marker = " · carica politica" if entry.owner.political_offices else ""
+        marker = (
+            " · " + translate(locale, "svg.carica_politica")
+            if entry.owner.political_offices
+            else ""
+        )
         parts.append(
             f'<text x="{10 + box_w / 2}" y="{y + 44}" text-anchor="middle" '
             f'class="grafo-etichetta-piccola">{tipo}{escape(marker)}</text>'
@@ -78,7 +80,7 @@ def ownership_graph_svg(profile: SourceProfile) -> str:
             f'class="grafo-arco" fill="none" />'
         )
         share = entry.ownership.share_pct
-        label = f"{share:g}%" if share is not None else "quota n.d."
+        label = f"{share:g}%" if share is not None else translate(locale, "svg.quota_nd")
         parts.append(
             f'<text x="{mid_x}" y="{(y1 + y2) / 2 - 6}" text-anchor="middle" '
             f'class="grafo-etichetta-piccola">{escape(label)}</text>'
@@ -93,6 +95,7 @@ def cocoverage_scatter_svg(
     *,
     highlight: str | None = None,
     names: dict[str, str] | None = None,
+    locale: str = DEFAULT_LOCALE,
 ) -> str:
     """Mappa di co-copertura: ogni punto è una fonte; gli assi sono emergenti.
 
@@ -100,10 +103,7 @@ def cocoverage_scatter_svg(
     copre le stesse story), mai assoluta.
     """
     if not positions:
-        return (
-            '<p class="dato-mancante">Mappa di co-copertura: dato non disponibile '
-            "(servono almeno 3 fonti con story condivise).</p>"
-        )
+        return f'<p class="dato-mancante">{escape(translate(locale, "svg.copertura_nd"))}</p>'
     width, height, pad = 720, 480, 50
     xs = [p[0] for p in positions.values()]
     ys = [p[1] for p in positions.values()]
@@ -120,17 +120,16 @@ def cocoverage_scatter_svg(
 
     parts = [
         f'<svg viewBox="0 0 {width} {height}" role="img" class="mappa-cocopertura" '
-        'aria-label="Mappa di co-copertura delle fonti (dimensioni emergenti)">',
+        f'aria-label="{escape(translate(locale, "svg.mappa_aria"))}">',
         f'<line x1="{pad}" y1="{height - pad}" x2="{width - pad}" '
         f'y2="{height - pad}" class="grafo-arco" />',
         f'<line x1="{pad}" y1="{pad}" x2="{pad}" y2="{height - pad}" '
         'class="grafo-arco" />',
         f'<text x="{width / 2}" y="{height - 10}" text-anchor="middle" '
-        'class="grafo-etichetta-piccola">dimensione 1 '
-        "(emergente: leggi le story che la separano)</text>",
+        f'class="grafo-etichetta-piccola">{escape(translate(locale, "svg.dim1"))}</text>',
         f'<text x="14" y="{height / 2}" text-anchor="middle" '
         f'transform="rotate(-90 14 {height / 2})" '
-        'class="grafo-etichetta-piccola">dimensione 2 (emergente)</text>',
+        f'class="grafo-etichetta-piccola">{escape(translate(locale, "svg.dim2"))}</text>',
     ]
     for slug, (x, y) in sorted(positions.items()):
         cx, cy = sx(x), sy(y)
@@ -148,7 +147,8 @@ def cocoverage_scatter_svg(
 
 
 def coverage_bar_svg(
-    by_group: dict[str, int], *, label: str, width: int = 360
+    by_group: dict[str, int], *, label: str, width: int = 360,
+    locale: str = DEFAULT_LOCALE,
 ) -> str:
     """Barra di copertura proporzionale (per paese o per fascia)."""
     total = sum(by_group.values())

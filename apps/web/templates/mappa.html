@@ -1,40 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Mappa di co-copertura — {{ app_name }}{% endblock %}
+{% block title %}{{ t('mappa.titolo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
-<h2 class="titolo-sezione">La mappa di co-copertura</h2>
-<p class="occhiello">
-  Ogni punto è una testata. Due testate sono vicine se hanno coperto le stesse
-  story negli ultimi 30 giorni. <strong>Gli assi non hanno un significato
-  prefissato</strong>: emergono dai dati (analisi delle componenti principali)
-  e vanno interpretati guardando le story che li separano, elencate sotto.
-  Nessuna etichetta politica viene assegnata da questa mappa.
-</p>
+<h2 class="titolo-sezione">{{ t('mappa.titolo') }}</h2>
+<p class="occhiello">{{ t('mappa.occhiello') | safe }}</p>
 
 {{ mappa_svg | safe }}
 
 {% if result.positions %}
 <p class="fonte-meta">
-  Calcolata ora su {{ result.n_stories }} story condivise da {{ result.n_sources }} fonti;
-  varianza spiegata: dim. 1 = {{ (result.explained_variance[0] * 100) | round(1) }}%,
-  dim. 2 = {{ (result.explained_variance[1] * 100) | round(1) }}%.
-  Metodo: cocoverage-pca-v1 (<a href="/metodo">come lo calcoliamo</a>).
+  {{ t('mappa.calcolata',
+       story=result.n_stories, fonti=result.n_sources,
+       v1=(result.explained_variance[0] * 100) | round(1),
+       v2=(result.explained_variance[1] * 100) | round(1)) | safe }}
 </p>
 
 <div class="assi-griglia">
-  {% for chiave, titolo in [
-    ("x_positive", "Story che spingono a destra della dimensione 1"),
-    ("x_negative", "Story che spingono a sinistra della dimensione 1"),
-    ("y_positive", "Story che spingono in alto della dimensione 2"),
-    ("y_negative", "Story che spingono in basso della dimensione 2"),
-  ] %}
+  {% set chiavi_titolo = {"x_positive": "mappa.x_pos", "x_negative": "mappa.x_neg",
+                          "y_positive": "mappa.y_pos", "y_negative": "mappa.y_neg"} %}
+  {% for chiave in ["x_positive", "x_negative", "y_positive", "y_negative"] %}
   {% if result.axis_stories.get(chiave) %}
   <section class="asse-lista">
-    <h3>{{ titolo }}</h3>
+    <h3>{{ t(chiavi_titolo[chiave]) }}</h3>
     <ol>
       {% for s in result.axis_stories[chiave] %}
       <li><a href="/storia/{{ s.story_id }}">{{ s.title }}</a>
-        <small>(carico {{ s.loading }})</small></li>
+        <small>{{ t('mappa.carico', l=s.loading) }}</small></li>
       {% endfor %}
     </ol>
   </section>

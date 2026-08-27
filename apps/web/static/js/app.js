@@ -12,10 +12,15 @@
     var bottone = document.querySelector("[data-tema-toggle]");
     if (!bottone) return;
     var notte = temaEffettivo() === "notte";
-    bottone.textContent = notte ? "Edizione diurna" : "Edizione notturna";
+    // Etichette localizzate fornite dal server nei data-attribute.
+    bottone.textContent = notte
+      ? bottone.getAttribute("data-label-giorno") || "Edizione diurna"
+      : bottone.getAttribute("data-label-notte") || "Edizione notturna";
     bottone.setAttribute(
       "aria-label",
-      notte ? "Passa all'edizione diurna" : "Passa all'edizione notturna"
+      (notte
+        ? bottone.getAttribute("data-aria-giorno")
+        : bottone.getAttribute("data-aria-notte")) || bottone.textContent
     );
   }
 
