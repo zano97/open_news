@@ -1,0 +1,961 @@
+# data/lexicon_it.yaml
+# Lessico di framing della stampa italiana — gruppi di termini con stessa
+# denotazione e connotazione diversa, come usati nei titoli dei giornali.
+# Progetto Open News — seed iniziale. Tutte le note in italiano.
+# Le fonti citate sono solo quelle reali e verificabili; dove non certe, omesse.
+version: 1
+language: it
+groups:
+  - id: migranti_senza_permesso
+    denotation: persone straniere presenti sul territorio senza un titolo di soggiorno valido
+    topic: immigrazione
+    terms:
+      - term: clandestino
+        connotation: negativo
+        note: suggerisce segretezza e intenzione criminale, criminalizza la condizione amministrativa
+      - term: irregolare
+        connotation: tecnico
+        note: descrive la posizione giuridica senza attribuire colpa morale
+      - term: migrante senza documenti
+        connotation: neutro
+        note: descrizione fattuale della condizione, calco del francese sans-papiers
+      - term: straniero non in regola
+        connotation: neutro
+        note: formula burocratica usata in cronaca per evitare termini marcati
+    rationale: la scelta tra condizione giuridica e stigma criminale orienta il lettore prima ancora dei fatti
+    added_by: seed iniziale del progetto
+    references: ["Carta di Roma (2008)"]
+
+  - id: persone_in_fuga
+    denotation: persone che lasciano il proprio paese e arrivano in Italia
+    topic: immigrazione
+    terms:
+      - term: migrante
+        connotation: neutro
+        note: termine generico che non specifica motivazioni o status
+      - term: profugo
+        connotation: enfatico
+        note: evoca fuga da guerre e catastrofi, suscita compassione
+      - term: rifugiato
+        connotation: tecnico
+        note: status giuridico riconosciuto ai sensi della Convenzione di Ginevra
+      - term: richiedente asilo
+        connotation: tecnico
+        note: indica una procedura in corso, non un esito
+      - term: disperato
+        connotation: enfatico
+        note: pietismo che riduce la persona alla sua condizione
+    rationale: alternare status giuridici e etichette emotive sposta la cornice tra diritto e pietà o allarme
+    added_by: seed iniziale del progetto
+    references: ["Carta di Roma (2008)"]
+
+  - id: arrivi_via_mare
+    denotation: arrivo di migranti sulle coste italiane via mare
+    topic: immigrazione
+    terms:
+      - term: sbarchi
+        connotation: neutro
+        note: termine ormai standard ma con eco quasi militare
+      - term: arrivi via mare
+        connotation: neutro
+        note: descrizione fattuale preferita dai manuali di deontologia
+      - term: flussi migratori
+        connotation: tecnico
+        note: lessico statistico-amministrativo che spersonalizza
+      - term: invasione
+        connotation: negativo
+        note: metafora bellica che presenta i migranti come nemici
+      - term: ondata
+        connotation: enfatico
+        note: metafora idraulica che suggerisce forza incontrollabile
+    rationale: le metafore idrauliche e belliche trasformano un fenomeno amministrativo in minaccia esistenziale
+    added_by: seed iniziale del progetto
+    references: ["Carta di Roma (2008)"]
+
+  - id: navi_soccorso
+    denotation: navi di organizzazioni non governative che soccorrono migranti nel Mediterraneo
+    topic: immigrazione
+    terms:
+      - term: navi umanitarie
+        connotation: positivo
+        note: mette in primo piano la finalità di soccorso
+      - term: navi ong
+        connotation: neutro
+        note: indica solo la natura del soggetto armatore
+      - term: taxi del mare
+        connotation: negativo
+        note: espressione polemica che insinua complicità con i trafficanti
+    rationale: la stessa nave può essere presentata come soccorritrice o complice a seconda del termine
+    added_by: seed iniziale del progetto
+
+  - id: prelievo_fiscale
+    denotation: prelievo obbligatorio di denaro da parte dello Stato
+    topic: economia
+    terms:
+      - term: imposta
+        connotation: tecnico
+        note: termine giuridico corretto per i prelievi senza controprestazione diretta
+      - term: tassa
+        connotation: neutro
+        note: uso comune generico, tecnicamente indica prelievi legati a un servizio
+      - term: tributo
+        connotation: tecnico
+        note: iperonimo giuridico usato nei testi normativi
+      - term: balzello
+        connotation: negativo
+        note: arcaismo che evoca prelievi arbitrari e vessatori
+      - term: stangata
+        connotation: negativo
+        note: presenta il prelievo come colpo inferto al cittadino
+      - term: prelievo
+        connotation: neutro
+        note: formula asettica che attenua la percezione del costo
+    rationale: dal linguaggio giuridico alla metafora del colpo, il termine decide se lo Stato riscuote o aggredisce
+    added_by: seed iniziale del progetto
+
+  - id: legge_di_bilancio
+    denotation: legge annuale che definisce entrate e spese dello Stato
+    topic: economia
+    terms:
+      - term: legge di bilancio
+        connotation: tecnico
+        note: denominazione ufficiale attuale
+      - term: manovra
+        connotation: neutro
+        note: uso giornalistico consolidato, con lieve sfumatura di aggiustamento emergenziale
+      - term: finanziaria
+        connotation: neutro
+        note: denominazione storica rimasta nel lessico comune
+      - term: manovra lacrime e sangue
+        connotation: negativo
+        note: formula enfatica per manovre percepite come punitive
+    rationale: la scelta tra nome ufficiale e formule drammatizzanti segnala il giudizio sulla politica economica
+    added_by: seed iniziale del progetto
+
+  - id: condono_fiscale
+    denotation: provvedimento che riduce o annulla sanzioni e debiti fiscali pregressi
+    topic: economia
+    terms:
+      - term: condono
+        connotation: negativo
+        note: evoca premio agli evasori e resa dello Stato
+      - term: sanatoria
+        connotation: negativo
+        note: simile a condono, con sfumatura burocratica
+      - term: pace fiscale
+        connotation: positivo
+        note: formula promozionale che presenta il provvedimento come riconciliazione
+      - term: rottamazione delle cartelle
+        connotation: neutro
+        note: metafora ormai tecnicizzata nel lessico normativo
+      - term: tregua fiscale
+        connotation: positivo
+        note: variante che suggerisce sospensione di un conflitto
+    rationale: i nomi promozionali coniati dai proponenti competono con i termini critici dell'opposizione
+    added_by: seed iniziale del progetto
+
+  - id: imposta_patrimoniale
+    denotation: imposta sul patrimonio complessivo delle persone fisiche
+    topic: economia
+    terms:
+      - term: patrimoniale
+        connotation: neutro
+        note: uso giornalistico standard, spesso già caricato negativamente dal contesto
+      - term: imposta sui grandi patrimoni
+        connotation: positivo
+        note: sottolinea che colpirebbe solo i più ricchi
+      - term: esproprio
+        connotation: negativo
+        note: iperbole che equipara l'imposta alla confisca
+    rationale: definire la platea dei contribuenti nel nome stesso della misura ne orienta il consenso
+    added_by: seed iniziale del progetto
+
+  - id: accise_carburanti
+    denotation: imposte indirette sui carburanti
+    topic: economia
+    terms:
+      - term: accise
+        connotation: tecnico
+        note: termine giuridico corretto
+      - term: pizzo di Stato
+        connotation: negativo
+        note: paragone con l'estorsione mafiosa usato in polemica politica
+      - term: prelievo sui carburanti
+        connotation: neutro
+        note: descrizione fattuale senza giudizio
+    rationale: accostare il fisco all'estorsione criminale delegittima l'imposizione fiscale in sé
+    added_by: seed iniziale del progetto
+
+  - id: decessi_sul_lavoro
+    denotation: lavoratori che muoiono durante l'attività lavorativa
+    topic: lavoro
+    terms:
+      - term: morti sul lavoro
+        connotation: neutro
+        note: descrizione diretta del fenomeno
+      - term: morti bianche
+        connotation: enfatico
+        note: formula tradizionale criticata perché attenua le responsabilità
+      - term: infortuni mortali
+        connotation: tecnico
+        note: lessico assicurativo-statistico che spersonalizza
+      - term: strage silenziosa
+        connotation: enfatico
+        note: denuncia la dimensione sistemica e la scarsa attenzione mediatica
+      - term: omicidi sul lavoro
+        connotation: negativo
+        note: formula militante che attribuisce responsabilità penale ai datori
+    rationale: tra statistica assicurativa e denuncia, il termine decide se esiste un colpevole
+    added_by: seed iniziale del progetto
+
+  - id: lavoro_irregolare
+    denotation: attività lavorativa svolta senza contratto e contributi
+    topic: lavoro
+    terms:
+      - term: lavoro nero
+        connotation: negativo
+        note: formula comune che evoca illegalità, ambigua su chi sia il responsabile
+      - term: lavoro sommerso
+        connotation: tecnico
+        note: lessico economico-statistico
+      - term: lavoratori sfruttati
+        connotation: enfatico
+        note: sposta la responsabilità sul datore di lavoro
+      - term: economia informale
+        connotation: tecnico
+        note: eufemismo accademico che neutralizza l'illegalità
+    rationale: il termine scelto distribuisce la colpa tra lavoratore, datore e sistema
+    added_by: seed iniziale del progetto
+
+  - id: riduzione_personale
+    denotation: riduzione del numero di dipendenti di un'azienda
+    topic: lavoro
+    terms:
+      - term: licenziamenti
+        connotation: neutro
+        note: termine diretto che nomina l'atto e le persone colpite
+      - term: esuberi
+        connotation: tecnico
+        note: eufemismo aziendale che presenta le persone come eccedenza contabile
+      - term: tagli al personale
+        connotation: negativo
+        note: metafora chirurgica che evoca sacrificio imposto
+      - term: ristrutturazione
+        connotation: tecnico
+        note: eufemismo manageriale che nasconde l'impatto umano
+      - term: piano di razionalizzazione
+        connotation: tecnico
+        note: lessico aziendalese che presenta i licenziamenti come ottimizzazione
+    rationale: l'aziendalese trasforma persone licenziate in voci di bilancio da ottimizzare
+    added_by: seed iniziale del progetto
+
+  - id: lavoro_precario
+    denotation: rapporti di lavoro a termine, discontinui o poco tutelati
+    topic: lavoro
+    terms:
+      - term: precariato
+        connotation: negativo
+        note: sottolinea insicurezza e fragilità esistenziale
+      - term: lavoro flessibile
+        connotation: positivo
+        note: cornice che presenta la discontinuità come libertà e dinamismo
+      - term: contratti atipici
+        connotation: tecnico
+        note: lessico giuslavoristico neutro
+    rationale: la stessa condizione contrattuale è denunciata come precarietà o celebrata come flessibilità
+    added_by: seed iniziale del progetto
+
+  - id: gruppi_giovanili_violenti
+    denotation: gruppi di minorenni o giovanissimi autori di reati o aggressioni
+    topic: giustizia
+    terms:
+      - term: baby gang
+        connotation: negativo
+        note: anglicismo allarmistico che criminalizza in blocco e suggerisce organizzazione stabile
+      - term: bande giovanili
+        connotation: neutro
+        note: descrizione più sobria dello stesso fenomeno
+      - term: gruppi di minorenni
+        connotation: neutro
+        note: formula fattuale che evita l'etichetta criminale
+      - term: giovani
+        connotation: neutro
+        note: usato quando si vuole attenuare la gravità dei fatti
+    rationale: l'etichetta baby gang costruisce un'emergenza criminale, la perifrasi la dissolve
+    added_by: seed iniziale del progetto
+
+  - id: uccisione_donna
+    denotation: uccisione di una donna da parte di partner, ex partner o familiare
+    topic: giustizia
+    terms:
+      - term: femminicidio
+        connotation: tecnico
+        note: termine che nomina la matrice di genere del delitto, ormai accolto nei dizionari
+      - term: omicidio
+        connotation: neutro
+        note: termine generico che non registra la specificità del fenomeno
+      - term: delitto passionale
+        connotation: negativo
+        note: formula deprecata che romanticizza e attenua la responsabilità dell'autore
+      - term: dramma della gelosia
+        connotation: negativo
+        note: cornice giustificatoria che sposta il focus sul movente sentimentale
+      - term: raptus
+        connotation: negativo
+        note: pseudo-spiegazione medica che deresponsabilizza l'omicida
+    rationale: le formule romanticizzanti spostano la colpa sulla relazione, il termine specifico la tiene sull'autore
+    added_by: seed iniziale del progetto
+    references: ["Accademia della Crusca"]
+
+  - id: omicidio_stradale
+    denotation: uccisione di una persona causata da un conducente
+    topic: giustizia
+    terms:
+      - term: omicidio stradale
+        connotation: tecnico
+        note: fattispecie penale introdotta nel 2016
+      - term: pirata della strada
+        connotation: negativo
+        note: etichetta usata soprattutto in caso di fuga del conducente
+      - term: incidente mortale
+        connotation: neutro
+        note: presenta l'evento come fatalità senza responsabili
+      - term: tragedia della strada
+        connotation: enfatico
+        note: cornice fatalistica che rimuove la condotta colposa
+    rationale: tra fatalità e reato, il lessico decide se cercare un colpevole o compiangere il destino
+    added_by: seed iniziale del progetto
+
+  - id: persone_detenute
+    denotation: persone che scontano una pena o una misura cautelare in carcere
+    topic: giustizia
+    terms:
+      - term: detenuti
+        connotation: neutro
+        note: termine standard
+      - term: carcerati
+        connotation: negativo
+        note: variante popolare con sfumatura spregiativa
+      - term: ristretti
+        connotation: tecnico
+        note: lessico penitenziario-amministrativo
+      - term: galeotti
+        connotation: negativo
+        note: termine arcaico e stigmatizzante
+    rationale: il grado di stigma del termine riflette l'idea di pena come vendetta o come rieducazione
+    added_by: seed iniziale del progetto
+
+  - id: gestazione_per_altri
+    denotation: pratica in cui una donna porta avanti una gravidanza per conto di altri
+    topic: diritti civili
+    terms:
+      - term: utero in affitto
+        connotation: negativo
+        note: metafora mercantile che presenta la pratica come compravendita del corpo
+      - term: maternità surrogata
+        connotation: neutro
+        note: termine di uso comune relativamente descrittivo
+      - term: gestazione per altri
+        connotation: tecnico
+        note: formula preferita da chi difende la pratica, ne sottolinea la dimensione solidale
+      - term: gpa
+        connotation: tecnico
+        note: sigla che neutralizza ulteriormente la carica emotiva
+    rationale: la metafora dell'affitto e la sigla tecnica sono i due poli di una battaglia lessicale esplicita
+    added_by: seed iniziale del progetto
+
+  - id: questioni_di_genere
+    denotation: studi e politiche relativi all'identità di genere
+    topic: diritti civili
+    terms:
+      - term: teoria gender
+        connotation: negativo
+        note: etichetta polemica che presenta gli studi di genere come ideologia da imporre
+      - term: ideologia gender
+        connotation: negativo
+        note: variante ancora più marcata della precedente
+      - term: identità di genere
+        connotation: tecnico
+        note: concetto usato in psicologia e nel diritto
+      - term: studi di genere
+        connotation: tecnico
+        note: denominazione accademica del campo di ricerca
+    rationale: trasformare un campo di studi in una teoria o ideologia lo presenta come minaccia e non come sapere
+    added_by: seed iniziale del progetto
+
+  - id: matrimonio_stesso_sesso
+    denotation: unione coniugale tra persone dello stesso sesso
+    topic: diritti civili
+    terms:
+      - term: nozze gay
+        connotation: neutro
+        note: formula giornalistica breve, con effetto di etichettatura del gruppo
+      - term: matrimonio egualitario
+        connotation: positivo
+        note: cornice che presenta l'istituto come questione di uguaglianza
+      - term: matrimonio tra persone dello stesso sesso
+        connotation: neutro
+        note: descrizione fattuale estesa
+    rationale: egualitario incorpora la tesi favorevole nel nome stesso dell'istituto
+    added_by: seed iniziale del progetto
+
+  - id: interruzione_gravidanza
+    denotation: interruzione volontaria di una gravidanza
+    topic: diritti civili
+    terms:
+      - term: aborto
+        connotation: neutro
+        note: termine comune, usato con carica negativa nei contesti militanti contrari
+      - term: interruzione volontaria di gravidanza
+        connotation: tecnico
+        note: formula della legge 194, sigla ivg
+      - term: soppressione del nascituro
+        connotation: negativo
+        note: formula del lessico militante contrario, presuppone la personalità del feto
+    rationale: la scelta tra lessico sanitario e lessico morale presuppone già una risposta sulla natura del feto
+    added_by: seed iniziale del progetto
+
+  - id: fine_vita
+    denotation: pratiche mediche che anticipano o accompagnano la morte di malati gravi consenzienti
+    topic: diritti civili
+    terms:
+      - term: eutanasia
+        connotation: neutro
+        note: termine storico, per alcuni carico di associazioni negative
+      - term: suicidio assistito
+        connotation: tecnico
+        note: fattispecie giuridica distinta dall'eutanasia attiva
+      - term: fine vita
+        connotation: neutro
+        note: iperonimo attenuativo usato nel dibattito parlamentare
+      - term: dolce morte
+        connotation: enfatico
+        note: formula giornalistica eufemistica e sentimentale
+      - term: morte assistita
+        connotation: neutro
+        note: variante descrittiva intermedia
+    rationale: l'oscillazione tra tecnicismi e eufemismi misura il disagio culturale verso il tema
+    added_by: seed iniziale del progetto
+
+  - id: attivisti_clima
+    denotation: attivisti che compiono azioni dimostrative per la causa climatica
+    topic: ambiente
+    terms:
+      - term: eco-vandali
+        connotation: negativo
+        note: riduce l'azione politica a danneggiamento gratuito
+      - term: eco-teppisti
+        connotation: negativo
+        note: variante che criminalizza gli autori
+      - term: eco-attivisti
+        connotation: neutro
+        note: registra la motivazione ambientale senza giudizio
+      - term: attivisti per il clima
+        connotation: neutro
+        note: formula descrittiva estesa
+      - term: ambientalisti
+        connotation: neutro
+        note: iperonimo generico, talvolta usato con sfumatura ironica
+    rationale: nominare il gesto come vandalismo o come attivismo decide se la notizia è cronaca nera o politica
+    added_by: seed iniziale del progetto
+
+  - id: scetticismo_climatico
+    denotation: posizioni che negano o ridimensionano il cambiamento climatico di origine umana
+    topic: ambiente
+    terms:
+      - term: negazionisti climatici
+        connotation: negativo
+        note: accosta la posizione al negazionismo storico
+      - term: scettici del clima
+        connotation: neutro
+        note: presenta la posizione come dubbio legittimo
+    rationale: scettico nobilita come dubbio scientifico ciò che negazionista bolla come rifiuto dei fatti
+    added_by: seed iniziale del progetto
+
+  - id: politiche_verdi
+    denotation: politiche di riduzione delle emissioni e riconversione ecologica
+    topic: ambiente
+    terms:
+      - term: transizione ecologica
+        connotation: tecnico
+        note: denominazione ufficiale europea e ministeriale
+      - term: svolta green
+        connotation: positivo
+        note: anglicismo promozionale
+      - term: follia green
+        connotation: negativo
+        note: formula polemica che presenta le politiche come irrazionali e costose
+    rationale: lo stesso pacchetto normativo è progresso o follia a seconda dell'aggettivo
+    added_by: seed iniziale del progetto
+
+  - id: impianto_rifiuti
+    denotation: impianto che brucia rifiuti producendo energia
+    topic: ambiente
+    terms:
+      - term: termovalorizzatore
+        connotation: positivo
+        note: sottolinea il recupero energetico, preferito dai sostenitori
+      - term: inceneritore
+        connotation: negativo
+        note: sottolinea la combustione e le emissioni, preferito dagli oppositori
+    rationale: caso di scuola italiano di come il nome dell'impianto incorpori il giudizio sull'impianto
+    added_by: seed iniziale del progetto
+
+  - id: conflitto_armato
+    denotation: attacco militare su larga scala di uno Stato contro un altro
+    topic: esteri
+    terms:
+      - term: guerra
+        connotation: neutro
+        note: termine diretto
+      - term: invasione
+        connotation: negativo
+        note: attribuisce chiaramente l'aggressione a una parte
+      - term: conflitto
+        connotation: neutro
+        note: termine simmetrico che non nomina l'aggressore
+      - term: operazione militare speciale
+        connotation: tecnico
+        note: eufemismo della propaganda russa per l'invasione dell'Ucraina
+      - term: crisi
+        connotation: neutro
+        note: attenuativo che deresponsabilizza tutte le parti
+    rationale: riprendere o rifiutare il lessico dei belligeranti è una scelta editoriale con effetti di legittimazione
+    added_by: seed iniziale del progetto
+
+  - id: attacco_aereo
+    denotation: attacco militare condotto con aerei, missili o droni
+    topic: esteri
+    terms:
+      - term: bombardamento
+        connotation: neutro
+        note: termine diretto che evoca distruzione
+      - term: raid
+        connotation: tecnico
+        note: anglicismo che suggerisce rapidità e precisione chirurgica
+      - term: attacco aereo
+        connotation: neutro
+        note: descrizione fattuale
+      - term: attacco mirato
+        connotation: positivo
+        note: riprende la cornice della precisione proposta da chi attacca
+    rationale: raid e mirato attenuano la distruzione, bombardamento la mostra
+    added_by: seed iniziale del progetto
+
+  - id: governo_estero_ostile
+    denotation: governo di uno Stato estero
+    topic: esteri
+    terms:
+      - term: governo
+        connotation: neutro
+        note: termine standard che implica legittimità ordinaria
+      - term: esecutivo
+        connotation: tecnico
+        note: variante istituzionale
+      - term: regime
+        connotation: negativo
+        note: riservato ai governi considerati autoritari o ostili
+      - term: giunta
+        connotation: negativo
+        note: usato soprattutto per i governi golpisti militari
+    rationale: la stampa chiama regime quasi solo i governi sgraditi, misurando così il proprio allineamento
+    added_by: seed iniziale del progetto
+
+  - id: combattenti_irregolari
+    denotation: combattenti armati non statali
+    topic: esteri
+    terms:
+      - term: terroristi
+        connotation: negativo
+        note: delegittima totalmente la causa e i mezzi
+      - term: miliziani
+        connotation: neutro
+        note: registra l'appartenenza a una milizia senza giudizio esplicito
+      - term: ribelli
+        connotation: neutro
+        note: suggerisce opposizione a un potere costituito, talvolta con simpatia
+      - term: combattenti
+        connotation: neutro
+        note: termine più neutro disponibile
+      - term: partigiani
+        connotation: positivo
+        note: evoca la resistenza legittima contro l'occupante
+    rationale: lo stesso gruppo armato cambia natura morale a seconda dell'etichetta scelta dalla redazione
+    added_by: seed iniziale del progetto
+
+  - id: vittime_civili
+    denotation: civili uccisi in operazioni militari
+    topic: esteri
+    terms:
+      - term: vittime civili
+        connotation: neutro
+        note: descrizione fattuale
+      - term: danni collaterali
+        connotation: tecnico
+        note: eufemismo militare che spersonalizza i morti
+      - term: strage di civili
+        connotation: enfatico
+        note: denuncia la gravità e suggerisce intenzionalità o sproporzione
+    rationale: l'eufemismo militare e la denuncia enfatica raccontano gli stessi corpi in modi opposti
+    added_by: seed iniziale del progetto
+
+  - id: classe_politica
+    denotation: insieme delle persone che ricoprono cariche politiche
+    topic: politica
+    terms:
+      - term: politici
+        connotation: neutro
+        note: termine standard
+      - term: classe politica
+        connotation: neutro
+        note: variante sociologica
+      - term: casta
+        connotation: negativo
+        note: presenta i politici come ceto privilegiato e chiuso, popolarizzato dal libro omonimo del 2007
+      - term: palazzo
+        connotation: negativo
+        note: metonimia che evoca distanza dal paese reale
+    rationale: casta e palazzo incorporano la tesi antipolitica nel lessico di cronaca
+    added_by: seed iniziale del progetto
+
+  - id: leader_antisistema
+    denotation: forze politiche che si presentano contro le élite o per la sovranità nazionale
+    topic: politica
+    terms:
+      - term: populisti
+        connotation: negativo
+        note: usato quasi sempre come accusa, raramente come autodefinizione
+      - term: sovranisti
+        connotation: negativo
+        note: etichetta giornalistica per la destra nazionalista, rivendicata solo in parte
+      - term: nazionalisti
+        connotation: negativo
+        note: richiama i precedenti storici del nazionalismo
+      - term: patrioti
+        connotation: positivo
+        note: autodefinizione valorizzante delle stesse forze
+    rationale: gli stessi partiti sono populisti per gli avversari e patrioti per se stessi
+    added_by: seed iniziale del progetto
+
+  - id: nomine_pubbliche
+    denotation: assegnazione di incarichi ai vertici di enti e aziende pubbliche
+    topic: politica
+    terms:
+      - term: nomine
+        connotation: neutro
+        note: termine standard
+      - term: toto-nomine
+        connotation: negativo
+        note: il prefisso toto- riduce le nomine a scommessa e gioco di palazzo
+      - term: spartizione delle poltrone
+        connotation: negativo
+        note: presenta le nomine come bottino di partito
+      - term: manuale Cencelli
+        connotation: negativo
+        note: riferimento storico alla ripartizione proporzionale degli incarichi tra correnti
+    rationale: il lessico ludico e spartitorio nega in partenza che le nomine possano premiare il merito
+    added_by: seed iniziale del progetto
+
+  - id: accordo_tra_avversari
+    denotation: accordo di governo o di programma tra forze politiche avversarie
+    topic: politica
+    terms:
+      - term: inciucio
+        connotation: negativo
+        note: napoletanismo che bolla l'accordo come intrigo sottobanco
+      - term: larghe intese
+        connotation: neutro
+        note: formula istituzionale per le coalizioni ampie
+      - term: compromesso
+        connotation: neutro
+        note: può essere nobile o al ribasso a seconda del contesto
+      - term: accordo di governo
+        connotation: neutro
+        note: descrizione fattuale
+    rationale: inciucio criminalizza la mediazione che larghe intese istituzionalizza
+    added_by: seed iniziale del progetto
+
+  - id: scetticismo_vaccinale
+    denotation: persone che rifiutano o esitano a vaccinarsi
+    topic: sanità
+    terms:
+      - term: no-vax
+        connotation: negativo
+        note: etichetta che compatta posizioni diverse in un fronte ideologico
+      - term: esitanti vaccinali
+        connotation: tecnico
+        note: categoria della letteratura di sanità pubblica che distingue il dubbio dal rifiuto
+      - term: scettici sui vaccini
+        connotation: neutro
+        note: formula intermedia
+      - term: free vax
+        connotation: positivo
+        note: autodefinizione che sposta la cornice sulla libertà di scelta
+    rationale: l'etichetta unica no-vax cancella la distinzione tra rifiuto militante e semplice esitazione
+    added_by: seed iniziale del progetto
+
+  - id: sostegno_poveri
+    denotation: trasferimenti monetari pubblici a persone in povertà
+    topic: welfare
+    terms:
+      - term: sostegno al reddito
+        connotation: tecnico
+        note: lessico delle politiche sociali
+      - term: assistenzialismo
+        connotation: negativo
+        note: presenta l'aiuto come dipendenza cronica e spreco
+      - term: misure di contrasto alla povertà
+        connotation: tecnico
+        note: formula amministrativa
+      - term: aiuti
+        connotation: neutro
+        note: termine generico
+    rationale: assistenzialismo trasforma un diritto sociale in vizio da correggere
+    added_by: seed iniziale del progetto
+
+  - id: reddito_cittadinanza
+    denotation: misura italiana di reddito minimo condizionato introdotta nel 2019
+    topic: welfare
+    terms:
+      - term: reddito di cittadinanza
+        connotation: neutro
+        note: denominazione ufficiale della misura
+      - term: sussidio
+        connotation: negativo
+        note: nel dibattito italiano assume sfumatura di elargizione immeritata
+      - term: paghetta di Stato
+        connotation: negativo
+        note: formula polemica che infantilizza i percettori
+      - term: reddito minimo
+        connotation: tecnico
+        note: categoria comparata delle politiche europee
+    rationale: chiamare la misura sussidio o paghetta ne prepara la delegittimazione politica
+    added_by: seed iniziale del progetto
+
+  - id: comunita_rom
+    denotation: persone appartenenti alle comunità rom e sinti
+    topic: minoranze
+    terms:
+      - term: rom
+        connotation: neutro
+        note: etnonimo corretto, insieme a sinti per le comunità italiane
+      - term: nomadi
+        connotation: negativo
+        note: etichetta impropria, la grande maggioranza è stanziale
+      - term: zingari
+        connotation: negativo
+        note: eteronimo storicamente spregiativo
+    rationale: nomadi giustifica implicitamente i campi e la precarietà abitativa come scelta culturale
+    added_by: seed iniziale del progetto
+    references: ["Carta di Roma (2008)"]
+
+  - id: insediamenti_rom
+    denotation: aree in cui vivono comunità rom in condizioni abitative precarie
+    topic: minoranze
+    terms:
+      - term: campo nomadi
+        connotation: negativo
+        note: formula amministrativa che naturalizza la segregazione abitativa
+      - term: insediamento
+        connotation: neutro
+        note: termine descrittivo
+      - term: baraccopoli
+        connotation: enfatico
+        note: sottolinea il degrado delle condizioni abitative
+    rationale: campo nomadi presenta come etnica una condizione che è abitativa e sociale
+    added_by: seed iniziale del progetto
+    references: ["Carta di Roma (2008)"]
+
+  - id: feste_non_autorizzate
+    denotation: eventi musicali organizzati senza autorizzazione in spazi occupati
+    topic: giustizia
+    terms:
+      - term: rave
+        connotation: neutro
+        note: termine di genere musicale, in Italia caricato negativamente dalla cronaca
+      - term: free party
+        connotation: positivo
+        note: autodefinizione della scena, sottolinea gratuità e autogestione
+      - term: festa illegale
+        connotation: negativo
+        note: mette in primo piano la violazione di legge
+      - term: raduno abusivo
+        connotation: negativo
+        note: lessico da ordinanza che criminalizza la partecipazione
+    rationale: la stessa festa è espressione culturale o reato a seconda del titolo
+    added_by: seed iniziale del progetto
+
+  - id: criminalita_percepita
+    denotation: tema della sicurezza urbana e della criminalità nel dibattito pubblico
+    topic: sicurezza
+    terms:
+      - term: emergenza sicurezza
+        connotation: negativo
+        note: presenta la criminalità come eccezionale e crescente a prescindere dai dati
+      - term: allarme criminalità
+        connotation: enfatico
+        note: variante che amplifica la minaccia
+      - term: percezione di insicurezza
+        connotation: tecnico
+        note: distingue il sentimento dai dati sui reati
+      - term: questione sicurezza
+        connotation: neutro
+        note: formula che tematizza senza drammatizzare
+    rationale: emergenza e allarme costruiscono la notizia prima ancora dei dati sui reati
+    added_by: seed iniziale del progetto
+
+  - id: marginalita_urbana
+    denotation: presenza di povertà, dipendenze e disagio negli spazi urbani
+    topic: sicurezza
+    terms:
+      - term: degrado
+        connotation: negativo
+        note: cornice estetico-securitaria che chiede rimozione e controllo
+      - term: marginalità sociale
+        connotation: tecnico
+        note: cornice sociologica che chiede politiche sociali
+      - term: decoro urbano
+        connotation: negativo
+        note: valore in nome del quale si allontanano le persone marginali
+    rationale: degrado inquadra le persone come problema estetico, marginalità come questione sociale
+    added_by: seed iniziale del progetto
+
+  - id: mercati_finanziari
+    denotation: insieme degli investitori che comprano e vendono titoli di Stato
+    topic: economia
+    terms:
+      - term: i mercati
+        connotation: neutro
+        note: personificazione che presenta gli investitori come giudice impersonale
+      - term: gli investitori
+        connotation: neutro
+        note: nomina i soggetti concreti
+      - term: la speculazione
+        connotation: negativo
+        note: presenta le vendite come attacco ostile e parassitario
+    rationale: la personificazione dei mercati e la demonizzazione della speculazione sono cornici opposte degli stessi movimenti di prezzo
+    added_by: seed iniziale del progetto
+
+  - id: assenteismo_pubblico
+    denotation: dipendenti pubblici che si assentano irregolarmente dal lavoro
+    topic: lavoro
+    terms:
+      - term: furbetti del cartellino
+        connotation: negativo
+        note: diminutivo ironico che generalizza il sospetto sul pubblico impiego
+      - term: assenteisti
+        connotation: negativo
+        note: termine diretto ma meno macchiettistico
+      - term: dipendenti infedeli
+        connotation: tecnico
+        note: lessico giuridico-disciplinare
+    rationale: la macchietta del furbetto estende lo stigma dai singoli responsabili all'intera categoria
+    added_by: seed iniziale del progetto
+
+  - id: prostituzione
+    denotation: persone che offrono prestazioni sessuali a pagamento
+    topic: diritti civili
+    terms:
+      - term: prostitute
+        connotation: neutro
+        note: termine tradizionale, carico di stigma sociale
+      - term: sex worker
+        connotation: tecnico
+        note: anglicismo che inquadra l'attività come lavoro e rivendica diritti
+      - term: lucciole
+        connotation: negativo
+        note: eufemismo giornalistico folcloristico e spersonalizzante
+    rationale: chiamare lavoro o devianza la stessa attività orienta il dibattito su diritti e repressione
+    added_by: seed iniziale del progetto
+
+  - id: riordino_scuole
+    denotation: riduzione del numero di istituti scolastici autonomi e accorpamenti
+    topic: scuola
+    terms:
+      - term: dimensionamento scolastico
+        connotation: tecnico
+        note: denominazione amministrativa ufficiale
+      - term: tagli alla scuola
+        connotation: negativo
+        note: presenta la misura come sottrazione di risorse all'istruzione
+      - term: razionalizzazione della rete scolastica
+        connotation: tecnico
+        note: eufemismo gestionale
+    rationale: il lessico amministrativo neutralizza ciò che il lessico sindacale denuncia come taglio
+    added_by: seed iniziale del progetto
+
+  - id: occupazioni_abitative
+    denotation: occupazione di immobili vuoti da parte di persone senza casa o collettivi
+    topic: sicurezza
+    terms:
+      - term: occupanti abusivi
+        connotation: negativo
+        note: mette in primo piano l'illegalità della condotta
+      - term: occupanti
+        connotation: neutro
+        note: descrizione fattuale
+      - term: famiglie senza casa
+        connotation: enfatico
+        note: sposta il focus sul bisogno abitativo
+      - term: movimenti per il diritto all'abitare
+        connotation: positivo
+        note: autodefinizione politica dei collettivi
+    rationale: la stessa occupazione è reato contro la proprietà o risposta a un bisogno a seconda del soggetto nominato
+    added_by: seed iniziale del progetto
+
+  - id: liberalizzazione_cannabis
+    denotation: proposte di regolamentazione legale della cannabis
+    topic: giustizia
+    terms:
+      - term: legalizzazione
+        connotation: neutro
+        note: termine standard del dibattito, implica regole e controllo pubblico
+      - term: liberalizzazione
+        connotation: negativo
+        note: nel lessico dei contrari suggerisce assenza di regole
+      - term: droga libera
+        connotation: negativo
+        note: slogan polemico che equipara regolamentazione e abbandono
+      - term: regolamentazione
+        connotation: tecnico
+        note: sottolinea il controllo statale della filiera
+    rationale: scivolare da legalizzazione a droga libera trasforma una proposta di regole nella sua caricatura
+    added_by: seed iniziale del progetto
+
+  - id: intervento_forze_ordine
+    denotation: uso della forza da parte della polizia durante manifestazioni o sgomberi
+    topic: sicurezza
+    terms:
+      - term: carica
+        connotation: neutro
+        note: termine tecnico di ordine pubblico
+      - term: scontri
+        connotation: neutro
+        note: formula simmetrica che non attribuisce l'iniziativa
+      - term: violenza della polizia
+        connotation: negativo
+        note: attribuisce chiaramente la responsabilità alle forze dell'ordine
+      - term: tafferugli
+        connotation: enfatico
+        note: diminutivo che ridimensiona la gravità dei fatti
+    rationale: scontri distribuisce la responsabilità che carica della polizia e tafferugli spostano in direzioni opposte
+    added_by: seed iniziale del progetto
+
+  - id: aiuti_imprese
+    denotation: trasferimenti pubblici alle imprese in difficoltà
+    topic: economia
+    terms:
+      - term: aiuti di Stato
+        connotation: tecnico
+        note: categoria giuridica europea
+      - term: salvataggio
+        connotation: neutro
+        note: presenta l'intervento come necessario per evitare il fallimento
+      - term: regalo alle imprese
+        connotation: negativo
+        note: formula polemica che nega l'interesse pubblico dell'intervento
+      - term: sostegno al sistema produttivo
+        connotation: positivo
+        note: cornice che presenta l'aiuto come investimento collettivo
+    rationale: lo stesso trasferimento è salvataggio doveroso o regalo indebito a seconda del titolo
+    added_by: seed iniziale del progetto

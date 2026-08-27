@@ -5,7 +5,7 @@ from core.models.article import SNIPPET_MAX_CHARS, Article
 from core.models.base import Base, utcnow
 from core.models.provenance import Provenance
 from core.models.signals import BiasSignal
-from core.models.source import Owner, Ownership, PublicFunding, Source
+from core.models.source import FeedState, Owner, Ownership, PublicFunding, Source
 from core.models.story import Coverage, Story
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
     "Base",
     "BiasSignal",
     "Coverage",
+    "FeedState",
     "Owner",
     "Ownership",
     "Provenance",

@@ -1,0 +1,628 @@
+# data/lexicon_en.yaml
+# Lessico di framing — stampa anglofona (EN)
+# Progetto: Open News — aggregatore open-source sulla trasparenza dei media
+# Gruppi di termini con stessa denotazione ma connotazione diversa,
+# come appaiono nei titoli della stampa in lingua inglese.
+# Nota: non è stato possibile leggere data/lexicon_it.yaml in questa sessione
+# (errore dell'ambiente di esecuzione); lo schema segue le convenzioni del
+# progetto per quanto ricostruibile. Verificare la coerenza dei campi.
+# Tutte le note e i rationale sono in italiano. Le references sono indicate
+# solo quando certe; altrimenti null.
+
+language: en
+version: 1
+last_updated: "2026-08-27"
+notes: >
+  Le etichette di connotazione (es. "negativa", "neutra", "eufemistica")
+  descrivono la tendenza d'uso prevalente nei titoli, non un giudizio
+  sull'oggetto denotato. L'orientamento ("leaning") indica l'area politica
+  o istituzionale che tende a preferire il termine, quando riconoscibile;
+  null quando l'uso è trasversale o incerto.
+
+groups:
+
+  - id: en-immigration-status
+    denotation: "Persone che risiedono in un paese senza autorizzazione legale"
+    rationale: >
+      La scelta tra criminalizzazione della persona ("illegal alien"),
+      descrizione dello status ("undocumented") o del percorso legale
+      ("asylum seeker") orienta fortemente la percezione del lettore.
+    terms:
+      - term: "illegal aliens"
+        connotation: "negativa, disumanizzante"
+        leaning: "destra / conservatore"
+        note: "Termine legale storico negli USA, oggi percepito come stigmatizzante; sconsigliato dall'AP Stylebook."
+      - term: "illegal immigrants"
+        connotation: "negativa"
+        leaning: "destra / conservatore"
+        note: "L'AP Stylebook dal 2013 raccomanda di non usare 'illegal' riferito a persone, ma solo ad azioni."
+      - term: "undocumented migrants"
+        connotation: "neutra-empatica"
+        leaning: "sinistra / progressista"
+        note: "Sposta l'attenzione dallo status penale a quello amministrativo."
+      - term: "migrants"
+        connotation: "neutra"
+        leaning: null
+        note: "Termine ombrello; può omettere la dimensione della richiesta di protezione."
+      - term: "asylum seekers"
+        connotation: "empatica, legalistica"
+        leaning: "sinistra / progressista"
+        note: "Sottolinea il diritto a chiedere protezione internazionale."
+    references:
+      - "AP Stylebook"
+
+  - id: en-abortion-opponents
+    denotation: "Movimento contrario all'aborto legale"
+    rationale: >
+      "Pro-life" è l'autodefinizione del movimento e incornicia la questione
+      come difesa della vita; "anti-abortion" descrive la posizione senza
+      adottarne il frame.
+    terms:
+      - term: "pro-life"
+        connotation: "positiva, autodefinizione"
+        leaning: "destra / conservatore"
+        note: null
+      - term: "anti-abortion"
+        connotation: "neutra-descrittiva"
+        leaning: null
+        note: "Forma raccomandata dall'AP Stylebook al posto di 'pro-life'."
+    references:
+      - "AP Stylebook"
+
+  - id: en-abortion-supporters
+    denotation: "Movimento favorevole al diritto all'aborto"
+    rationale: >
+      "Pro-choice" incornicia la questione come libertà di scelta;
+      "pro-abortion" è usato in senso polemico dagli avversari e suggerisce
+      falsamente un favore verso l'aborto in sé.
+    terms:
+      - term: "pro-choice"
+        connotation: "positiva, autodefinizione"
+        leaning: "sinistra / progressista"
+        note: null
+      - term: "abortion-rights (supporters)"
+        connotation: "neutra-descrittiva"
+        leaning: null
+        note: "Forma raccomandata dall'AP Stylebook."
+      - term: "pro-abortion"
+        connotation: "negativa, polemica"
+        leaning: "destra / conservatore"
+        note: "Etichetta usata quasi solo dagli oppositori."
+    references:
+      - "AP Stylebook"
+
+  - id: en-estate-tax
+    denotation: "Imposta sulle successioni (patrimoni trasmessi alla morte)"
+    rationale: >
+      "Death tax" è un'etichetta coniata nella comunicazione politica
+      conservatrice USA (associata al consulente Frank Luntz) per rendere
+      impopolare l'imposta; "estate tax" è il nome tecnico.
+    terms:
+      - term: "estate tax"
+        connotation: "neutra, tecnica"
+        leaning: null
+        note: null
+      - term: "death tax"
+        connotation: "negativa, emotiva"
+        leaning: "destra / conservatore"
+        note: "Frame: tassare la morte anziché il patrimonio."
+    references: null
+
+  - id: en-government-regime
+    denotation: "Governo di uno Stato"
+    rationale: >
+      "Regime" delegittima implicitamente il governo descritto; "government"
+      e "administration" sono neutri. La scelta segnala l'allineamento
+      geopolitico della testata.
+    terms:
+      - term: "government"
+        connotation: "neutra"
+        leaning: null
+        note: null
+      - term: "administration"
+        connotation: "neutra, istituzionale"
+        leaning: null
+        note: "Uso prevalente per i governi considerati legittimi o alleati."
+      - term: "regime"
+        connotation: "negativa, delegittimante"
+        leaning: null
+        note: "Riservato di norma a governi autoritari o avversari; l'asimmetria d'uso è essa stessa un indicatore di framing."
+    references: null
+
+  - id: en-armed-nonstate-actors
+    denotation: "Combattenti armati non statali"
+    rationale: >
+      Classico caso "one man's terrorist is another man's freedom fighter":
+      lo stesso gruppo può essere descritto lungo un continuum che va dalla
+      legittimazione eroica alla criminalizzazione.
+    terms:
+      - term: "freedom fighters"
+        connotation: "fortemente positiva, legittimante"
+        leaning: null
+        note: "Usato per gruppi di cui si condivide la causa."
+      - term: "rebels"
+        connotation: "moderatamente positiva o neutra"
+        leaning: null
+        note: null
+      - term: "insurgents"
+        connotation: "neutra-negativa, militare"
+        leaning: null
+        note: "Lessico prevalente nel giornalismo di guerra post-2003 (Iraq)."
+      - term: "militants"
+        connotation: "neutra-negativa"
+        leaning: null
+        note: "Termine intermedio spesso scelto per evitare 'terrorists'."
+      - term: "terrorists"
+        connotation: "fortemente negativa, criminalizzante"
+        leaning: null
+        note: "Molte testate (es. BBC, Reuters) ne limitano l'uso in voce propria preferendo attribuirlo a fonti."
+    references: null
+
+  - id: en-climate
+    denotation: "Riscaldamento del pianeta causato dalle attività umane"
+    rationale: >
+      "Global warming" e "climate change" hanno storie d'uso politicizzate
+      (il secondo fu promosso anche perché percepito come meno allarmante);
+      "climate crisis/emergency" alza deliberatamente il livello di urgenza.
+    terms:
+      - term: "global warming"
+        connotation: "neutra-datata"
+        leaning: null
+        note: null
+      - term: "climate change"
+        connotation: "neutra"
+        leaning: null
+        note: "Standard scientifico e giornalistico prevalente."
+      - term: "climate crisis"
+        connotation: "allarmata, mobilitante"
+        leaning: "sinistra / progressista"
+        note: "Adottato come standard editoriale dal Guardian nel 2019."
+      - term: "climate emergency"
+        connotation: "fortemente allarmata"
+        leaning: "sinistra / progressista"
+        note: null
+    references: null
+
+  - id: en-civil-disorder
+    denotation: "Manifestazioni di piazza con episodi di disordine"
+    rationale: >
+      "Riot" criminalizza i partecipanti, "protest" li legittima, "unrest"
+      neutralizza, "uprising" nobilita. La scelta dipende spesso da chi
+      protesta e contro chi.
+    terms:
+      - term: "riot"
+        connotation: "negativa, criminalizzante"
+        leaning: null
+        note: null
+      - term: "protest"
+        connotation: "neutra-legittimante"
+        leaning: null
+        note: null
+      - term: "unrest"
+        connotation: "neutra, distanziante"
+        leaning: null
+        note: "Astrae dagli attori; frequente nei titoli d'agenzia."
+      - term: "uprising"
+        connotation: "positiva, epica"
+        leaning: null
+        note: "Suggerisce una rivolta giusta contro un potere oppressivo."
+      - term: "civil disturbance"
+        connotation: "neutra, burocratica"
+        leaning: null
+        note: "Lessico di fonte istituzionale/polizia."
+    references: null
+
+  - id: en-welfare-programs
+    denotation: "Programmi pubblici di protezione sociale (pensioni, sanità, sussidi)"
+    rationale: >
+      "Entitlements" negli USA suggerisce pretese e insostenibilità;
+      "social programs" o "safety net" evocano protezione; "handouts" è
+      apertamente spregiativo.
+    terms:
+      - term: "entitlements"
+        connotation: "negativa nel dibattito fiscale"
+        leaning: "destra / conservatore"
+        note: "Tecnicamente neutro nel gergo di bilancio USA, ma connotato nel dibattito pubblico."
+      - term: "social programs"
+        connotation: "neutra-positiva"
+        leaning: "sinistra / progressista"
+        note: null
+      - term: "safety net"
+        connotation: "positiva, protettiva"
+        leaning: null
+        note: null
+      - term: "handouts"
+        connotation: "spregiativa"
+        leaning: "destra / conservatore"
+        note: "Implica assistenzialismo immeritato."
+    references: null
+
+  - id: en-tax-cuts
+    denotation: "Riduzione delle imposte"
+    rationale: >
+      "Tax relief" presuppone che le tasse siano un peso da cui 'sollevare'
+      il contribuente (frame analizzato da George Lakoff); "tax cuts" è
+      descrittivo; "tax giveaways/breaks for the rich" inverte la valenza.
+    terms:
+      - term: "tax relief"
+        connotation: "positiva, presuppone le tasse come afflizione"
+        leaning: "destra / conservatore"
+        note: null
+      - term: "tax cuts"
+        connotation: "neutra"
+        leaning: null
+        note: null
+      - term: "tax giveaways"
+        connotation: "negativa"
+        leaning: "sinistra / progressista"
+        note: "Implica regali ingiustificati, di norma ai più ricchi."
+    references: null
+
+  - id: en-invasion-of-ukraine
+    denotation: "Attacco militare su larga scala di uno Stato contro un altro (caso tipico: Russia-Ucraina 2022)"
+    rationale: >
+      "Special military operation" è l'eufemismo ufficiale del Cremlino,
+      imposto anche ai media russi; "invasion" e "war" descrivono i fatti
+      e sono lo standard della stampa internazionale.
+    terms:
+      - term: "special military operation"
+        connotation: "eufemistica, propaganda di Stato"
+        leaning: "pro-Cremlino"
+        note: "In Russia l'uso di 'war'/'invasion' è stato perseguito per legge dal 2022."
+      - term: "invasion"
+        connotation: "negativa verso l'aggressore, fattuale"
+        leaning: null
+        note: null
+      - term: "war"
+        connotation: "neutra-fattuale"
+        leaning: null
+        note: null
+      - term: "conflict"
+        connotation: "neutra, distanziante"
+        leaning: null
+        note: "Può occultare l'asimmetria tra aggressore e aggredito."
+    references: null
+
+  - id: en-settlers
+    denotation: "Civili di uno Stato insediati in territori occupati o contesi"
+    rationale: >
+      "Settlers" è lo standard giornalistico; "colonists/colonizers" evoca
+      il colonialismo e delegittima; "residents"/"communities" normalizza
+      la presenza.
+    terms:
+      - term: "settlers"
+        connotation: "neutra nello standard giornalistico"
+        leaning: null
+        note: null
+      - term: "colonists / colonizers"
+        connotation: "negativa, delegittimante"
+        leaning: "pro-palestinese / anticoloniale"
+        note: null
+      - term: "residents"
+        connotation: "normalizzante"
+        leaning: "pro-insediamenti"
+        note: "Omette lo status contestato del territorio."
+    references: null
+
+  - id: en-woke-progressive
+    denotation: "Posizioni attente alle ingiustizie sociali e identitarie"
+    rationale: >
+      "Woke" nasce come autodefinizione nella comunità afroamericana ed è
+      diventato un'etichetta spregiativa nell'uso conservatore; "progressive"
+      è l'autodefinizione neutra-positiva della stessa area.
+    terms:
+      - term: "woke"
+        connotation: "spregiativa nell'uso attuale prevalente"
+        leaning: "destra / conservatore"
+        note: "Originariamente positiva ('stay woke'); oggi quasi sempre polemica nei titoli."
+      - term: "progressive"
+        connotation: "neutra-positiva, autodefinizione"
+        leaning: "sinistra / progressista"
+        note: null
+      - term: "politically correct"
+        connotation: "spregiativa"
+        leaning: "destra / conservatore"
+        note: "Etichetta polemica precedente a 'woke' con funzione analoga."
+    references: null
+
+  - id: en-migration-flows
+    denotation: "Aumento degli arrivi di migranti"
+    rationale: >
+      Le metafore idrauliche o naturali ("wave", "flood", "surge") presentano
+      la migrazione come forza incontrollabile e minacciosa; "increase in
+      arrivals" è descrittivo.
+    terms:
+      - term: "surge"
+        connotation: "allarmistica"
+        leaning: null
+        note: null
+      - term: "influx"
+        connotation: "moderatamente allarmistica"
+        leaning: null
+        note: null
+      - term: "wave / flood"
+        connotation: "allarmistica, disumanizzante (metafora idraulica)"
+        leaning: "destra / conservatore"
+        note: null
+      - term: "increase in arrivals"
+        connotation: "neutra"
+        leaning: null
+        note: null
+    references: null
+
+  - id: en-wealthy
+    denotation: "Persone e imprese con redditi o patrimoni elevati"
+    rationale: >
+      "Job creators" attribuisce ai ricchi una funzione sociale benefica,
+      usata per argomentare contro l'aumento delle tasse; "the wealthy"
+      è descrittivo; "the one percent" li incornicia come élite privilegiata.
+    terms:
+      - term: "job creators"
+        connotation: "positiva, funzionale"
+        leaning: "destra / conservatore"
+        note: null
+      - term: "the wealthy / the rich"
+        connotation: "neutra"
+        leaning: null
+        note: null
+      - term: "the one percent"
+        connotation: "negativa, frame della disuguaglianza"
+        leaning: "sinistra / progressista"
+        note: "Popolarizzato dal movimento Occupy Wall Street (2011)."
+    references: null
+
+  - id: en-torture
+    denotation: "Pratiche coercitive violente negli interrogatori"
+    rationale: >
+      "Enhanced interrogation techniques" è l'eufemismo dell'amministrazione
+      USA post-2001 per pratiche (es. waterboarding) ampiamente qualificate
+      come tortura; l'adozione o meno dell'eufemismo da parte dei media è
+      stata a lungo dibattuta.
+    terms:
+      - term: "enhanced interrogation (techniques)"
+        connotation: "eufemistica, governativa"
+        leaning: "filo-governativo USA"
+        note: null
+      - term: "harsh interrogation"
+        connotation: "intermedia"
+        leaning: null
+        note: "Compromesso adottato da varie testate USA."
+      - term: "torture"
+        connotation: "negativa, fattuale-giuridica"
+        leaning: null
+        note: "Termine con precisa definizione nel diritto internazionale."
+    references: null
+
+  - id: en-civilian-deaths
+    denotation: "Civili uccisi in operazioni militari"
+    rationale: >
+      "Collateral damage" astrae e tecnicizza la morte di civili;
+      "civilian deaths/casualties" è descrittivo; "massacre" massimizza
+      la responsabilità morale.
+    terms:
+      - term: "collateral damage"
+        connotation: "eufemistica, tecnicizzante"
+        leaning: "fonte militare"
+        note: null
+      - term: "civilian casualties"
+        connotation: "neutra-tecnica"
+        leaning: null
+        note: null
+      - term: "civilian deaths"
+        connotation: "neutra-fattuale"
+        leaning: null
+        note: null
+      - term: "massacre / slaughter"
+        connotation: "fortemente negativa, accusatoria"
+        leaning: null
+        note: null
+    references: null
+
+  - id: en-gig-economy
+    denotation: "Lavoro tramite piattaforme, a chiamata e senza tutele stabili"
+    rationale: >
+      "Gig economy" e "flexible work" enfatizzano libertà e modernità;
+      "precarious work" enfatizza l'assenza di tutele.
+    terms:
+      - term: "gig economy"
+        connotation: "neutra-positiva, modernizzante"
+        leaning: "pro-piattaforme"
+        note: null
+      - term: "flexible work"
+        connotation: "positiva"
+        leaning: "pro-piattaforme"
+        note: null
+      - term: "precarious work"
+        connotation: "negativa, frame delle tutele"
+        leaning: "sinistra / sindacale"
+        note: null
+      - term: "casualization (of labour)"
+        connotation: "negativa, processuale"
+        leaning: "sinistra / sindacale"
+        note: null
+    references: null
+
+  - id: en-occupied-territories
+    denotation: "Territori occupati o a sovranità contesa (caso tipico: Cisgiordania)"
+    rationale: >
+      "Occupied territories" e "illegal settlements" adottano il frame del
+      diritto internazionale; "disputed territories" suggerisce equivalenza
+      tra le rivendicazioni; "Judea and Samaria" adotta la toponomastica
+      biblica usata dai sostenitori degli insediamenti.
+    terms:
+      - term: "occupied territories"
+        connotation: "frame del diritto internazionale"
+        leaning: null
+        note: "Terminologia prevalente in ONU e gran parte della stampa internazionale."
+      - term: "illegal settlements"
+        connotation: "negativa verso gli insediamenti, giuridica"
+        leaning: null
+        note: null
+      - term: "disputed territories"
+        connotation: "neutralizzante, equidistante"
+        leaning: "pro-israeliano"
+        note: null
+      - term: "Judea and Samaria"
+        connotation: "legittimante gli insediamenti"
+        leaning: "destra israeliana"
+        note: null
+    references: null
+
+  - id: en-death-panels
+    denotation: "Organi pubblici di valutazione di costi/benefici delle cure sanitarie"
+    rationale: >
+      "Death panels" è un'etichetta polemica (Sarah Palin, 2009) contro la
+      riforma sanitaria USA, che dipingeva comitati di valutazione come
+      organi che decidono chi far morire; nominata "Lie of the Year" da
+      PolitiFact nel 2009.
+    terms:
+      - term: "death panels"
+        connotation: "fortemente negativa, disinformativa"
+        leaning: "destra / conservatore"
+        note: "Non corrispondeva ad alcuna previsione reale della legge."
+      - term: "end-of-life counseling"
+        connotation: "neutra-tecnica"
+        leaning: null
+        note: "Ciò a cui la polemica si riferiva: consulenze volontarie sul fine vita."
+      - term: "cost-effectiveness review"
+        connotation: "neutra, tecnocratica"
+        leaning: null
+        note: null
+    references:
+      - "PolitiFact, Lie of the Year 2009"
+
+  - id: en-protesters-mob
+    denotation: "Manifestanti contro un governo"
+    rationale: >
+      "Pro-democracy protesters" legittima la protesta come causa
+      universale; "anti-government mob/rioters" la criminalizza. La stampa
+      di Stato e quella internazionale usano spesso etichette opposte per
+      gli stessi eventi (es. Hong Kong 2019).
+    terms:
+      - term: "pro-democracy protesters"
+        connotation: "positiva, legittimante"
+        leaning: null
+        note: null
+      - term: "demonstrators"
+        connotation: "neutra"
+        leaning: null
+        note: null
+      - term: "anti-government mob"
+        connotation: "negativa, criminalizzante"
+        leaning: "filo-governativo"
+        note: null
+      - term: "rioters"
+        connotation: "negativa"
+        leaning: "filo-governativo"
+        note: null
+    references: null
+
+  - id: en-gun-control
+    denotation: "Regolamentazione dell'acquisto e possesso di armi da fuoco"
+    rationale: >
+      "Gun control" evoca restrizione e controllo statale; "gun safety" e
+      "gun violence prevention" riformulano lo stesso obiettivo in termini
+      di sicurezza; "gun rights" incornicia il tema come libertà
+      costituzionale.
+    terms:
+      - term: "gun control"
+        connotation: "frame della restrizione"
+        leaning: null
+        note: "Termine storico, oggi evitato dagli stessi promotori delle regole."
+      - term: "gun safety (measures)"
+        connotation: "positiva, frame della sicurezza"
+        leaning: "sinistra / progressista"
+        note: null
+      - term: "gun rights"
+        connotation: "positiva, frame della libertà"
+        leaning: "destra / conservatore"
+        note: null
+    references: null
+
+  - id: en-pro-anti-vax
+    denotation: "Persone contrarie o esitanti verso le vaccinazioni"
+    rationale: >
+      "Anti-vaxxers" è spregiativo e omogeneizzante; "vaccine hesitancy" è
+      il termine tecnico OMS che distingue l'esitazione dal rifiuto
+      ideologico; "vaccine skeptics" suggerisce un dubbio razionale.
+    terms:
+      - term: "anti-vaxxers"
+        connotation: "spregiativa"
+        leaning: null
+        note: null
+      - term: "vaccine skeptics"
+        connotation: "neutra-legittimante"
+        leaning: null
+        note: "Può nobilitare come 'scetticismo' posizioni antiscientifiche."
+      - term: "vaccine-hesitant (people)"
+        connotation: "neutra, tecnica"
+        leaning: null
+        note: "Categoria usata dall'OMS."
+    references: null
+
+  - id: en-regime-change
+    denotation: "Rovesciamento di un governo straniero promosso dall'esterno"
+    rationale: >
+      "Regime change" tecnicizza; "liberation" nobilita l'intervento;
+      "coup" lo criminalizza. Lo stesso evento riceve etichette opposte
+      a seconda dell'allineamento della testata.
+    terms:
+      - term: "liberation"
+        connotation: "positiva, legittimante l'intervento"
+        leaning: "filo-interventista"
+        note: null
+      - term: "regime change"
+        connotation: "neutra-tecnica"
+        leaning: null
+        note: null
+      - term: "coup / overthrow"
+        connotation: "negativa, delegittimante"
+        leaning: "anti-interventista"
+        note: null
+    references: null
+
+  - id: en-spending
+    denotation: "Spesa pubblica in programmi e infrastrutture"
+    rationale: >
+      "Investment" presenta la spesa come produttiva e lungimirante;
+      "spending" è neutro; "big government spending" e "pork" la presentano
+      come sperpero clientelare.
+    terms:
+      - term: "investment (in ...)"
+        connotation: "positiva"
+        leaning: "sinistra / progressista"
+        note: null
+      - term: "spending"
+        connotation: "neutra"
+        leaning: null
+        note: null
+      - term: "big government spending"
+        connotation: "negativa, frame anti-statalista"
+        leaning: "destra / conservatore"
+        note: null
+      - term: "pork (barrel)"
+        connotation: "spregiativa, clientelare"
+        leaning: null
+        note: "Riferito a spese mirate a collegi elettorali specifici."
+    references: null
+
+  - id: en-whistleblower-leaker
+    denotation: "Persona che rivela informazioni riservate di un'organizzazione"
+    rationale: >
+      "Whistleblower" attribuisce motivazione etica e interesse pubblico;
+      "leaker" è neutro-negativo; "traitor" criminalizza. Casi come Snowden
+      hanno diviso le redazioni proprio su questa scelta lessicale.
+    terms:
+      - term: "whistleblower"
+        connotation: "positiva, interesse pubblico"
+        leaning: null
+        note: null
+      - term: "leaker"
+        connotation: "neutra-negativa"
+        leaning: null
+        note: null
+      - term: "traitor"
+        connotation: "fortemente negativa, criminalizzante"
+        leaning: "filo-governativo / securitario"
+        note: null
+    references: null

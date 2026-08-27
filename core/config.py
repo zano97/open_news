@@ -7,11 +7,15 @@ domini delle fonti del catalogo.
 """
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 METHOD_VERSION = "0.1.0"
 """Versione della metodologia: compare accanto a ogni valore calcolato."""
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
 
 
 class Settings(BaseSettings):

@@ -30,6 +30,7 @@ dependencies = [
     "numpy>=1.26",
     "trafilatura>=1.9",
     "markdown>=3.6",
+    "ruamel.yaml>=0.18",
 ]
 
 [project.optional-dependencies]

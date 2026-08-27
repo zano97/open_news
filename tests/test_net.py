@@ -1,0 +1,60 @@
+"""Fase 1: la guardia sull'egress blocca i domini fuori allowlist.
+
+Questo è il test richiesto dalla definizione di "fatto" del progetto: nessuna
+chiamata verso servizi non in allowlist (quindi nessun servizio a pagamento)
+può partire dal codice, perché ogni client HTTP passa da core.net.build_client.
+"""
+
+import httpx
+import pytest
+import respx
+
+from core.net import EgressDeniedError, build_client, host_allowed
+
+
+class TestHostAllowed:
+    def test_infrastruttura_gratuita(self) -> None:
+        assert host_allowed("api.gdeltproject.org")
+        assert host_allowed("query.wikidata.org")
+        assert host_allowed("www.wikidata.org")
+
+    def test_fonti_del_catalogo(self) -> None:
+        assert host_allowed("www.repubblica.it")
+        assert host_allowed("feeds.bbci.co.uk")
+        assert host_allowed("rss.nytimes.com")
+
+    def test_host_interni_allo_stack(self) -> None:
+        assert host_allowed("meilisearch")  # nome di servizio compose, senza punto
+        assert host_allowed("localhost")
+        assert host_allowed("127.0.0.1")
+        assert host_allowed("192.168.1.10")
+
+    def test_servizi_esterni_negati(self) -> None:
+        assert not host_allowed("api.openai.com")
+        assert not host_allowed("newsapi.org")
+        assert not host_allowed("evil.example.com")
+        assert not host_allowed("8.8.8.8")  # IP pubblico
+
+    def test_suffisso_non_ingannabile(self) -> None:
+        # Un dominio che TERMINA con un dominio ammesso ma non ne è sottodominio.
+        assert not host_allowed("fakewikidata.org")
+        assert not host_allowed("wikidata.org.evil.com")
+
+
+async def test_client_blocca_dominio_non_ammesso() -> None:
+    async with build_client() as client:
+        with pytest.raises(EgressDeniedError):
+            await client.get("https://api.openai.com/v1/models")
+
+
+@respx.mock
+async def test_client_consente_dominio_ammesso() -> None:
+    route = respx.get("https://api.gdeltproject.org/api/v2/doc/doc").mock(
+        return_value=httpx.Response(200, json={"articles": []})
+    )
+    async with build_client() as client:
+        resp = await client.get("https://api.gdeltproject.org/api/v2/doc/doc")
+    assert resp.status_code == 200
+    assert route.called
+    # Il client si identifica sempre con lo User-Agent del progetto.
+    assert "OpenNewsBot" in route.calls[0].request.headers["User-Agent"]

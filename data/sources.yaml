@@ -1,0 +1,794 @@
+# Catalogo delle fonti di Open News.
+#
+# Regole del catalogo:
+# - feed_urls: URL RSS/Atom canonici. La verifica via HTTP reale avviene con
+#   `make verify-feeds` (scripts/verify_feeds.py), che aggiorna `enabled`,
+#   `disabled_reason` e `last_checked`. I feed non ancora verificati hanno
+#   verified: false.
+# - wikidata_qid: SOLO se certo; altrimenti null (mai un dato inventato).
+#   `scripts/enrich_wikidata.py` può completarlo interrogando Wikidata.
+# - terms_note: restrizioni note dei termini d'uso rilevanti per un
+#   aggregatore che mostra titolo + snippet breve + link. Non è un parere
+#   legale; vedi docs/LEGAL.md.
+# - Le fonti senza RSS pubblico (Reuters, AP) hanno feed_urls: [] e vengono
+#   coperte solo via GDELT DOC 2.0 (con citazione, vedi NOTICE).
+
+sources:
+  # ------------------------- ITALIA -------------------------
+  - slug: repubblica
+    name: la Repubblica
+    domain: repubblica.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.repubblica.it/rss/homepage/rss2.0.xml
+    gdelt_domain: repubblica.it
+    wikidata_qid: Q874175
+    founded: 1976
+    enabled: true
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Contenuti (c) GEDI;
+      niente riproduzione del testo integrale.
+
+  - slug: corriere-della-sera
+    name: Corriere della Sera
+    domain: corriere.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://xml2.corriereobjects.it/rss/homepage.xml
+    gdelt_domain: corriere.it
+    wikidata_qid: Q748141
+    founded: 1876
+    enabled: true
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Contenuti (c) RCS
+      MediaGroup.
+
+  - slug: sole-24-ore
+    name: Il Sole 24 Ore
+    domain: ilsole24ore.com
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ilsole24ore.com/rss/italia.xml
+      - https://www.ilsole24ore.com/rss/mondo.xml
+    gdelt_domain: ilsole24ore.com
+    wikidata_qid: null
+    founded: 1965
+    enabled: true
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Molti articoli sono
+      dietro paywall: il link porta comunque alla fonte.
+
+  - slug: fatto-quotidiano
+    name: il Fatto Quotidiano
+    domain: ilfattoquotidiano.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ilfattoquotidiano.it/feed/
+    gdelt_domain: ilfattoquotidiano.it
+    wikidata_qid: Q1477482
+    founded: 2009
+    enabled: true
+    self_declared_line:
+      quote: >-
+        Un quotidiano libero da ogni condizionamento politico ed economico,
+        che non riceve alcun finanziamento pubblico.
+      url: https://www.ilfattoquotidiano.it/chi-siamo/
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: il-giornale
+    name: il Giornale
+    domain: ilgiornale.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ilgiornale.it/rss.xml
+    gdelt_domain: ilgiornale.it
+    wikidata_qid: Q580060
+    founded: 1974
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: libero
+    name: Libero
+    domain: liberoquotidiano.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.liberoquotidiano.it/rss.xml
+    gdelt_domain: liberoquotidiano.it
+    wikidata_qid: null
+    founded: 2000
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: avvenire
+    name: Avvenire
+    domain: avvenire.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.avvenire.it/rss
+    gdelt_domain: avvenire.it
+    wikidata_qid: null
+    founded: 1968
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: il-manifesto
+    name: il manifesto
+    domain: ilmanifesto.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://ilmanifesto.it/feed
+    gdelt_domain: ilmanifesto.it
+    wikidata_qid: Q1470141
+    founded: 1969
+    enabled: true
+    self_declared_line:
+      quote: quotidiano comunista
+      url: https://ilmanifesto.it/
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Testata in gran parte
+      dietro abbonamento.
+
+  - slug: il-foglio
+    name: Il Foglio
+    domain: ilfoglio.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ilfoglio.it/rss.xml
+    gdelt_domain: ilfoglio.it
+    wikidata_qid: null
+    founded: 1996
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: domani
+    name: Domani
+    domain: editorialedomani.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.editorialedomani.it/rss
+    gdelt_domain: editorialedomani.it
+    wikidata_qid: null
+    founded: 2020
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: il-post
+    name: Il Post
+    domain: ilpost.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ilpost.it/feed/
+    gdelt_domain: ilpost.it
+    wikidata_qid: Q3792136
+    founded: 2010
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: internazionale
+    name: Internazionale
+    domain: internazionale.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.internazionale.it/rss
+    gdelt_domain: internazionale.it
+    wikidata_qid: null
+    founded: 1993
+    enabled: true
+    terms_note: >-
+      Rivista che traduce e ripubblica articoli della stampa estera; i diritti
+      dei singoli articoli restano alle testate originali.
+
+  - slug: fanpage
+    name: Fanpage.it
+    domain: fanpage.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.fanpage.it/feed/
+    gdelt_domain: fanpage.it
+    wikidata_qid: null
+    founded: 2010
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: open
+    name: Open
+    domain: open.online
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.open.online/feed/
+    gdelt_domain: open.online
+    wikidata_qid: null
+    founded: 2018
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: linkiesta
+    name: Linkiesta
+    domain: linkiesta.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.linkiesta.it/feed/
+    gdelt_domain: linkiesta.it
+    wikidata_qid: null
+    founded: 2011
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: la-stampa
+    name: La Stampa
+    domain: lastampa.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.lastampa.it/rss.xml
+    gdelt_domain: lastampa.it
+    wikidata_qid: Q676555
+    founded: 1867
+    enabled: true
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Contenuti (c) GEDI.
+
+  - slug: agi
+    name: AGI — Agenzia Giornalistica Italia
+    domain: agi.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.agi.it/rss
+    gdelt_domain: agi.it
+    wikidata_qid: null
+    founded: 1950
+    enabled: true
+    terms_note: >-
+      Agenzia di stampa; l'uso qui è limitato a titolo+snippet+link verso il
+      sito AGI. Nessuna ridistribuzione dei lanci.
+
+  - slug: adnkronos
+    name: Adnkronos
+    domain: adnkronos.com
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.adnkronos.com/rss
+    gdelt_domain: adnkronos.com
+    wikidata_qid: null
+    founded: 1963
+    enabled: true
+    terms_note: >-
+      Agenzia di stampa; l'uso qui è limitato a titolo+snippet+link verso il
+      sito Adnkronos.
+
+  - slug: ansa
+    name: ANSA
+    domain: ansa.it
+    country: it
+    language: it
+    region: italy
+    feed_urls:
+      - https://www.ansa.it/sito/ansait_rss.xml
+    gdelt_domain: ansa.it
+    wikidata_qid: Q392934
+    founded: 1945
+    enabled: false
+    disabled_reason: >-
+      I termini d'uso dei feed RSS ANSA consentono solo uso personale e non
+      commerciale e vietano la ripubblicazione dei titoli su siti web. La
+      fonte resta nel catalogo per trasparenza, ma disabilitata di default;
+      può essere abilitata solo previo accordo con ANSA.
+    terms_note: >-
+      Termini restrittivi: solo uso personale non commerciale, vietata la
+      ripubblicazione dei titoli su siti web.
+
+  # ------------------------- EUROPA -------------------------
+  - slug: bbc-news
+    name: BBC News
+    domain: bbc.co.uk
+    country: gb
+    language: en
+    region: europe
+    feed_urls:
+      - https://feeds.bbci.co.uk/news/rss.xml
+    gdelt_domain: bbc.co.uk
+    wikidata_qid: Q747860
+    founded: 1922
+    enabled: true
+    terms_note: >-
+      I termini BBC consentono l'uso personale dei feed; per un aggregatore
+      pubblico BBC chiede attribuzione e link. Mostriamo solo
+      titolo+snippet+link con attribuzione.
+
+  - slug: guardian
+    name: The Guardian
+    domain: theguardian.com
+    country: gb
+    language: en
+    region: europe
+    feed_urls:
+      - https://www.theguardian.com/international/rss
+    gdelt_domain: theguardian.com
+    wikidata_qid: Q11148
+    founded: 1821
+    enabled: true
+    terms_note: >-
+      L'uso dei feed richiede attribuzione e link alla fonte; consentito
+      titolo+snippet+link.
+
+  - slug: le-monde
+    name: Le Monde
+    domain: lemonde.fr
+    country: fr
+    language: fr
+    region: europe
+    feed_urls:
+      - https://www.lemonde.fr/rss/une.xml
+    gdelt_domain: lemonde.fr
+    wikidata_qid: Q12461
+    founded: 1944
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: le-figaro
+    name: Le Figaro
+    domain: lefigaro.fr
+    country: fr
+    language: fr
+    region: europe
+    feed_urls:
+      - https://www.lefigaro.fr/rss/figaro_actualites.xml
+    gdelt_domain: lefigaro.fr
+    wikidata_qid: Q216047
+    founded: 1826
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: el-pais
+    name: El País
+    domain: elpais.com
+    country: es
+    language: es
+    region: europe
+    feed_urls:
+      - https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada
+    gdelt_domain: elpais.com
+    wikidata_qid: Q42583
+    founded: 1976
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: el-mundo
+    name: El Mundo
+    domain: elmundo.es
+    country: es
+    language: es
+    region: europe
+    feed_urls:
+      - https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml
+    gdelt_domain: elmundo.es
+    wikidata_qid: Q645895
+    founded: 1989
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: faz
+    name: Frankfurter Allgemeine Zeitung
+    domain: faz.net
+    country: de
+    language: de
+    region: europe
+    feed_urls:
+      - https://www.faz.net/rss/aktuell/
+    gdelt_domain: faz.net
+    wikidata_qid: Q756617
+    founded: 1949
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: sueddeutsche
+    name: Süddeutsche Zeitung
+    domain: sueddeutsche.de
+    country: de
+    language: de
+    region: europe
+    feed_urls:
+      - https://rss.sueddeutsche.de/rss/Topthemen
+    gdelt_domain: sueddeutsche.de
+    wikidata_qid: Q217595
+    founded: 1945
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: dw
+    name: Deutsche Welle
+    domain: dw.com
+    country: de
+    language: en
+    region: europe
+    feed_urls:
+      - https://rss.dw.com/rdf/rss-en-all
+    gdelt_domain: dw.com
+    wikidata_qid: null
+    founded: 1953
+    enabled: true
+    terms_note: >-
+      Emittente pubblica internazionale tedesca, finanziata dal bilancio
+      federale (fatto registrato al livello 1). Feed in inglese.
+
+  - slug: france24
+    name: France 24
+    domain: france24.com
+    country: fr
+    language: en
+    region: europe
+    feed_urls:
+      - https://www.france24.com/en/rss
+    gdelt_domain: france24.com
+    wikidata_qid: null
+    founded: 2006
+    enabled: true
+    terms_note: >-
+      Emittente pubblica internazionale francese (France Médias Monde),
+      finanziamento statale registrato al livello 1. Feed in inglese.
+
+  - slug: euronews
+    name: Euronews
+    domain: euronews.com
+    country: fr
+    language: en
+    region: europe
+    feed_urls:
+      - https://www.euronews.com/rss
+    gdelt_domain: euronews.com
+    wikidata_qid: null
+    founded: 1993
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: publico-pt
+    name: Público
+    domain: publico.pt
+    country: pt
+    language: pt
+    region: europe
+    feed_urls:
+      - https://www.publico.pt/rss
+    gdelt_domain: publico.pt
+    wikidata_qid: null
+    founded: 1990
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: nrc
+    name: NRC
+    domain: nrc.nl
+    country: nl
+    language: nl
+    region: europe
+    feed_urls:
+      - https://www.nrc.nl/rss/
+    gdelt_domain: nrc.nl
+    wikidata_qid: null
+    founded: 1970
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  # ------------------------- MONDO -------------------------
+  - slug: al-jazeera
+    name: Al Jazeera English
+    domain: aljazeera.com
+    country: qa
+    language: en
+    region: world
+    feed_urls:
+      - https://www.aljazeera.com/xml/rss/all.xml
+    gdelt_domain: aljazeera.com
+    wikidata_qid: null
+    founded: 2006
+    enabled: true
+    terms_note: >-
+      Emittente finanziata dallo stato del Qatar (fatto registrato al
+      livello 1).
+
+  - slug: npr
+    name: NPR
+    domain: npr.org
+    country: us
+    language: en
+    region: world
+    feed_urls:
+      - https://feeds.npr.org/1001/rss.xml
+    gdelt_domain: npr.org
+    wikidata_qid: null
+    founded: 1970
+    enabled: true
+    terms_note: >-
+      I termini NPR consentono l'uso personale non commerciale dei feed con
+      attribuzione; per un aggregatore pubblico mostriamo solo
+      titolo+snippet+link con attribuzione e senza pubblicità.
+
+  - slug: nyt
+    name: The New York Times
+    domain: nytimes.com
+    country: us
+    language: en
+    region: world
+    feed_urls:
+      - https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+    gdelt_domain: nytimes.com
+    wikidata_qid: Q9684
+    founded: 1851
+    enabled: true
+    terms_note: >-
+      I feed pubblici NYT sono per uso non commerciale con attribuzione e
+      link; mostriamo solo titolo+snippet+link.
+
+  - slug: washington-post
+    name: The Washington Post
+    domain: washingtonpost.com
+    country: us
+    language: en
+    region: world
+    feed_urls:
+      - https://feeds.washingtonpost.com/rss/world
+    gdelt_domain: washingtonpost.com
+    wikidata_qid: Q166032
+    founded: 1877
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: fox-news
+    name: Fox News
+    domain: foxnews.com
+    country: us
+    language: en
+    region: world
+    feed_urls:
+      - https://moxie.foxnews.com/google-publisher/latest.xml
+    gdelt_domain: foxnews.com
+    wikidata_qid: Q216589
+    founded: 1996
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: cbc
+    name: CBC News
+    domain: cbc.ca
+    country: ca
+    language: en
+    region: world
+    feed_urls:
+      - https://www.cbc.ca/webfeed/rss/rss-topstories
+    gdelt_domain: cbc.ca
+    wikidata_qid: null
+    founded: 1936
+    enabled: true
+    terms_note: >-
+      Emittente pubblica canadese (finanziamento federale, livello 1). Feed
+      per uso personale non commerciale con attribuzione; mostriamo solo
+      titolo+snippet+link.
+
+  - slug: abc-australia
+    name: ABC News (Australia)
+    domain: abc.net.au
+    country: au
+    language: en
+    region: world
+    feed_urls:
+      - https://www.abc.net.au/news/feed/51120/rss.xml
+    gdelt_domain: abc.net.au
+    wikidata_qid: null
+    founded: 1932
+    enabled: true
+    terms_note: >-
+      Emittente pubblica australiana (finanziamento federale, livello 1).
+
+  - slug: the-hindu
+    name: The Hindu
+    domain: thehindu.com
+    country: in
+    language: en
+    region: world
+    feed_urls:
+      - https://www.thehindu.com/news/national/feeder/default.rss
+    gdelt_domain: thehindu.com
+    wikidata_qid: null
+    founded: 1878
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: times-of-india
+    name: The Times of India
+    domain: timesofindia.indiatimes.com
+    country: in
+    language: en
+    region: world
+    feed_urls:
+      - https://timesofindia.indiatimes.com/rssfeedstopstories.cms
+    gdelt_domain: timesofindia.indiatimes.com
+    wikidata_qid: null
+    founded: 1838
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: nhk
+    name: NHK News
+    domain: nhk.or.jp
+    country: jp
+    language: ja
+    region: world
+    feed_urls:
+      - https://www3.nhk.or.jp/rss/news/cat0.xml
+    gdelt_domain: nhk.or.jp
+    wikidata_qid: null
+    founded: 1926
+    enabled: true
+    terms_note: >-
+      Emittente pubblica giapponese finanziata dal canone (livello 1).
+
+  - slug: scmp
+    name: South China Morning Post
+    domain: scmp.com
+    country: hk
+    language: en
+    region: world
+    feed_urls:
+      - https://www.scmp.com/rss/91/feed
+    gdelt_domain: scmp.com
+    wikidata_qid: null
+    founded: 1903
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: folha
+    name: Folha de S.Paulo
+    domain: folha.uol.com.br
+    country: br
+    language: pt
+    region: world
+    feed_urls:
+      - https://feeds.folha.uol.com.br/emcimadahora/rss091.xml
+    gdelt_domain: folha.uol.com.br
+    wikidata_qid: null
+    founded: 1921
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: clarin
+    name: Clarín
+    domain: clarin.com
+    country: ar
+    language: es
+    region: world
+    feed_urls:
+      - https://www.clarin.com/rss/lo-ultimo/
+    gdelt_domain: clarin.com
+    wikidata_qid: null
+    founded: 1945
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: daily-maverick
+    name: Daily Maverick
+    domain: dailymaverick.co.za
+    country: za
+    language: en
+    region: world
+    feed_urls:
+      - https://www.dailymaverick.co.za/dmrss/
+    gdelt_domain: dailymaverick.co.za
+    wikidata_qid: null
+    founded: 2009
+    enabled: true
+    terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  - slug: haaretz
+    name: Haaretz (English)
+    domain: haaretz.com
+    country: il
+    language: en
+    region: world
+    feed_urls:
+      - https://www.haaretz.com/srv/haaretz-latest.rss
+    gdelt_domain: haaretz.com
+    wikidata_qid: Q216243
+    founded: 1918
+    enabled: true
+    terms_note: >-
+      Nessuna restrizione nota per titolo+snippet+link. Gran parte dei
+      contenuti è dietro paywall.
+
+  - slug: kyiv-independent
+    name: The Kyiv Independent
+    domain: kyivindependent.com
+    country: ua
+    language: en
+    region: world
+    feed_urls:
+      - https://kyivindependent.com/rss/
+    gdelt_domain: kyivindependent.com
+    wikidata_qid: null
+    founded: 2021
+    enabled: true
+    terms_note: >-
+      Testata indipendente finanziata da lettori e grant (dichiarato dalla
+      testata stessa; registrato al livello 1 quando documentabile).
+
+  - slug: moscow-times
+    name: The Moscow Times
+    domain: themoscowtimes.com
+    country: ru
+    language: en
+    region: world
+    feed_urls:
+      - https://www.themoscowtimes.com/rss/news
+    gdelt_domain: themoscowtimes.com
+    wikidata_qid: null
+    founded: 1992
+    enabled: true
+    terms_note: >-
+      Testata in esilio (sede ad Amsterdam), dichiarata "agente straniero" e
+      poi "indesiderata" dalle autorità russe: fatti registrati al livello 1.
+
+  - slug: reuters
+    name: Reuters
+    domain: reuters.com
+    country: gb
+    language: en
+    region: world
+    feed_urls: []
+    gdelt_domain: reuters.com
+    wikidata_qid: Q130879
+    founded: 1851
+    enabled: true
+    terms_note: >-
+      Reuters non offre feed RSS pubblici: la copertura è rilevata solo via
+      GDELT DOC 2.0 (titolo+link; con citazione del GDELT Project). Nessun
+      contenuto Reuters viene ripubblicato.
+
+  - slug: associated-press
+    name: Associated Press
+    domain: apnews.com
+    country: us
+    language: en
+    region: world
+    feed_urls: []
+    gdelt_domain: apnews.com
+    wikidata_qid: Q40469
+    founded: 1846
+    enabled: true
+    terms_note: >-
+      AP non offre feed RSS pubblici: la copertura è rilevata solo via GDELT
+      DOC 2.0 (titolo+link; con citazione del GDELT Project). Nessun
+      contenuto AP viene ripubblicato.

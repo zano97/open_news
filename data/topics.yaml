@@ -1,0 +1,207 @@
+# data/topics.yaml
+# Tassonomia fissa dei temi per la classificazione delle notizie di Open News.
+# 20 temi, identificatori stabili in snake_case. Le keyword sono locuzioni
+# minuscole discriminanti pensate per apparire nei titoli; ogni keyword
+# appartiene a un solo tema, quello in cui risulta piu' segnaletica.
+version: 1
+topics:
+  - id: politica_interna
+    label_it: Politica interna
+    label_en: Domestic politics
+    description: Attivita' di governo, parlamento, partiti e istituzioni nazionali italiane.
+    keywords:
+      it: [consiglio dei ministri, decreto legge, fiducia al governo, rimpasto, quirinale, palazzo chigi, senato, camera dei deputati, opposizione, maggioranza, segretario di partito, mozione di sfiducia, question time, sottosegretario, riforma costituzionale, premierato]
+      en: [cabinet reshuffle, parliament vote, ruling party, opposition leader, coalition government, prime minister's office, no-confidence motion, lawmakers, legislation passed, party congress, government bill, domestic policy, house speaker, senate hearing]
+      fr: [conseil des ministres, remaniement, assemblée nationale, motion de censure, majorité présidentielle, projet de loi, premier ministre nommé, parti au pouvoir, sénat français, élysée]
+      de: [bundestag, koalitionsvertrag, bundesregierung, kanzleramt, misstrauensvotum, parteitag, gesetzentwurf, bundesrat, regierungskrise, ministerpräsident]
+      es: [consejo de ministros, moción de censura, congreso de los diputados, partido gobernante, investidura, pacto de gobierno, la moncloa, portavoz parlamentario, decreto ley, oposición política]
+  - id: elezioni
+    label_it: Elezioni
+    label_en: Elections
+    description: Campagne elettorali, voto, risultati, sondaggi e sistemi elettorali.
+    keywords:
+      it: [elezioni politiche, elezioni regionali, elezioni comunali, ballottaggio, urne, exit poll, affluenza, candidato sindaco, campagna elettorale, seggi elettorali, legge elettorale, sondaggi elettorali, scrutinio, liste elettorali, voto anticipato, primarie]
+      en: [general election, ballot, polling station, voter turnout, exit poll, presidential race, midterms, runoff, swing states, election campaign, candidacy announced, electoral college, primaries, landslide victory]
+      fr: [élection présidentielle, législatives, scrutin, bureau de vote, second tour, taux de participation, campagne électorale, candidat à la présidence, sondages électoraux, dépouillement]
+      de: [bundestagswahl, landtagswahl, wahlkampf, stichwahl, wahlbeteiligung, wahllokal, hochrechnung, wahlergebnis, spitzenkandidat, briefwahl]
+      es: [elecciones generales, jornada electoral, urnas, papeleta, recuento, segunda vuelta, campaña electoral, encuestas electorales, candidatura presidencial, participación electoral]
+  - id: economia_finanza
+    label_it: Economia e finanza
+    label_en: Economy and finance
+    description: Andamento economico, mercati, banche, imprese, fisco e conti pubblici.
+    keywords:
+      it: [pil, inflazione, spread, borsa di milano, ftse mib, manovra economica, legge di bilancio, tassi di interesse, debito pubblico, banche italiane, trimestrale, fisco, iva, rating, recessione, mutui]
+      en: [gdp growth, inflation rate, stock market, wall street, interest rates, federal reserve, quarterly earnings, bond yields, recession fears, tax cuts, budget deficit, ipo, merger deal, hedge fund, stock rally]
+      fr: [croissance du pib, inflation, bourse de paris, cac 40, taux d'intérêt, déficit budgétaire, banque centrale, marchés financiers, dette publique, pouvoir d'achat]
+      de: [inflationsrate, leitzins, dax, börse, haushaltsdefizit, wirtschaftswachstum, rezession, staatsverschuldung, quartalszahlen, steuerreform]
+      es: [inflación, prima de riesgo, ibex 35, tipos de interés, bolsa de madrid, déficit público, crecimiento económico, deuda pública, presupuestos generales, recesión]
+  - id: lavoro_sindacati
+    label_it: Lavoro e sindacati
+    label_en: Labour and unions
+    description: Occupazione, contratti, vertenze, scioperi e relazioni sindacali.
+    keywords:
+      it: [sciopero generale, cgil, cisl, uil, contratto collettivo, licenziamenti, cassa integrazione, salario minimo, vertenza, precariato, disoccupazione, sicurezza sul lavoro, morti sul lavoro, smart working, contratti a termine, buste paga]
+      en: [strike action, trade union, layoffs, collective bargaining, minimum wage, picket line, walkout, job cuts, unemployment figures, workers' rights, labour dispute, union vote, hiring freeze, gig workers]
+      fr: [grève générale, syndicats, licenciements, plan social, salaire minimum, smic, négociations salariales, chômage, préavis de grève, conditions de travail]
+      de: [streik, gewerkschaft, tarifverhandlungen, warnstreik, mindestlohn, stellenabbau, kurzarbeit, arbeitslosenquote, betriebsrat, ig metall]
+      es: [huelga general, sindicatos, despidos, convenio colectivo, salario mínimo, ere, paro registrado, negociación colectiva, reforma laboral, precariedad laboral]
+  - id: immigrazione
+    label_it: Immigrazione
+    label_en: Immigration
+    description: Flussi migratori, sbarchi, accoglienza, asilo e politiche migratorie.
+    keywords:
+      it: [migranti, sbarchi, lampedusa, ong in mare, richiedenti asilo, permesso di soggiorno, centri di accoglienza, rimpatri, decreto flussi, ius soli, cpr, scafisti, naufragio di migranti, rotta balcanica, hotspot, clandestini]
+      en: [migrants, asylum seekers, border crossings, deportation, refugee crisis, migrant boat, small boats, immigration raid, detention center, visa overstay, undocumented immigrants, resettlement, migrant caravan, border wall]
+      fr: [migrants, demandeurs d'asile, traversées de la manche, sans-papiers, expulsions, titre de séjour, centres de rétention, réfugiés, regroupement familial, ofpra]
+      de: [flüchtlinge, asylbewerber, abschiebung, migrationspolitik, aufenthaltserlaubnis, grenzkontrollen, asylantrag, erstaufnahme, seenotrettung, einwanderung]
+      es: [migrantes, pateras, solicitantes de asilo, deportaciones, frontera sur, canarias ruta migratoria, ceuta y melilla, permiso de residencia, refugiados, inmigración irregular]
+  - id: giustizia_criminalita
+    label_it: Giustizia e criminalità
+    label_en: Justice and crime
+    description: Processi, indagini, criminalità comune e organizzata, forze dell'ordine.
+    keywords:
+      it: [omicidio, arresto, procura, indagine, processo, condanna, ergastolo, mafia, ndrangheta, camorra, carabinieri, femminicidio, rapina, sequestro, corruzione, cassazione, intercettazioni, latitante]
+      en: [murder trial, arrested, indictment, verdict, sentenced, homicide, prosecutors, court ruling, organized crime, fraud charges, manhunt, shooting suspect, life sentence, appeal court, money laundering]
+      fr: [meurtre, garde à vue, mis en examen, procès, parquet, condamnation, perpétuité, féminicide, braquage, trafic de drogue, cour d'assises]
+      de: [mordprozess, festnahme, staatsanwaltschaft, ermittlungen, urteil, verurteilt, lebenslange haft, razzia, tatverdächtiger, clan-kriminalität]
+      es: [asesinato, detenido, fiscalía, juicio, condena, prisión provisional, audiencia nacional, narcotráfico, violencia machista, atraco, guardia civil]
+  - id: guerra_conflitti
+    label_it: Guerre e conflitti
+    label_en: War and conflicts
+    description: Conflitti armati, operazioni militari, vittime di guerra e tregue.
+    keywords:
+      it: [guerra in ucraina, offensiva, bombardamento, missili, droni militari, cessate il fuoco, tregua, fronte, controffensiva, vittime civili, esercito russo, striscia di gaza, hamas, hezbollah, raid aereo, trincee, mobilitazione militare]
+      en: [ceasefire, airstrikes, offensive, shelling, frontline, missile attack, drone strike, troops, war crimes, invasion, counteroffensive, hostages, armed conflict, military escalation, warring parties]
+      fr: [cessez-le-feu, frappes aériennes, offensive militaire, bombardements, ligne de front, missiles, trêve, otages, conflit armé, contre-offensive]
+      de: [waffenruhe, luftangriffe, offensive, beschuss, front, raketenangriff, kriegsverbrechen, invasion, gefechte, drohnenangriff]
+      es: [alto el fuego, ofensiva, bombardeos, misiles, frente de guerra, tregua, rehenes, contraofensiva, crímenes de guerra, ataque con drones]
+  - id: esteri_diplomazia
+    label_it: Esteri e diplomazia
+    label_en: Foreign affairs and diplomacy
+    description: Relazioni internazionali, vertici, trattati, sanzioni e politica estera.
+    keywords:
+      it: [vertice bilaterale, farnesina, ambasciatore, sanzioni internazionali, onu, nato, g7, g20, trattato, negoziati diplomatici, visita di stato, dazi, casa bianca, cremlino, pechino, relazioni bilaterali]
+      en: [summit, bilateral talks, sanctions, diplomatic ties, state visit, foreign minister, united nations, nato allies, peace talks, treaty signed, ambassador recalled, tariffs, geopolitical tensions, white house talks]
+      fr: [sommet international, sanctions, relations diplomatiques, visite d'état, quai d'orsay, ambassadeur, négociations de paix, traité, nations unies, tensions géopolitiques]
+      de: [gipfeltreffen, sanktionen, diplomatische beziehungen, staatsbesuch, außenminister, vereinte nationen, friedensgespräche, botschafter, nato-partner, abkommen]
+      es: [cumbre internacional, sanciones, relaciones diplomáticas, visita de estado, ministro de exteriores, naciones unidas, negociaciones de paz, tratado, embajador, tensión geopolítica]
+  - id: unione_europea
+    label_it: Unione Europea
+    label_en: European Union
+    description: Istituzioni, politiche, fondi e normative dell'Unione Europea.
+    keywords:
+      it: [commissione europea, parlamento europeo, bruxelles, consiglio europeo, bce, pnrr, fondi europei, eurozona, direttiva ue, patto di stabilità, ursula von der leyen, allargamento ue, eurogruppo, procedura di infrazione, strasburgo, next generation eu]
+      en: [european commission, european parliament, brussels, eu summit, eurozone, ecb, eu funds, eu directive, european council, eu enlargement, single market, eu regulation, von der leyen, eu membership]
+      fr: [commission européenne, parlement européen, bruxelles, conseil européen, zone euro, bce, fonds européens, directive européenne, élargissement de l'ue, eurodéputés]
+      de: [eu-kommission, europaparlament, brüssel, eu-gipfel, eurozone, ezb, eu-richtlinie, eu-erweiterung, binnenmarkt, eu-haushalt]
+      es: [comisión europea, parlamento europeo, bruselas, consejo europeo, eurozona, bce, fondos europeos, directiva europea, ampliación de la ue, eurodiputados]
+  - id: clima_ambiente
+    label_it: Clima e ambiente
+    label_en: Climate and environment
+    description: Cambiamento climatico, inquinamento, biodiversità e tutela del territorio.
+    keywords:
+      it: [cambiamento climatico, riscaldamento globale, emissioni co2, siccità, ondata di calore, ghiacciai, inquinamento, biodiversità, cop30, deforestazione, ecosistema, specie a rischio, smog, rifiuti, dissesto idrogeologico, mari e oceani]
+      en: [climate change, global warming, carbon emissions, heatwave, drought, biodiversity, deforestation, pollution, net zero, climate summit, greenhouse gases, wildfires season, melting glaciers, conservation]
+      fr: [changement climatique, réchauffement climatique, émissions de co2, canicule, sécheresse, biodiversité, pollution, déforestation, neutralité carbone, écosystèmes]
+      de: [klimawandel, erderwärmung, co2-emissionen, hitzewelle, dürre, artenvielfalt, umweltverschmutzung, klimaschutz, klimaneutralität, abholzung]
+      es: [cambio climático, calentamiento global, emisiones de co2, ola de calor, sequía, biodiversidad, contaminación, deforestación, neutralidad climática, ecosistemas]
+  - id: energia
+    label_it: Energia
+    label_en: Energy
+    description: Fonti energetiche, prezzi di gas ed elettricità, rinnovabili e nucleare.
+    keywords:
+      it: [prezzo del gas, bollette, rinnovabili, fotovoltaico, eolico, nucleare, gasdotto, rigassificatore, petrolio, opec, caro energia, idrogeno verde, eni, enel, metano, transizione energetica, colonnine di ricarica]
+      en: [gas prices, oil prices, renewables, solar power, wind farm, nuclear plant, pipeline, energy bills, opec, energy transition, power grid, lng, offshore wind, barrel of crude]
+      fr: [prix du gaz, facture d'électricité, énergies renouvelables, éolien, nucléaire, edf, gazoduc, transition énergétique, pétrole, panneaux solaires]
+      de: [gaspreis, strompreise, erneuerbare energien, windkraft, atomkraft, pipeline, energiewende, solaranlagen, wasserstoff, ölpreis]
+      es: [precio del gas, factura de la luz, renovables, energía eólica, energía solar, nuclear, gasoducto, transición energética, petróleo, hidrógeno verde]
+  - id: salute_sanita
+    label_it: Salute e sanità
+    label_en: Health and healthcare
+    description: Sistema sanitario, malattie, farmaci, vaccini e salute pubblica.
+    keywords:
+      it: [sanità pubblica, liste d'attesa, pronto soccorso, medici di base, vaccino, epidemia, virus, tumore, farmaco, ospedali, aifa, oms, influenza, salute mentale, malattie rare, screening, infermieri]
+      en: [public health, hospital, vaccine, outbreak, virus, cancer treatment, nhs, drug approval, epidemic, mental health, patients, clinical care, health workers, obesity, flu season]
+      fr: [hôpital, vaccin, épidémie, virus, cancer, médicaments, sécurité sociale santé, urgences saturées, déserts médicaux, santé mentale]
+      de: [krankenhaus, impfstoff, epidemie, virus, krebs, medikamente, gesundheitssystem, krankenkassen, pflegekräfte, psychische gesundheit]
+      es: [sanidad pública, hospital, vacuna, epidemia, virus, cáncer, medicamentos, listas de espera, atención primaria, salud mental]
+  - id: scienza_ricerca
+    label_it: Scienza e ricerca
+    label_en: Science and research
+    description: Scoperte scientifiche, ricerca, spazio e mondo accademico.
+    keywords:
+      it: [scoperta scientifica, studio pubblicato, ricercatori, nasa, esa, missione spaziale, telescopio, dna, premio nobel, laboratorio, esperimento, astrofisica, genetica, fossili, particelle, cnr]
+      en: [scientific study, researchers, nasa, space mission, telescope, dna, nobel prize, breakthrough discovery, spacecraft, black hole, gene editing, fossil, particle physics, peer-reviewed]
+      fr: [découverte scientifique, chercheurs, mission spatiale, télescope, adn, prix nobel, cnrs, astronomie, laboratoire, fossile]
+      de: [wissenschaftler, studie veröffentlicht, weltraummission, teleskop, dna, nobelpreis, forschung, astronomie, experiment, fossil]
+      es: [descubrimiento científico, investigadores, misión espacial, telescopio, adn, premio nobel, csic, astronomía, laboratorio, fósil]
+  - id: tecnologia
+    label_it: Tecnologia
+    label_en: Technology
+    description: Intelligenza artificiale, big tech, cybersicurezza, internet e dispositivi digitali.
+    keywords:
+      it: [intelligenza artificiale, chatgpt, algoritmo, attacco hacker, cybersicurezza, social network, smartphone, big tech, chip, dati personali, privacy digitale, startup, criptovalute, banda larga, robot, app]
+      en: [artificial intelligence, ai chatbot, cyberattack, data breach, big tech, silicon valley, smartphone launch, semiconductor, social media platform, cryptocurrency, cloud computing, software update, tech startup, machine learning]
+      fr: [intelligence artificielle, cyberattaque, données personnelles, réseaux sociaux, géants du numérique, semi-conducteurs, cryptomonnaies, piratage informatique, application mobile, start-up]
+      de: [künstliche intelligenz, cyberangriff, datenschutz, soziale netzwerke, tech-konzerne, halbleiter, kryptowährungen, hackerangriff, digitalisierung, algorithmus]
+      es: [inteligencia artificial, ciberataque, datos personales, redes sociales, gigantes tecnológicos, semiconductores, criptomonedas, hackeo, aplicación móvil, algoritmo]
+  - id: istruzione
+    label_it: Istruzione
+    label_en: Education
+    description: Scuola, università, studenti, docenti e politiche educative.
+    keywords:
+      it: [scuola, studenti, maturità, università, docenti, insegnanti, esame di stato, atenei, borse di studio, tasse universitarie, dispersione scolastica, presidi, aule, iscrizioni scolastiche, ricercatori universitari precari, anno scolastico]
+      en: [schools, students, teachers, university, tuition fees, exam results, curriculum, classrooms, graduates, student loans, campus, scholarship, headteacher, school year]
+      fr: [école, élèves, enseignants, université, baccalauréat, rentrée scolaire, parcoursup, professeurs, frais de scolarité, réforme scolaire]
+      de: [schule, schüler, lehrer, universität, abitur, studierende, lehrermangel, schuljahr, hochschulen, bildungspolitik]
+      es: [escuela, alumnos, profesores, universidad, selectividad, curso escolar, matrícula universitaria, becas, aulas, reforma educativa]
+  - id: cultura_spettacolo
+    label_it: Cultura e spettacolo
+    label_en: Culture and entertainment
+    description: Cinema, musica, arte, libri, televisione e mondo dello spettacolo.
+    keywords:
+      it: [film, festival di sanremo, mostra del cinema, concerto, tournée, romanzo, premio strega, museo, mostra d'arte, serie tv, attore, regista, cantante, teatro, box office, palinsesto, red carpet]
+      en: [movie premiere, box office, album release, concert tour, oscars, film festival, bestseller, art exhibition, tv series, actor, director, celebrity, streaming series, grammy]
+      fr: [film, festival de cannes, concert, tournée, roman, césar, exposition, série télévisée, acteur, chanteur, prix goncourt]
+      de: [film, berlinale, konzert, tournee, roman, ausstellung, fernsehserie, schauspieler, sänger, filmfestspiele]
+      es: [película, estreno, concierto, gira, novela, premios goya, exposición, serie de televisión, actor, cantante, taquilla]
+  - id: sport
+    label_it: Sport
+    label_en: Sports
+    description: Competizioni sportive, risultati, atleti e società sportive.
+    keywords:
+      it: [serie a, champions league, scudetto, calciomercato, nazionale di calcio, gran premio, motogp, olimpiadi, giro d'italia, allenatore esonerato, gol, semifinale, atp, medaglia d'oro, derby, juventus, inter, milan]
+      en: [premier league, champions league, world cup, transfer window, grand prix, olympics, playoffs, knockout stage, head coach, hat-trick, wimbledon, super bowl, gold medal, title race]
+      fr: [ligue 1, ligue des champions, coupe du monde, mercato, grand prix, jeux olympiques, tour de france, roland-garros, sélectionneur, médaille d'or]
+      de: [bundesliga, champions league, weltmeisterschaft, transfermarkt, olympia, trainerentlassung, formel 1, halbfinale, goldmedaille, nationalmannschaft]
+      es: [la liga, champions, mundial de fútbol, fichajes, gran premio, juegos olímpicos, entrenador destituido, semifinal, medalla de oro, real madrid]
+  - id: diritti_societa
+    label_it: Diritti e società
+    label_en: Rights and society
+    description: Diritti civili, uguaglianza, discriminazioni, questioni sociali e demografiche.
+    keywords:
+      it: [diritti civili, comunità lgbtq, unioni civili, aborto, parità di genere, discriminazione, razzismo, povertà, disabilità, denatalità, violenza di genere, diritti umani, pride, fine vita, eutanasia, senzatetto]
+      en: [civil rights, lgbtq rights, abortion rights, gender equality, discrimination, racism, poverty, human rights, same-sex marriage, disability rights, homelessness, pride march, gender pay gap, hate speech]
+      fr: [droits civiques, droits lgbt, avortement, égalité femmes-hommes, discriminations, racisme, pauvreté, droits humains, handicap, sans-abri]
+      de: [bürgerrechte, lgbtq-rechte, abtreibung, gleichstellung, diskriminierung, rassismus, armut, menschenrechte, obdachlosigkeit, behinderung]
+      es: [derechos civiles, colectivo lgtbi, aborto, igualdad de género, discriminación, racismo, pobreza, derechos humanos, personas sin hogar, discapacidad]
+  - id: religione
+    label_it: Religione
+    label_en: Religion
+    description: Chiese, fedi, Vaticano, dialogo interreligioso e vita religiosa.
+    keywords:
+      it: [papa, vaticano, angelus, conclave, cardinali, diocesi, cei, udienza generale, pellegrinaggio, giubileo, santa sede, vescovi, parrocchia, ramadan, sinodo, beatificazione]
+      en: [pope, vatican, catholic church, cardinals, bishops, conclave, pilgrimage, ramadan, mosque, synagogue, archbishop, holy see, clergy, interfaith]
+      fr: [pape, vatican, église catholique, cardinaux, évêques, pèlerinage, ramadan, mosquée, laïcité, diocèse]
+      de: [papst, vatikan, katholische kirche, kardinäle, bischöfe, wallfahrt, ramadan, moschee, kirchenaustritte, bistum]
+      es: [papa, vaticano, iglesia católica, cardenales, obispos, peregrinación, ramadán, mezquita, cónclave, diócesis]
+  - id: disastri_incidenti
+    label_it: Disastri e incidenti
+    label_en: Disasters and accidents
+    description: Calamità naturali, incidenti gravi, emergenze e soccorsi.
+    keywords:
+      it: [terremoto, alluvione, frana, incendio, valanga, esplosione, crollo, incidente stradale, incidente aereo, protezione civile, vigili del fuoco, dispersi, evacuazione, nubifragio, eruzione, deragliamento, annegamento]
+      en: [earthquake, flooding, landslide, wildfire, explosion, building collapse, plane crash, train derailment, rescue operation, evacuation, hurricane, tornado, death toll, missing persons, ferry sinking]
+      fr: [séisme, inondations, glissement de terrain, incendie, explosion, effondrement, crash d'avion, déraillement, secours, évacuation, ouragan]
+      de: [erdbeben, überschwemmung, erdrutsch, waldbrand, explosion, einsturz, flugzeugabsturz, zugunglück, rettungskräfte, evakuierung]
+      es: [terremoto, inundaciones, deslizamiento de tierra, incendio forestal, explosión, derrumbe, accidente aéreo, descarrilamiento, equipos de rescate, evacuación, huracán]

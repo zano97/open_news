@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>Quotidiano d'Esempio</title>
+    <link>https://esempio.test/</link>
+    <description>Feed di prova registrato per i test di Open News</description>
+    <item>
+      <title>Il governo approva la riforma delle pensioni dopo mesi di trattative</title>
+      <link>https://esempio.test/politica/riforma-pensioni?utm_source=rss&amp;utm_medium=feed</link>
+      <description>&lt;p&gt;Dopo mesi di trattative con i sindacati, il consiglio dei ministri ha approvato la riforma delle pensioni. La misura entrer&#224; in vigore dal prossimo gennaio e riguarda circa due milioni di lavoratori del settore privato, con un meccanismo di uscita flessibile legato all'et&#224; anagrafica e ai contributi versati.&lt;/p&gt;</description>
+      <pubDate>Thu, 27 Aug 2026 08:15:00 GMT</pubDate>
+      <author>redazione@esempio.test (Maria Rossi)</author>
+      <media:thumbnail url="https://esempio.test/img/pensioni.jpg"/>
+    </item>
+    <item>
+      <title>Il governo approva la riforma delle pensioni dopo mesi di trattative</title>
+      <link>https://esempio.test/politica/riforma-pensioni?utm_source=twitter&amp;utm_campaign=social</link>
+      <description>Dopo mesi di trattative con i sindacati, il consiglio dei ministri ha approvato la riforma delle pensioni.</description>
+      <pubDate>Thu, 27 Aug 2026 08:20:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Alluvione nel nord del paese: migliaia di sfollati nella notte</title>
+      <link>https://esempio.test/cronaca/alluvione-nord</link>
+      <description>Le piogge torrenziali della notte hanno provocato esondazioni in tre province. La protezione civile parla di migliaia di sfollati e danni ingenti alle infrastrutture.</description>
+      <pubDate>Thu, 27 Aug 2026 06:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title></title>
+      <link>https://esempio.test/vuoto</link>
+      <description>Voce senza titolo: va ignorata.</description>
+    </item>
+  </channel>
+</rss>

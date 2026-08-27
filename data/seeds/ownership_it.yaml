@@ -1,0 +1,253 @@
+# ---------------------------------------------------------------------------
+# Open News – data/seeds/ownership_it.yaml
+# Assetti proprietari e finanziamenti pubblici delle testate italiane.
+# Regola editoriale: nessun dato inventato. Dove la confidenza non è
+# sufficiente il valore è null e la nota (in italiano) spiega cosa verificare.
+# I QID Wikidata non sono stati verificati online in questa sessione:
+# per prudenza sono valorizzati a null con nota, da completare in revisione.
+# Ultimo aggiornamento: 2026-08-27
+# ---------------------------------------------------------------------------
+version: 1
+
+owners:
+  - name: "GEDI Gruppo Editoriale S.p.A."
+    type: società
+    wikidata_qid: null
+    note: "Controllata da Exor N.V. (holding della famiglia Agnelli-Elkann). QID Wikidata da verificare."
+  - name: "Exor N.V."
+    type: società
+    wikidata_qid: null
+    note: "Holding della famiglia Agnelli-Elkann, azionista di controllo di GEDI. QID Wikidata da verificare."
+  - name: "RCS MediaGroup S.p.A."
+    type: società
+    wikidata_qid: null
+    note: "Controllata da Cairo Communication S.p.A. (Urbano Cairo). QID Wikidata da verificare."
+  - name: "Urbano Cairo"
+    type: persona
+    wikidata_qid: null
+    note: "Editore e azionista di controllo di Cairo Communication / RCS MediaGroup. QID Wikidata da verificare."
+  - name: "Confindustria"
+    type: società
+    wikidata_qid: null
+    note: "Associazione di rappresentanza delle imprese: la tassonomia dei tipi non prevede 'associazione', tipologia approssimata a 'società'. QID Wikidata da verificare."
+  - name: "SEIF S.p.A. (Società Editoriale Il Fatto)"
+    type: società
+    wikidata_qid: null
+    note: "Editrice de il Fatto Quotidiano, quotata su Euronext Growth Milan. QID Wikidata da verificare."
+  - name: "Famiglia Angelucci"
+    type: persona
+    wikidata_qid: null
+    note: "Gruppo familiare (sanità e editoria); le partecipazioni editoriali fanno capo a società riconducibili alla famiglia. QID non applicabile al nucleo familiare."
+  - name: "Antonio Angelucci"
+    type: persona
+    wikidata_qid: null
+    note: "QID Wikidata da verificare."
+    political_offices:
+      - office: "Deputato della Repubblica Italiana (Camera dei deputati)"
+        holder_note: "Eletto per la prima volta nel 2008; rieletto nelle legislature successive, in carica anche nella XIX legislatura."
+        from_year: 2008
+        to_year: null
+        evidence_url: "https://it.wikipedia.org/wiki/Antonio_Angelucci"
+  - name: "Conferenza Episcopale Italiana (CEI)"
+    type: fondazione
+    wikidata_qid: null
+    note: "Ente ecclesiastico: la tassonomia dei tipi non prevede 'ente religioso', tipologia approssimata a 'fondazione'. QID Wikidata da verificare."
+  - name: "il nuovo manifesto società cooperativa editrice"
+    type: cooperativa
+    wikidata_qid: null
+    note: "Cooperativa di giornalisti e lavoratori che edita il manifesto. QID Wikidata da verificare."
+  - name: "Valter Mainetti"
+    type: persona
+    wikidata_qid: null
+    note: "Imprenditore immobiliare, storicamente legato alla proprietà de Il Foglio. QID Wikidata da verificare."
+  - name: "Carlo De Benedetti"
+    type: persona
+    wikidata_qid: null
+    note: "Fondatore ed editore di Domani (Editoriale Domani S.p.A.). QID Wikidata da verificare."
+  - name: "Il Post S.r.l."
+    type: società
+    wikidata_qid: null
+    note: "Società editrice del Post. QID Wikidata da verificare."
+  - name: "Internazionale S.p.A."
+    type: società
+    wikidata_qid: null
+    note: "Società editrice del settimanale Internazionale. L'eventuale legame societario con il gruppo Espresso/GEDI non è stato verificato con sufficiente confidenza."
+  - name: "Ciaopeople Media Group"
+    type: società
+    wikidata_qid: null
+    note: "Gruppo editoriale digitale con sede a Napoli, editore di Fanpage.it. QID Wikidata da verificare."
+  - name: "Enrico Mentana"
+    type: persona
+    wikidata_qid: null
+    note: "Giornalista, fondatore ed editore di Open. QID Wikidata da verificare."
+  - name: "Editoriale Linkiesta"
+    type: società
+    wikidata_qid: null
+    note: "Società editrice de Linkiesta; denominazione societaria esatta da verificare sul ROC AGCOM. QID Wikidata da verificare."
+  - name: "Eni S.p.A."
+    type: società
+    wikidata_qid: null
+    note: "Società partecipata dallo Stato italiano (quota di riferimento tramite MEF e Cassa Depositi e Prestiti): il controllo di AGI configura quindi un legame indiretto con lo Stato. QID Wikidata da verificare."
+  - name: "GMC Giuseppe Marra Communications S.p.A."
+    type: società
+    wikidata_qid: null
+    note: "Holding della famiglia Marra, proprietaria dell'agenzia Adnkronos. QID Wikidata da verificare."
+  - name: "ANSA Società Cooperativa"
+    type: cooperativa
+    wikidata_qid: null
+    note: "Cooperativa i cui soci sono i principali editori di quotidiani italiani. QID Wikidata da verificare."
+
+ownerships:
+  - source_slug: repubblica
+    owner_name: "GEDI Gruppo Editoriale S.p.A."
+    share_pct: null
+    from_year: 2017
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Testata edita dal gruppo GEDI (nato nel 2017 dalla fusione Gruppo Espresso–ITEDI), controllato da Exor N.V. (famiglia Agnelli-Elkann). Quota puntuale della catena di controllo da verificare su bilancio societario."
+  - source_slug: la-stampa
+    owner_name: "GEDI Gruppo Editoriale S.p.A."
+    share_pct: null
+    from_year: 2017
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Confluita in GEDI con la fusione ITEDI–Gruppo Espresso del 2017; controllo ultimo di Exor N.V. (famiglia Agnelli-Elkann)."
+  - source_slug: corriere-della-sera
+    owner_name: "RCS MediaGroup S.p.A."
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "RCS MediaGroup è controllata da Cairo Communication S.p.A. (Urbano Cairo) dal 2016; quota puntuale da verificare su bilancio societario."
+  - source_slug: sole-24-ore
+    owner_name: "Confindustria"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Confindustria è azionista di maggioranza de Il Sole 24 Ore S.p.A. (società quotata); quota esatta da verificare su bilancio societario."
+  - source_slug: fatto-quotidiano
+    owner_name: "SEIF S.p.A. (Società Editoriale Il Fatto)"
+    share_pct: 100
+    from_year: 2009
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "SEIF è la società editrice della testata dalla fondazione (2009); l'azionariato di SEIF è diffuso tra soci fondatori e mercato."
+  - source_slug: il-giornale
+    owner_name: "Famiglia Angelucci"
+    share_pct: null
+    from_year: 2023
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Ceduto nel 2023 dalla famiglia Berlusconi a società riconducibili alla famiglia Angelucci; quota e veicolo societario esatti da verificare sul ROC AGCOM."
+  - source_slug: libero
+    owner_name: "Famiglia Angelucci"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Testata riconducibile alla famiglia Angelucci; anno di acquisizione e quota puntuale da verificare. Antonio Angelucci è deputato in carica: vedi political_offices."
+  - source_slug: avvenire
+    owner_name: "Conferenza Episcopale Italiana (CEI)"
+    share_pct: null
+    from_year: 1968
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Quotidiano di ispirazione cattolica promosso dalla CEI sin dalla fondazione (1968), tramite la società editrice Avvenire."
+  - source_slug: il-manifesto
+    owner_name: "il nuovo manifesto società cooperativa editrice"
+    share_pct: 100
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Testata edita in forma cooperativa dai propri giornalisti e lavoratori; anno di costituzione della cooperativa attuale da verificare."
+  - source_slug: il-foglio
+    owner_name: "Valter Mainetti"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Partecipazione storicamente riportata dalla stampa specializzata; assetto proprietario attuale e quote da verificare sul ROC AGCOM."
+  - source_slug: domani
+    owner_name: "Carlo De Benedetti"
+    share_pct: null
+    from_year: 2020
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Testata fondata nel 2020 ed edita da Editoriale Domani S.p.A., riconducibile a Carlo De Benedetti."
+  - source_slug: il-post
+    owner_name: "Il Post S.r.l."
+    share_pct: 100
+    from_year: 2010
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Società editrice della testata dalla fondazione (2010); composizione dell'azionariato della S.r.l. da verificare."
+  - source_slug: internazionale
+    owner_name: "Internazionale S.p.A."
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Editrice del settimanale. L'eventuale partecipazione del gruppo Espresso/GEDI nel capitale non è stata verificata con sufficiente confidenza: da controllare su bilancio societario o ROC AGCOM."
+  - source_slug: fanpage
+    owner_name: "Ciaopeople Media Group"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Fanpage.it è la principale testata del gruppo Ciaopeople; quota e anno di lancio esatti da verificare."
+  - source_slug: open
+    owner_name: "Enrico Mentana"
+    share_pct: null
+    from_year: 2018
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Testata online fondata da Enrico Mentana nel 2018; veicolo societario e quote da verificare sul ROC AGCOM."
+  - source_slug: linkiesta
+    owner_name: "Editoriale Linkiesta"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Azionariato diffuso tra numerosi piccoli soci; denominazione societaria e quote da verificare sul ROC AGCOM."
+  - source_slug: agi
+    owner_name: "Eni S.p.A."
+    share_pct: 100
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Agenzia interamente controllata da Eni, società a partecipazione statale: il legame indiretto con lo Stato è rilevante per la trasparenza. Anno di acquisizione da verificare."
+  - source_slug: adnkronos
+    owner_name: "GMC Giuseppe Marra Communications S.p.A."
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Agenzia controllata dalla holding della famiglia Marra; quota puntuale da verificare su bilancio societario."
+  - source_slug: ansa
+    owner_name: "ANSA Società Cooperativa"
+    share_pct: 100
+    from_year: 1945
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Agenzia costituita nel 1945 in forma di cooperativa i cui soci sono i principali editori italiani."
+
+public_funding:
+  - source_slug: avvenire
+    year: 2022
+    amount_eur: null
+    program: "Fondo per il pluralismo e l'innovazione dell'informazione – contributi diretti"
+    evidence_url: "https://informazioneeditoria.gov.it/it/attivita/sostegno-alleditoria/"
+    note: "Testata beneficiaria dei contributi diretti all'editoria; importo da verificare sul sito del Dipartimento per l'informazione e l'editoria."
+  - source_slug: il-manifesto
+    year: 2022
+    amount_eur: null
+    program: "Fondo per il pluralismo e l'innovazione dell'informazione – contributi diretti"
+    evidence_url: "https://informazioneeditoria.gov.it/it/attivita/sostegno-alleditoria/"
+    note: "Testata edita da cooperativa di giornalisti, beneficiaria dei contributi diretti; importo da verificare sul sito del Dipartimento per l'informazione e l'editoria."
+  - source_slug: libero
+    year: 2022
+    amount_eur: null
+    program: "Fondo per il pluralismo e l'innovazione dell'informazione – contributi diretti"
+    evidence_url: "https://informazioneeditoria.gov.it/it/attivita/sostegno-alleditoria/"
+    note: "Testata storicamente beneficiaria dei contributi diretti; l'eventuale percezione nell'annualità indicata e l'importo sono da verificare sul sito del Dipartimento per l'informazione e l'editoria."

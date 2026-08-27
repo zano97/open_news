@@ -1,0 +1,30 @@
+{
+  "articles": [
+    {
+      "url": "https://www.reuters.com/world/europe/example-story-2026-08-27/",
+      "url_mobile": "",
+      "title": "EU leaders meet to discuss energy policy amid price surge",
+      "seendate": "20260827T101500Z",
+      "socialimage": "https://www.reuters.com/resizer/example.jpg",
+      "domain": "reuters.com",
+      "language": "English",
+      "sourcecountry": "United Kingdom"
+    },
+    {
+      "url": "https://www.reuters.com/markets/example-markets-2026-08-27/",
+      "title": "Global markets steady as investors await central bank decision",
+      "seendate": "20260827T093000Z",
+      "socialimage": "",
+      "domain": "reuters.com",
+      "language": "English",
+      "sourcecountry": "United Kingdom"
+    },
+    {
+      "url": "https://www.reuters.com/no-title/",
+      "title": "",
+      "seendate": "20260827T090000Z",
+      "domain": "reuters.com",
+      "language": "English"
+    }
+  ]
+}

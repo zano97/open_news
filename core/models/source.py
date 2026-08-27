@@ -41,6 +41,21 @@ class Source(Base):
     fundings: Mapped[list["PublicFunding"]] = relationship(back_populates="source")
 
 
+class FeedState(Base):
+    """Stato per-feed della cache HTTP condizionale (ETag / Last-Modified)."""
+
+    __tablename__ = "feed_states"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("sources.id"), index=True)
+    feed_url: Mapped[str] = mapped_column(Text, unique=True)
+    etag: Mapped[str | None] = mapped_column(String(300))
+    last_modified: Mapped[str | None] = mapped_column(String(100))
+    last_status: Mapped[int | None] = mapped_column(Integer)
+    last_fetched_at: Mapped[datetime | None] = mapped_column(TZDateTime())
+    error: Mapped[str | None] = mapped_column(Text)
+
+
 class Owner(Base):
     __tablename__ = "owners"
 

@@ -4,6 +4,13 @@ import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from apps.worker.jobs.ingest import (
+    fetch_fulltext_job,
+    ingest_feeds_job,
+    ingest_gdelt_job,
+    sync_catalog_job,
+)
+
 log = logging.getLogger("opennews.worker.jobs")
 
 
@@ -13,3 +20,15 @@ async def heartbeat() -> None:
 
 def register_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(heartbeat, "interval", minutes=15, id="heartbeat")
+    # Il catalogo si sincronizza subito all'avvio e poi ogni 6 ore.
+    scheduler.add_job(sync_catalog_job, id="sync_catalog")
+    scheduler.add_job(sync_catalog_job, "interval", hours=6, id="sync_catalog_periodic")
+    scheduler.add_job(
+        ingest_feeds_job, "interval", minutes=10, id="ingest_feeds", max_instances=1
+    )
+    scheduler.add_job(
+        ingest_gdelt_job, "interval", minutes=30, id="ingest_gdelt", max_instances=1
+    )
+    scheduler.add_job(
+        fetch_fulltext_job, "interval", minutes=15, id="fetch_fulltext", max_instances=1
+    )
