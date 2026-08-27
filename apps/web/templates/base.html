@@ -49,6 +49,10 @@
   </div>
 </header>
 
+{% if demo_mode %}
+<p class="banner-demo" role="status">{{ t('demo.banner') | safe }}</p>
+{% endif %}
+
 <main id="contenuto" class="contenuto">
   {% block content %}{% endblock %}
 </main>

@@ -39,6 +39,18 @@
 {% endmacro %}
 
 {% block content %}
+{% if countries and countries | length > 1 %}
+<nav class="filtro-paesi" aria-label="{{ t('filtro.aria') }}">
+  <a href="/" class="{{ 'paese-attivo' if not paese }}">{{ t('filtro.tutto_mondo') }}</a>
+  {% for c in countries %}
+  <a href="/?paese={{ c }}" class="{{ 'paese-attivo' if paese == c }}"
+     hreflang="{{ c }}">{{ c | upper }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+{% if paese %}
+<p class="filtro-nota">{{ t('filtro.nota', paese=paese | upper) }}</p>
+{% endif %}
 {% if stories %}
 {% set apertura = stories[0] %}
 {{ card(apertura, coverages.get(apertura.id), lead=true) }}

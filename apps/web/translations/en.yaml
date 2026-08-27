@@ -193,3 +193,11 @@ svg.dim1: "dimension 1 (emergent: read the stories that separate it)"
 svg.dim2: "dimension 2 (emergent)"
 svg.tono_aria: "Headline tone distribution for {nome}"
 svg.copertura_nd: "data not available"
+
+# Trasparenza demo
+demo.banner: "This instance shows <strong>invented demo news</strong>, attributed only to fictional outlets marked “(demo)”. For real news run <code>make seed</code> (or reinstall without <code>OPENNEWS_DEMO</code>)."
+
+# Filtro per paese
+filtro.tutto_mondo: "Whole world"
+filtro.aria: "Filter the front page by outlet country"
+filtro.nota: "You are seeing stories covered by at least one outlet from: {paese}. The unfiltered front page stays worldwide."

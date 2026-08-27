@@ -149,3 +149,71 @@ class TestEntities:
         # Parole capitalizzate solo perché a inizio frase non diventano entità.
         entities = extract_entities(["Domani si vota", "Domani sciopero dei treni"])
         assert all(e["label"] != "Domani" for e in entities)
+
+
+async def test_banner_demo_solo_con_notizie_demo(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    # Senza articoli demo: nessun banner.
+    resp = await client.get("/")
+    assert "banner-demo" not in resp.text
+
+    # Con una testata demo e un suo articolo: il banner dichiara la demo.
+    demo = Source(
+        slug="demo-prova", name="Testata Demo (demo)", domain="demo-prova.invalid",
+        country="it", language="it", region="world", feed_urls=[],
+        terms_note="fonte dimostrativa",
+    )
+    session.add(demo)
+    await session.flush()
+    session.add(
+        Article(source_id=demo.id, url="https://demo-prova.invalid/1", title="Notizia demo")
+    )
+    await session.commit()
+
+    resp = await client.get("/")
+    assert "banner-demo" in resp.text
+    assert "notizie dimostrative" in resp.text
+
+
+async def test_filtro_per_paese(client: AsyncClient, session: AsyncSession) -> None:
+    """La prima pagina è mondiale di default; con ?paese=xx mostra solo le
+    story coperte da almeno una testata di quel paese."""
+    it_fonte = Source(
+        slug="filtro-it", name="Gazzetta Filtro", domain="filtro-it.test",
+        country="it", language="it", region="italy", feed_urls=[], terms_note="",
+    )
+    gb_fonte = Source(
+        slug="filtro-gb", name="Filter Gazette", domain="filtro-gb.test",
+        country="gb", language="en", region="europe", feed_urls=[], terms_note="",
+    )
+    session.add_all([it_fonte, gb_fonte])
+    await session.flush()
+    story_it = Story(title_neutral="Notizia solo italiana", source_count=1, article_count=1)
+    story_gb = Story(title_neutral="British-only story", source_count=1, article_count=1)
+    session.add_all([story_it, story_gb])
+    await session.flush()
+    session.add_all([
+        Article(source_id=it_fonte.id, url="https://filtro-it.test/1",
+                title="Notizia solo italiana", story_id=story_it.id),
+        Article(source_id=gb_fonte.id, url="https://filtro-gb.test/1",
+                title="British-only story", story_id=story_gb.id),
+    ])
+    await session.commit()
+
+    # Default: tutto il mondo, entrambe le story e la barra dei paesi.
+    tutto = await client.get("/")
+    assert "Notizia solo italiana" in tutto.text
+    assert "British-only story" in tutto.text
+    assert "filtro-paesi" in tutto.text
+    assert "Tutto il mondo" in tutto.text
+
+    solo_gb = await client.get("/?paese=gb")
+    assert "British-only story" in solo_gb.text
+    assert "Notizia solo italiana" not in solo_gb.text
+    assert "almeno una testata di: GB" in solo_gb.text
+
+    # Paese sconosciuto: ignorato, si torna al mondo intero.
+    invalido = await client.get("/?paese=zz")
+    assert "Notizia solo italiana" in invalido.text
+    assert "British-only story" in invalido.text

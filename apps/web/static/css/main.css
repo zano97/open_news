@@ -37,8 +37,11 @@
   --carta-scura: #eadfc4;      /* riquadri, schede */
   --inchiostro: #1a1a1a;
   --seppia: #5f5142;           /* metadati: contrasto 6.2:1 su carta */
-  --accento: #8b2e2e;          /* rosso mattone: link e interattivi */
-  --accento-vivo: #6f2424;
+  /* Accento marrone bronzo: scelto perché politicamente neutro (niente
+     rossi/blu/verdi di parte) e coerente con carta e inchiostro.
+     Contrasto su carta: 6.8:1 (vivo: 10.2:1) — WCAG AA. */
+  --accento: #6b4a2b;
+  --accento-vivo: #4a3118;
   --filetto: #b5a68a;
 
   --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
@@ -55,8 +58,8 @@
     --carta-scura: #2a2620;
     --inchiostro: #e8e0cd;
     --seppia: #b0a38c;
-    --accento: #d98f6f;
-    --accento-vivo: #e5a88d;
+    --accento: #cbb08a;          /* bronzo chiaro: 8.1:1 su carta notturna */
+    --accento-vivo: #dcbf94;
     --filetto: #4d463a;
   }
 }
@@ -65,8 +68,8 @@
   --carta-scura: #2a2620;
   --inchiostro: #e8e0cd;
   --seppia: #b0a38c;
-  --accento: #d98f6f;
-  --accento-vivo: #e5a88d;
+  --accento: #cbb08a;
+  --accento-vivo: #dcbf94;
   --filetto: #4d463a;
 }
 
@@ -224,6 +227,48 @@ hr.filetto {
   color: var(--accento);
   border-bottom: 2px solid var(--accento);
   font-weight: 700;
+}
+
+/* Filtro per paese in prima pagina: default mondo intero, un clic per il tuo. */
+.filtro-paesi {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  margin: 0 0 1rem;
+  font-family: var(--font-macchina);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+.filtro-paesi a {
+  color: var(--seppia);
+  text-decoration: none;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid transparent;
+}
+.filtro-paesi a:hover { color: var(--accento); }
+.filtro-paesi .paese-attivo {
+  color: var(--accento);
+  border: 1px solid var(--accento);
+  font-weight: 700;
+}
+.filtro-nota {
+  text-align: center;
+  color: var(--seppia);
+  font-size: 0.9rem;
+  margin: -0.4rem 0 1rem;
+}
+
+/* Banner di trasparenza per le notizie dimostrative (seed offline). */
+.banner-demo {
+  max-width: 75rem;
+  margin: 0.8rem auto 0;
+  padding: 0.5rem 1rem;
+  border: 1px dashed var(--accento);
+  color: var(--accento);
+  font-family: var(--font-macchina);
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 /* ---------- Contenuto ---------- */

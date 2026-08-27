@@ -175,6 +175,16 @@ async def masthead_context(session: AsyncSession) -> dict[str, Any]:
     source_count = (
         await session.execute(select(func.count()).select_from(Source).where(Source.enabled))
     ).scalar_one()
+    # Trasparenza: se in archivio ci sono notizie dimostrative (seed offline),
+    # il giornale lo dichiara con un banner. Mai spacciare demo per reale.
+    demo_articles = (
+        await session.execute(
+            select(func.count())
+            .select_from(Article)
+            .join(Source, Article.source_id == Source.id)
+            .where(Source.slug.like("demo-%"))
+        )
+    ).scalar_one()
     story_count = (
         await session.execute(select(func.count()).select_from(Story))
     ).scalar_one()
@@ -185,24 +195,39 @@ async def masthead_context(session: AsyncSession) -> dict[str, Any]:
         "source_count": source_count,
         "story_count": story_count,
         "last_update": last_update,
+        "demo_mode": demo_articles > 0,
     }
 
 
 @router.get("/", response_class=HTMLResponse)
 async def index(
-    request: Request, session: Annotated[AsyncSession, Depends(get_session)]
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    paese: str | None = None,
 ) -> HTMLResponse:
-    stories = (
+    # Paesi delle testate attive: alimentano il filtro "un paese in dettaglio".
+    countries = sorted(
         (
             await session.execute(
-                select(Story)
-                .order_by(Story.source_count.desc(), Story.last_seen.desc())
-                .limit(36)
+                select(Source.country).where(Source.enabled).distinct()
             )
-        )
-        .scalars()
-        .all()
+        ).scalars()
     )
+    paese = paese.lower() if paese and paese.lower() in countries else None
+
+    query = (
+        select(Story)
+        .order_by(Story.source_count.desc(), Story.last_seen.desc())
+        .limit(36)
+    )
+    if paese:
+        covered_by_country = (
+            select(Article.story_id)
+            .join(Source, Article.source_id == Source.id)
+            .where(Source.country == paese, Article.story_id.is_not(None))
+        )
+        query = query.where(Story.id.in_(covered_by_country))
+    stories = (await session.execute(query)).scalars().all()
     coverages = await _coverages_for(session, [s.id for s in stories])
     topic_labels = topic_labels_for(request_locale(request))
     return templates.TemplateResponse(
@@ -213,6 +238,8 @@ async def index(
             "stories": stories,
             "coverages": coverages,
             "topic_labels": topic_labels,
+            "countries": countries,
+            "paese": paese,
         },
     )
 

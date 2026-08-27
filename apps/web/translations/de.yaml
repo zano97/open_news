@@ -207,3 +207,11 @@ svg.dim1: "Dimension 1 (emergent: lesen Sie die Storys, die sie trennen)"
 svg.dim2: "Dimension 2 (emergent)"
 svg.tono_aria: "Verteilung des Schlagzeilentons von {nome}"
 svg.copertura_nd: "keine Daten verfügbar"
+
+# Trasparenza demo
+demo.banner: "Diese Instanz zeigt <strong>erfundene Demo-Nachrichten</strong>, die nur fiktiven, mit „(demo)“ gekennzeichneten Zeitungen zugeordnet sind. Für echte Nachrichten führe <code>make seed</code> aus (oder installiere ohne <code>OPENNEWS_DEMO</code> neu)."
+
+# Filtro per paese
+filtro.tutto_mondo: "Ganze Welt"
+filtro.aria: "Titelseite nach Land der Zeitungen filtern"
+filtro.nota: "Sie sehen Storys, die von mindestens einer Zeitung aus {paese} abgedeckt wurden. Die ungefilterte Titelseite bleibt weltweit."

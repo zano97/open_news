@@ -207,3 +207,11 @@ svg.dim1: "dimension 1 (émergente : lire les stories qui la séparent)"
 svg.dim2: "dimension 2 (émergente)"
 svg.tono_aria: "Distribution du ton des titres de {nome}"
 svg.copertura_nd: "donnée non disponible"
+
+# Trasparenza demo
+demo.banner: "Cette instance affiche des <strong>actualités de démonstration, inventées</strong>, attribuées uniquement à des journaux fictifs marqués « (demo) ». Pour les vraies actualités, lancez <code>make seed</code> (ou réinstallez sans <code>OPENNEWS_DEMO</code>)."
+
+# Filtro per paese
+filtro.tutto_mondo: "Monde entier"
+filtro.aria: "Filtrer la une par pays des journaux"
+filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {paese}. La une sans filtre reste mondiale."

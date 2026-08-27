@@ -207,3 +207,11 @@ svg.dim1: "dimensión 1 (emergente: lee las story que la separan)"
 svg.dim2: "dimensión 2 (emergente)"
 svg.tono_aria: "Distribución del tono de los titulares de {nome}"
 svg.copertura_nd: "dato no disponible"
+
+# Trasparenza demo
+demo.banner: "Esta instancia muestra <strong>noticias de demostración, inventadas</strong>, atribuidas solo a periódicos ficticios marcados «(demo)». Para noticias reales ejecuta <code>make seed</code> (o reinstala sin <code>OPENNEWS_DEMO</code>)."
+
+# Filtro per paese
+filtro.tutto_mondo: "Todo el mundo"
+filtro.aria: "Filtrar la portada por país de los periódicos"
+filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico de: {paese}. La portada sin filtro sigue siendo mundial."
