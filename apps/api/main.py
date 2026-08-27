@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from apps.api.routers import health, pages
+from apps.api.routers import annotate, export, health, pages
 from apps.api.templating import STATIC_DIR
 from core.config import get_settings
 
@@ -22,6 +22,8 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     app.include_router(health.router)
     app.include_router(pages.router)
+    app.include_router(annotate.router)
+    app.include_router(export.router)
     return app
 
 

@@ -125,4 +125,16 @@ def shape_signals(
     if cocoverage and isinstance(cocoverage.value, dict):
         views["cocoverage"] = SignalView(cocoverage, dict(cocoverage.value))
 
+    # Livello 4: un segnale per asse, il più recente di ciascuno.
+    annotation_axes: dict[str, BiasSignal] = {}
+    for signal in sorted(signals, key=lambda s: s.period_end, reverse=True):
+        if signal.signal_type == "annotation" and signal.axis:
+            annotation_axes.setdefault(signal.axis, signal)
+    if annotation_axes:
+        views["annotation"] = SignalView(
+            next(iter(annotation_axes.values())),
+            {axis: dict(s.value) for axis, s in annotation_axes.items()
+             if isinstance(s.value, dict)},
+        )
+
     return views

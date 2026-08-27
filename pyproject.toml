@@ -40,6 +40,8 @@ ml = [
     "sentence-transformers>=3.0",
     "lingua-language-detector>=2.0",
     "spacy>=3.7",
+    "scikit-learn>=1.4",
+    "joblib>=1.4",
 ]
 dev = [
     "pytest>=8.2",
@@ -67,7 +69,7 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RUF"]
 # Tipografia italiana legittima nei testi: apostrofo tipografico, ×, trattini.
-allowed-confusables = ["’", "×", "–", "à", "è", "é", "ì", "ò", "ù"]
+allowed-confusables = ["’", "×", "–", "à", "è", "é", "ì", "ò", "ù", "α"]
 ignore = [
     "SIM108", # ternary non sempre più leggibile
 ]

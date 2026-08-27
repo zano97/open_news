@@ -10,6 +10,7 @@ from datetime import timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from core.bias.annotation import compute_annotation_signals
 from core.bias.framing import compute_actors, compute_framing, compute_tone
 from core.bias.selection import (
     assign_story_topics,
@@ -36,6 +37,7 @@ async def compute_weekly_signals(
         "framing": await compute_framing(session, window_days=window),
         "actors": await compute_actors(session, window_days=window),
         "tone": await compute_tone(session, window_days=window),
+        "annotation": await compute_annotation_signals(session),
     }
     log.info("segnali settimanali: %s", summary)
     return summary

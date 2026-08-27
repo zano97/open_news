@@ -607,6 +607,55 @@ hr.filetto {
   font-family: var(--font-macchina);
 }
 
+/* ---------- Moduli (registrazione, annotazione) ---------- */
+.modulo { max-width: 42rem; margin: 0 auto; }
+.modulo-campi { display: flex; flex-direction: column; gap: 1rem; }
+.modulo-campi label { display: block; font-weight: 700; }
+.modulo-campi input[type="text"],
+.modulo-campi input[type="password"] {
+  display: block;
+  width: 100%;
+  font: inherit;
+  background: var(--carta);
+  color: var(--inchiostro);
+  border: 1px solid var(--seppia);
+  padding: 0.4rem 0.6rem;
+  margin-top: 0.2rem;
+}
+.modulo-campi fieldset {
+  border: 1px solid var(--filetto);
+  padding: 0.6rem 1rem 0.8rem;
+}
+.modulo-campi legend { font-weight: 700; padding: 0 0.4rem; }
+.scala { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.scala-voce {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--filetto);
+  padding: 0.3rem 0.7rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+.scala-voce:has(input:checked) {
+  border-color: var(--accento);
+  color: var(--accento);
+  font-weight: 700;
+}
+.scheda-cieca {
+  border: 2px solid var(--inchiostro);
+  padding: 1.2rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--carta-scura);
+}
+.scheda-cieca-titolo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  margin: 0 0 0.4rem;
+}
+.esci-inline { display: inline; }
+
 /* ---------- Piè di pagina ---------- */
 .pie {
   max-width: 75rem;

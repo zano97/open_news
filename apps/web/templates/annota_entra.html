@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Entra — {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="modulo">
+  <h2 class="titolo-sezione">Entra</h2>
+  <form method="post" action="/annota/entra" class="modulo-campi">
+    <label>Nome utente
+      <input type="text" name="username" required autocomplete="username">
+    </label>
+    <label>Password
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button type="submit" class="bottone">Entra</button>
+  </form>
+  <p>Non hai un profilo? <a href="/annota/registrati">Diventa annotatore</a>.</p>
+</section>
+{% endblock %}

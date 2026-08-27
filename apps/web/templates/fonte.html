@@ -217,9 +217,32 @@
 
   <section class="scheda-sezione">
     <h3>Posizionamento (livello 4 — giudizio umano)</h3>
+    {% if signal_views.annotation %}
+    {% for axis, v in signal_views.annotation.data.items() %}
+    <h4>{{ "Asse economico (−2 pubblico ↔ +2 mercato)" if axis == "economic"
+          else "Asse culturale (−2 progressista ↔ +2 conservatore)" }}</h4>
+    {% if v.status == "pubblicata" %}
+    <p>
+      Etichetta: <strong>{{ "%+.2f" | format(v.label) }}</strong>
+      <small>(α = {{ v.alpha }}, {{ v.n_articles }} articoli,
+        {{ v.n_annotators }} annotatori in {{ v.buckets | length }} fasce di
+        orientamento dichiarato — <a href="/metodo#livello4">protocollo</a>)</small>
+    </p>
+    {% else %}
+    <p class="dato-mancante">
+      In valutazione ({{ v.n_articles }}/50 articoli, {{ v.n_annotators }} annotatori
+      {%- if v.alpha is not none %}, α = {{ v.alpha }}{% endif %}):
+      {{ v.missing | join("; ") }}.
+    </p>
+    {% endif %}
+    {% endfor %}
+    {% else %}
     <p class="dato-mancante">In valutazione: l'etichetta di posizionamento viene
       pubblicata solo con ≥50 articoli annotati da ≥3 annotatori con orientamenti
-      dichiarati diversi e accordo α ≥ 0,6 (<a href="/metodo#livello4">protocollo</a>).</p>
+      dichiarati diversi e accordo α ≥ 0,6
+      (<a href="/metodo#livello4">protocollo</a>). Nessuna annotazione ancora:
+      <a href="/annota/registrati">diventa annotatore</a>.</p>
+    {% endif %}
   </section>
 
   <footer class="scheda-piede">
