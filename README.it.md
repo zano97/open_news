@@ -11,7 +11,7 @@ coperta e con quali titoli; per ogni testata vedi chi la possiede, quanti
 soldi pubblici riceve, quali temi copre più della media e quali storie ignora.
 
 L'interfaccia è un **giornale nel browser**, in stile quotidiano d'inizio
-Novecento, e parla **cinque lingue** (italiano, inglese, francese, tedesco,
+Novecento, in **cinque lingue** (italiano, inglese, francese, tedesco,
 spagnolo — si cambia dalla testata):
 
 | | |
@@ -28,9 +28,44 @@ spagnolo — si cambia dalla testata):
 - Ogni numero mostrato ha accanto **fonte, data del calcolo e metodo**
 - Licenza software: **AGPL-3.0** · dati derivati: **CC BY-SA 4.0**
 
+**Indice**: [Come funziona](#come-funziona) ·
+[Installazione](#installazione-scegli-la-modalità) ·
+[Aggiornare](#aggiornare) · [Come si usa](#come-si-usa) ·
+[Amministrazione](#amministrazione) ·
+[Funzioni opzionali](#funzioni-opzionali) ·
+[Problemi comuni](#problemi-comuni) ·
+[La metodologia](#il-bias-su-quattro-livelli-mai-un-punteggio-unico) ·
+[Per sviluppatori](#per-sviluppatori)
+
 ---
 
-## Installazione in una riga — senza Docker
+## Come funziona
+
+Il raccoglitore legge i **feed RSS di 47 testate di 19 paesi** (92 feed:
+prime pagine più le sezioni esteri/politica/economia delle testate maggiori)
+e integra con **GDELT** (gratuito) gli articoli che nei feed non compaiono —
+comprese Reuters e AP, che feed pubblici non ne hanno. Gli articoli sullo
+stesso evento vengono raggruppati in «story», così vedi **come testate
+diverse titolano lo stesso fatto**. Sopra i dati girano i quattro livelli
+della [metodologia](#il-bias-su-quattro-livelli-mai-un-punteggio-unico).
+Tutto nel rispetto delle testate: robots.txt, massimo una richiesta ogni 2
+secondi per sito, e in pagina solo titolo + estratto breve + link alla fonte
+(mai l'articolo intero: è delle testate).
+
+Finché l'app è aperta, le notizie si aggiornano da sole: feed ogni 10
+minuti, GDELT ogni 30, segnali di bias ogni lunedì.
+
+## Installazione: scegli la modalità
+
+| | **Personale — senza Docker** (consigliata) | **Server — con Docker** |
+|---|---|---|
+| Per chi | usi il giornale tu, sul tuo computer | vuoi pubblicarlo online per altri |
+| Richiede | niente: lo script si procura tutto da solo | Docker, una macchina sempre accesa |
+| Database | SQLite in `~/.opennews` | PostgreSQL + pgvector (+ Meilisearch) |
+| HTTPS/dominio | non serve (gira su localhost) | automatico con Caddy |
+| Si avvia con | icona «Open News» o comando `opennews` | `docker compose up -d` |
+
+### Modalità personale — senza Docker (Linux, macOS, Windows)
 
 **Linux / macOS:**
 
@@ -44,127 +79,166 @@ curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | 
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zano97/open_news/main/install.ps1 | iex"
 ```
 
-Lo script fa tutto da solo: scarica l'app, si procura Python
-(via [uv](https://github.com/astral-sh/uv) — niente da preinstallare), crea
-**l'icona «Open News»** (menu applicazioni su Linux, `~/Applications` su
-macOS, menu Start su Windows) e il comando `opennews` per il terminale,
-scarica le ultime 24 ore di notizie dalle testate reali (~10-15 minuti,
-solo la prima volta) e apre il giornale nel browser.
+Lo script fa tutto da solo, **senza Docker e senza prerequisiti**: scarica
+l'app in `~/.opennews`, si procura Python 3.12 per conto suo (tramite
+[uv](https://github.com/astral-sh/uv)), crea **l'icona «Open News»** (menu
+applicazioni su Linux, `~/Applications` su macOS, menu Start su Windows) e
+il comando `opennews`, scarica le ultime 24 ore di notizie vere (~10-15
+minuti, solo la prima volta) e apre il giornale nel browser.
 
-Da lì in poi: **clic sull'icona, oppure `opennews` nel terminale.** Finché
-è aperto, le notizie si aggiornano da sole ogni 10 minuti. I tuoi dati
-vivono in `~/.opennews`.
+Da lì in poi:
 
-Vuoi solo **vedere l'interfaccia subito, senza scaricare notizie vere**?
-Modalità demo (30 secondi, testate dimostrative dichiarate come tali):
+- **avvii** con un clic sull'icona, oppure con `opennews` nel terminale
+  (`opennews --port 8100` per un'altra porta, `--no-browser` per non aprire
+  il browser);
+- **fermi** con Ctrl+C nel terminale (o chiudendo la finestra): alla
+  prossima apertura riparte da dov'era;
+- i **dati** (notizie, impostazioni, annotazioni) vivono in `~/.opennews`
+  e sopravvivono ad aggiornamenti e reinstallazioni;
+- `opennews seed` riscarica le ultime 24 ore quando vuoi.
+
+Vuoi solo **vedere com'è fatta, senza scaricare notizie vere**? Modalità
+demo (30 secondi; testate dimostrative dichiarate come tali, con un banner
+che lo ricorda — mai un titolo inventato attribuito a una testata reale):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-In questa modalità senza Docker i riassunti funzionano subito con l'Ollama
-del tuo computer (`http://localhost:11434`, il predefinito).
+<details>
+<summary><strong>Installazione manuale senza Docker</strong> (se preferisci fare ogni passo a mano)</summary>
 
-Anche **l'aggiornamento** è una riga — riconosce da solo il tipo di
-installazione e i dati restano:
+Serve solo Python ≥ 3.12 e git:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/update.sh | bash
+git clone https://github.com/zano97/open_news.git
+cd open_news
+python3 -m venv .venv
+.venv/bin/pip install -e .
+.venv/bin/opennews seed        # scarica le notizie (oppure: seed --demo)
+.venv/bin/opennews             # avvia su http://127.0.0.1:8000 e apre il browser
 ```
 
-<details>
-<summary><strong>Modalità server con Docker</strong> (per un'istanza pubblica: PostgreSQL+pgvector, Meilisearch, Caddy con HTTPS automatico)</summary>
+`opennews` crea da solo il database SQLite in `~/.opennews`, esegue le
+migrazioni e fa girare sito e raccoglitore nello stesso processo.
+
+</details>
+
+### Modalità server — pubblicare un'istanza con Docker
+
+Per un giornale **raggiungibile da altri** (dominio, HTTPS automatico,
+database PostgreSQL): serve una macchina con
+[Docker](https://docs.docker.com/engine/install/) sempre accesa — bastano
+4 core / 8 GB, va bene anche ARM (Oracle Cloud Always Free, Raspberry Pi 5).
 
 ```bash
 OPENNEWS_DOCKER=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
 ```
 
-Vedi [docs/DEPLOY.md](docs/DEPLOY.md) per dominio/HTTPS, Oracle Free ARM,
-Raspberry Pi, backup. In modalità Docker l'URL predefinito di Ollama è
-`http://host.docker.internal:11434` (Ollama sulla macchina host).
+Lo script clona il repository, genera i segreti, avvia lo stack (PostgreSQL
++ pgvector, Meilisearch, api, worker, Caddy) e scarica le notizie. Poi, per
+andare online: metti `DOMAIN=notizie.tuodominio.org` nel file `.env` (il
+DNS deve puntare alla macchina, porte 80/443 aperte) e `docker compose up
+-d` — Caddy ottiene e rinnova i certificati HTTPS da solo. Guida completa
+(Oracle Free ARM, Raspberry Pi, backup, monitoraggio, passi manuali):
+[docs/DEPLOY.md](docs/DEPLOY.md).
 
-</details>
+## Aggiornare
 
-**Riassunti con l'AI, su richiesta («Il fatto in breve»).** Nella pagina di
-una notizia il lettore può premere un pulsante e vedere comparire in
-streaming un riassunto neutro — generato da un **modello aperto locale via
-[Ollama](https://ollama.com)**, mai un servizio a pagamento. La
-configurazione predefinita si aspetta **Ollama installato sul tuo computer**:
+Una riga, identica per entrambe le modalità — riconosce da sola che
+installazione hai, e **i dati restano**:
 
 ```bash
-OLLAMA_HOST=0.0.0.0 ollama serve      # così i container Docker possono raggiungerlo
-ollama pull qwen2.5:7b                # un tag Ollama reale (qwen2.5:3b su macchine piccole)
+curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/update.sh | bash
 ```
 
-poi nel pannello admin (`/impostazioni`) attiva l'interruttore. Il campo URL
-di Ollama è preimpostato a `http://host.docker.internal:11434`, che è
-**l'indirizzo speciale con cui i container raggiungono il tuo computer** —
-`localhost` punterebbe al container stesso. Se preferisci Ollama dentro
-Docker, avvia `docker compose --profile llm up -d` e imposta l'URL a
-`http://ollama:11434`. Lo «Stato del generatore» nel pannello verifica la
-connessione in diretta e ti dice esattamente cosa manca.
+In modalità personale poi rilanci `opennews`; in modalità server riavvia
+tutto da solo, migrazioni del database comprese.
 
-**Le notizie nella tua lingua.** I titoli delle testate restano sempre in
-lingua originale: la loro formulazione è esattamente ciò che il progetto
-misura. Con il traduttore open source opzionale
-([Argos Translate](https://www.argosopentech.com/), locale e gratuito) i
-titoli *neutri* delle story vengono tradotti nella lingua dell'interfaccia,
-sempre marcati come automatici:
+## Come si usa
+
+Non c'è niente da imparare: **l'interfaccia è il sito stesso**, dal browser,
+anche da telefono. In testata trovi la lingua (IT·EN·FR·DE·ES),
+l'**edizione notturna**, e sotto la barra dei **paesi** per concentrarti
+sulle testate di un paese (di default vedi il mondo intero). Le pagine:
+
+| Pagina | Che cosa ci trovi |
+|---|---|
+| **/** — Prima pagina | Le story del giorno in stile broadsheet: titolo neutro, **i titoli delle diverse testate a confronto**, copertura per paese, badge «lampo» e «angolo cieco». Filtro per paese con i conteggi. |
+| **/lampo** — Edizione lampo | Il "reel di carta": le notizie coperte da ≥5 testate in <2 ore, una schermata per notizia; scorri o usa ↑ ↓. Tre titoli a confronto dalle testate più diverse tra loro, col proprietario in piccolo. |
+| **/storia/{id}** | Una notizia: tutte le versioni affiancate (titolo + estratto + link alla fonte), chi l'ha pubblicata per prima, copertura per paese, entità Wikidata. Col generatore attivo, il pulsante **«Genera "Il fatto in breve"»**: riassunto neutro in streaming, generato in locale solo su tua richiesta, sempre marcato come automatico. |
+| **/fonti** e **/fonte/{slug}** | Il catalogo delle testate e la "scheda anagrafica" di ciascuna: grafo dei proprietari, **cariche politiche con date**, «Chi è il proprietario (secondo Wikidata)» — partiti, occupazioni, aziende — soldi pubblici per anno, linea auto-dichiarata, e i segnali dei 4 livelli. Dove i dati non bastano leggi "in valutazione", mai una stima nascosta. |
+| **/mappa** | La mappa di co-copertura: testate vicine = coprono le stesse story. Gli assi **emergono dai dati** e vanno letti con le story elencate sotto. |
+| **/metodo** | La metodologia completa in linguaggio semplice, con i numeri di calibrazione e i limiti noti. |
+| **/dati** | Export aperti (CSV, CC BY-SA 4.0) e API JSON documentata su **/docs**. |
+| **/annota** | Diventa annotatore: valuti titoli **alla cieca** (senza sapere la testata) su due assi. Le etichette si pubblicano solo con ≥50 articoli, ≥3 annotatori di orientamenti dichiarati diversi e accordo α ≥ 0,6. |
+| **/impostazioni** | Il pannello di amministrazione (vedi sotto). |
+
+## Amministrazione
+
+Il **primo profilo che si registra** su `/annota` diventa l'amministratore
+dell'istanza: vede il link «Impostazioni» in testata e il pannello
+`/impostazioni`, dove regola — con la spiegazione accanto a ogni campo —
+modello e URL di Ollama, motore di embedding, soglie del clustering e delle
+story «lampo», intervallo di cortesia della raccolta, finestre dei segnali.
+Le modifiche si salvano nel database, prevalgono su `.env` e valgono subito.
+I parametri della **metodologia** (soglie del livello 4, tassonomia,
+lessico) sono esclusi di proposito: si cambiano nel repository, con la
+versione del metodo.
+
+## Funzioni opzionali
+
+**Riassunti con l'AI («Il fatto in breve»).** Generati da un modello aperto
+**in locale** via [Ollama](https://ollama.com), mai un servizio a pagamento,
+e **solo quando il lettore preme il pulsante** nella pagina della notizia
+(streaming in diretta). Per attivarli:
 
 ```bash
+ollama pull qwen2.5:7b      # un modello vero (qwen2.5:3b su macchine piccole)
+```
+
+poi in `/impostazioni` accendi l'interruttore e salva. In **modalità
+personale** l'URL predefinito (`http://localhost:11434`) funziona subito.
+In **modalità server Docker** il predefinito è
+`http://host.docker.internal:11434` — l'indirizzo con cui i container
+raggiungono il tuo computer — e Ollama va avviato con
+`OLLAMA_HOST=0.0.0.0 ollama serve` perché accetti le loro connessioni. Lo
+«Stato del generatore» nel pannello verifica tutto in diretta e ti dice
+esattamente cosa manca; «Genera 3 riassunti ora» fa la prova immediata.
+
+**Titoli nella tua lingua.** I titoli delle testate restano in lingua
+originale (la loro formulazione è il dato). I titoli *neutri* delle story
+possono essere tradotti con [Argos Translate](https://www.argosopentech.com/)
+(open source, offline), sempre marcati «traduzione automatica»:
+
+```bash
+# modalità personale:
+~/.opennews/app/.venv/bin/pip install argostranslate
+~/.opennews/app/.venv/bin/python -m scripts.fetch_translation_models
+# modalità server:
 docker compose exec worker pip install argostranslate
 docker compose exec worker python -m scripts.fetch_translation_models
 ```
 
-<details>
-<summary><strong>Installazione manuale</strong> (se preferisci vedere ogni passo)</summary>
+**Clustering multilingue migliore.** Il motore predefinito non scarica
+nulla; per agganciare meglio le story tra lingue diverse passa a `e5` dal
+pannello (richiede gli extra `[ml]`; poi `make calibrate` — dettagli in
+[docs/DEPLOY.md](docs/DEPLOY.md)).
 
-```bash
-git clone https://github.com/zano97/open_news.git
-cd open_news
-cp .env.example .env            # 1. configura (vedi sotto)
-docker compose up --build -d    # 2. avvia lo stack completo
-docker compose exec api python -m scripts.verify_feeds   # 3. verifica i feed reali
-docker compose exec api python -m scripts.seed           # 4. popola (~10-15 minuti)
-```
+## Problemi comuni
 
-Nel file `.env` imposta almeno:
+- **Homepage vuota** → il primo scaricamento non è finito: `opennews seed`
+  (personale) o `docker compose logs worker` (server).
+- **Il pulsante dei riassunti non appare / non genera** → apri
+  `/impostazioni`: lo «Stato del generatore» dice se Ollama è raggiungibile
+  e se il modello è installato, col comando esatto per rimediare.
+- **Banner «notizie dimostrative»** → stai vedendo la demo: `opennews seed`
+  scarica quelle vere.
+- **`opennews` non trovato** → apri un nuovo terminale, oppure aggiungi
+  `~/.local/bin` al PATH (l'installer te lo segnala).
+- Altro → [docs/DEPLOY.md](docs/DEPLOY.md), sezione «Risoluzione problemi».
 
-| Variabile | A cosa serve |
-|---|---|
-| `POSTGRES_PASSWORD` | password del database (generane una: `openssl rand -hex 32`) |
-| `MEILI_MASTER_KEY` | chiave di Meilisearch |
-| `SECRET_KEY` | firma dei cookie di sessione degli annotatori |
-| `DOMAIN` | (solo in produzione) il tuo dominio: Caddy ottiene da solo l'HTTPS |
-| `EMBEDDING_BACKEND` | `hashing` (default, zero download) o `e5` (multilingue, consigliato in produzione — vedi [docs/DEPLOY.md](docs/DEPLOY.md)) |
-
-</details>
-
-## Come si usa l'applicazione
-
-Non c'è niente da imparare: **l'interfaccia è il sito stesso**, si usa dal
-browser come un normale giornale online (anche da telefono). Il terminale
-serve solo per installare e amministrare. La lingua dell'interfaccia
-(IT · EN · FR · DE · ES) si cambia dalla testata; i contenuti delle notizie
-restano nella lingua in cui ogni testata li ha scritti. Le pagine:
-
-| Pagina | Che cosa ci trovi |
-|---|---|
-| **/** — Prima pagina | Il giornale: le story del giorno in stile broadsheet. Ogni story mostra il titolo neutro, **i titoli delle diverse testate a confronto** (per vedere il framing a colpo d'occhio), la copertura per paese, i badge «lampo» e «angolo cieco». |
-| **/lampo** — Edizione lampo | Il "reel di carta": le notizie coperte da ≥5 testate in <2 ore, una scheda a schermo intero per notizia. Scorri, oppure usa i tasti ↑ ↓. Tre titoli a confronto scelti tra le testate più diverse tra loro, col proprietario in piccolo. Funziona anche senza JavaScript. |
-| **/storia/{id}** | Una notizia, tutte le versioni affiancate (titolo + snippet + link alla fonte), la timeline di chi l'ha pubblicata per prima, la copertura per paese, le entità collegate a Wikidata. Con il modello locale opzionale attivo, anche «il fatto in breve»: un riassunto neutro generato in locale, sempre marcato come automatico (gli articoli interi restano sui siti delle testate: ripubblicarli violerebbe il loro copyright). |
-| **/fonti** | Il catalogo delle testate, comprese quelle disabilitate con la motivazione (es. ANSA per i suoi termini d'uso). |
-| **/fonte/{slug}** | La "scheda anagrafica" di una testata: grafo dei proprietari, cariche politiche, soldi pubblici per anno, linea auto-dichiarata, e i segnali dei 4 livelli (che cosa copre, come racconta, posizionamento). Dove i dati non bastano leggi "in valutazione", mai una stima nascosta. |
-| **/mappa** | La mappa di co-copertura: testate vicine = coprono le stesse story. Gli assi **emergono dai dati** e vanno letti con le story elencate sotto la mappa. |
-| **/metodo** | La metodologia completa, in italiano semplice (e in inglese): come si calcola ogni cosa, con i numeri di calibrazione e i limiti noti. |
-| **/dati** | Gli export aperti (CSV, CC BY-SA 4.0): story, coperture, segnali, annotazioni anonime. API JSON documentata su **/docs**. |
-| **/impostazioni** | Pannello admin (il primo profilo registrato è l'amministratore): modello e URL di Ollama, motore di embedding, soglie del clustering, intervallo di cortesia della raccolta. Le modifiche vivono nel database, prevalgono su `.env` e si applicano a caldo. I parametri della metodologia sono esclusi di proposito. |
-| **/annota** | Diventa annotatore: valuti titoli **senza sapere da che testata vengono** (annotazione cieca) su due assi. Le etichette di posizionamento si pubblicano solo con ≥50 articoli, ≥3 annotatori con orientamenti dichiarati diversi e accordo α ≥ 0,6. |
-
-In alto a destra trovi l'**edizione notturna** (tema scuro); tutto il sito è
-navigabile da tastiera e rispetta `prefers-reduced-motion`.
-
-### Il bias su quattro livelli (mai un punteggio unico)
+## Il bias su quattro livelli (mai un punteggio unico)
 
 1. **Struttura (fatti):** proprietà, catene societarie, cariche politiche
    dei proprietari, finanziamenti pubblici — da registri pubblici (ROC
@@ -176,58 +250,63 @@ navigabile da tastiera e rispetta `prefers-reduced-motion`.
 4. **Posizionamento (giudizio umano con protocollo):** annotazione cieca con
    accordo inter-annotatore misurato e regole di pubblicazione esplicite.
 
-I quattro livelli sono mostrati **separati** e non si sommano mai.
+I quattro livelli sono mostrati **separati** e non si sommano mai. Tutto è
+spiegato, con i numeri, su `/metodo`.
 
-## Comandi utili
+## Per sviluppatori
 
-```bash
-make help          # elenco completo dei comandi
-make seed          # popola con le fonti reali (~24h di notizie; richiede rete)
-make seed-demo     # senza rete: testate dimostrative e notizie inventate
-make verify-feeds  # verifica HTTP reale di tutti i feed e aggiorna il catalogo
-make calibrate     # precision/recall della soglia di clustering sul set annotato
-make test          # test unit/integrazione con coverage (core >= 80%)
-make test-e2e      # test Playwright nel browser (desktop + mobile)
-make check         # ruff + mypy --strict + test
-```
-
-## Sviluppo locale senza Docker
+<details>
+<summary>Sviluppo locale, comandi, architettura</summary>
 
 ```bash
 make install       # crea .venv e installa le dipendenze (Python 3.12+)
-make test          # 140 test su SQLite, nessun servizio esterno richiesto
-.venv/bin/python -m scripts.seed --offline-demo   # popola un DB locale
-DATABASE_URL=sqlite+aiosqlite:///dev.sqlite3 \
-  .venv/bin/uvicorn apps.api.main:app --reload    # avvia su :8000
+make test          # 174 test su SQLite, nessun servizio esterno richiesto
+make check         # ruff + mypy --strict + test (coverage core >= 80%)
+make test-e2e      # test Playwright nel browser (desktop + mobile)
+make seed-demo     # popola un DB locale senza rete
+.venv/bin/opennews # avvia in modalità personale
 ```
 
-## Documentazione
+```
+apps/
+  api/         FastAPI: pagine HTML (Jinja2+HTMX) e API JSON, OpenAPI su /docs
+  web/         template, CSS scritto a mano, font self-hosted, traduzioni (5 lingue)
+  worker/      APScheduler: ingest RSS/GDELT, clustering, entità, segnali
+  launcher.py  comando `opennews` (modalità personale, worker incorporato)
+core/
+  models/    SQLAlchemy 2 async (portabile PostgreSQL/SQLite)
+  ingest/    RSS con cache condizionale, robots.txt, rate limit, GDELT
+  extract/   URL canonici, SimHash, lingua, testo integrale (mai esposto)
+  nlp/       embedding, temi, lessico, attori citati, tono, entità, riassunti
+  cluster/   clustering incrementale con soglia calibrata
+  bias/      i 4 livelli della metodologia + Krippendorff's alpha
+  i18n.py    lingue dell'interfaccia con fallback per chiave
+  net.py     UNICO punto di uscita rete, con allowlist (niente servizi a pagamento)
+data/        catalogo fonti, lessici, tassonomia temi, seed con evidenze
+docs/        METHODOLOGY (it/en) · DECISIONS (ADR) · LEGAL · DEPLOY
+```
 
-- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — la metodologia completa,
-  leggibile da non tecnici (in inglese: [`docs/METHODOLOGY.en.md`](docs/METHODOLOGY.en.md));
-  è la pagina pubblica `/metodo`
-- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deploy su VPS, **Oracle Cloud Always
-  Free (ARM)**, **Raspberry Pi 5**, backup e monitoraggio
-- [`docs/LEGAL.md`](docs/LEGAL.md) — cosa mostriamo, come raccogliamo, licenze
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — le decisioni architetturali (ADR)
+</details>
 
 ## Contribuire
 
 I file dati crescono via pull request, ogni voce con motivazione e fonte:
+`data/sources.yaml` (testate), `data/lexicon_it.yaml` / `lexicon_en.yaml`
+(lessico di framing), `data/topics.yaml` (temi),
+`data/seeds/ownership_it.yaml` (assetti proprietari **con evidenza**: mai
+un dato inventato, meglio `null` con una nota),
+`apps/web/translations/*.yaml` (lingue dell'interfaccia; un test garantisce
+la parità delle chiavi). Qualità: `make check` deve passare.
 
-- `data/sources.yaml` — nuove testate (con `terms_note` e feed verificati)
-- `data/lexicon_it.yaml` / `lexicon_en.yaml` — il lessico di framing
-- `data/topics.yaml` — le parole chiave della tassonomia dei temi
-- `data/seeds/ownership_it.yaml` — assetti proprietari **con evidenza**;
-  la regola è: mai un dato inventato, meglio `null` con una nota
-- `apps/web/translations/*.yaml` — le traduzioni dell'interfaccia (stesse
-  chiavi di `it.yaml`; un test garantisce la parità)
+## Documentazione e licenze
 
-Qualità: `make check` deve passare (ruff, mypy `--strict`, coverage ≥ 80%).
-
-## Licenze
+[`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) (la metodologia, anche
+[in inglese](docs/METHODOLOGY.en.md)) ·
+[`docs/DEPLOY.md`](docs/DEPLOY.md) (server, backup, monitoraggio) ·
+[`docs/LEGAL.md`](docs/LEGAL.md) (cosa mostriamo e come raccogliamo) ·
+[`docs/DECISIONS.md`](docs/DECISIONS.md) (le decisioni architetturali).
 
 Codice **AGPL-3.0-only** ([LICENSE](LICENSE)) · dati derivati **CC BY-SA
-4.0** (esportabili da `/dati`) · attribuzioni di terze parti in
-[NOTICE](NOTICE). I titoli e gli snippet restano delle rispettive testate e
-sono mostrati nei limiti della citazione con link alla fonte.
+4.0** (da `/dati`) · attribuzioni in [NOTICE](NOTICE). Titoli ed estratti
+restano delle rispettive testate, mostrati nei limiti della citazione con
+link alla fonte.
