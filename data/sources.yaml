@@ -1523,3 +1523,407 @@ sources:
   terms_note: >-
     Servizio in inglese dell'agenzia CNA (finanziamento pubblico: fatto di
     livello 1 quando documentato). Copertura via GDELT.
+
+  # ------------- AMPLIAMENTO 2026-08 (secondo giro) -------------
+  # Stessi criteri: feed storicamente stabili, altrimenti solo GDELT;
+  # `make verify-feeds` e l'autodiscovery fanno da rete di sicurezza.
+
+- slug: telex
+  name: Telex
+  domain: telex.hu
+  country: hu
+  language: hu
+  region: europe
+  feed_urls:
+  - https://telex.hu/rss
+  gdelt_domain: telex.hu
+  wikidata_qid:
+  founded: 2020
+  enabled: true
+  terms_note: >-
+    Testata indipendente nata dall'esodo della redazione di Index
+    (fatto di livello 1 quando documentato).
+
+- slug: dennik-n
+  name: "Denník N"
+  domain: dennikn.sk
+  country: sk
+  language: sk
+  region: europe
+  feed_urls:
+  - https://dennikn.sk/feed
+  gdelt_domain: dennikn.sk
+  wikidata_qid:
+  founded: 2015
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: err-news
+  name: ERR News
+  domain: err.ee
+  country: ee
+  language: en
+  region: europe
+  feed_urls:
+  - https://news.err.ee/rss
+  gdelt_domain: err.ee
+  wikidata_qid:
+  founded: 2007
+  enabled: true
+  terms_note: Emittente pubblica estone, servizio in inglese (livello 1).
+
+- slug: index-hr
+  name: Index.hr
+  domain: index.hr
+  country: hr
+  language: hr
+  region: europe
+  feed_urls: []
+  gdelt_domain: index.hr
+  wikidata_qid:
+  founded: 2002
+  enabled: true
+  terms_note: >-
+    Nessun feed pubblico stabile noto: copertura via GDELT (titolo+link,
+    con citazione del GDELT Project).
+
+- slug: n1-info
+  name: N1 (Srbija)
+  domain: n1info.rs
+  country: rs
+  language: sr
+  region: europe
+  feed_urls: []
+  gdelt_domain: n1info.rs
+  wikidata_qid:
+  founded: 2014
+  enabled: true
+  terms_note: >-
+    Affiliata CNN nei Balcani. Copertura via GDELT (titolo+link, con
+    citazione del GDELT Project).
+
+- slug: tvn24
+  name: TVN24
+  domain: tvn24.pl
+  country: pl
+  language: pl
+  region: europe
+  feed_urls: []
+  gdelt_domain: tvn24.pl
+  wikidata_qid:
+  founded: 2001
+  enabled: true
+  terms_note: >-
+    Gruppo Warner Bros. Discovery (fatto di livello 1 quando documentato).
+    Copertura via GDELT.
+
+- slug: ukrainska-pravda
+  name: Ukrainska Pravda
+  domain: pravda.com.ua
+  country: ua
+  language: uk
+  region: europe
+  feed_urls: []
+  gdelt_domain: pravda.com.ua
+  wikidata_qid:
+  founded: 2000
+  enabled: true
+  terms_note: >-
+    Copertura via GDELT (titolo+link, con citazione del GDELT Project).
+
+- slug: le-point
+  name: Le Point
+  domain: lepoint.fr
+  country: fr
+  language: fr
+  region: europe
+  feed_urls:
+  - https://www.lepoint.fr/rss.xml
+  gdelt_domain: lepoint.fr
+  wikidata_qid:
+  founded: 1972
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: ouest-france
+  name: Ouest-France
+  domain: ouest-france.fr
+  country: fr
+  language: fr
+  region: europe
+  feed_urls: []
+  gdelt_domain: ouest-france.fr
+  wikidata_qid:
+  founded: 1944
+  enabled: true
+  terms_note: >-
+    Il quotidiano più diffuso di Francia, proprietà di un'associazione
+    non profit (fatto di livello 1 quando documentato). Copertura via GDELT.
+
+- slug: il-messaggero
+  name: Il Messaggero
+  domain: ilmessaggero.it
+  country: it
+  language: it
+  region: italy
+  feed_urls:
+  - https://www.ilmessaggero.it/rss/home.xml
+  gdelt_domain: ilmessaggero.it
+  wikidata_qid:
+  founded: 1878
+  enabled: true
+  terms_note: >-
+    Gruppo Caltagirone (assetto registrato al livello 1 quando
+    documentato). Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: la-verita
+  name: "La Verità"
+  domain: laverita.info
+  country: it
+  language: it
+  region: italy
+  feed_urls: []
+  gdelt_domain: laverita.info
+  wikidata_qid:
+  founded: 2016
+  enabled: true
+  terms_note: >-
+    Nessun feed pubblico stabile noto: copertura via GDELT (titolo+link,
+    con citazione del GDELT Project).
+
+- slug: veinte-minutos
+  name: 20minutos
+  domain: 20minutos.es
+  country: es
+  language: es
+  region: europe
+  feed_urls:
+  - https://www.20minutos.es/rss/
+  gdelt_domain: 20minutos.es
+  wikidata_qid:
+  founded: 2000
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: la-vanguardia
+  name: La Vanguardia
+  domain: lavanguardia.com
+  country: es
+  language: es
+  region: europe
+  feed_urls:
+  - https://www.lavanguardia.com/rss/home.xml
+  gdelt_domain: lavanguardia.com
+  wikidata_qid:
+  founded: 1881
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: hankyoreh
+  name: The Hankyoreh (English)
+  domain: hani.co.kr
+  country: kr
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: hani.co.kr
+  wikidata_qid:
+  founded: 1988
+  enabled: true
+  terms_note: >-
+    Quotidiano di proprietà diffusa (azionariato popolare: fatto di
+    livello 1 quando documentato). Copertura via GDELT.
+
+- slug: caixin-global
+  name: Caixin Global
+  domain: caixinglobal.com
+  country: cn
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: caixinglobal.com
+  wikidata_qid:
+  founded: 2016
+  enabled: true
+  terms_note: >-
+    Testata economica cinese relativamente indipendente; contenuti in
+    gran parte a pagamento. Copertura via GDELT.
+
+- slug: global-times
+  name: Global Times
+  domain: globaltimes.cn
+  country: cn
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: globaltimes.cn
+  wikidata_qid:
+  founded: 1993
+  enabled: true
+  terms_note: >-
+    Testata del gruppo People's Daily, controllato dal Partito comunista
+    cinese: assetto e natura statale sono FATTI di livello 1, mostrati
+    accanto a ogni citazione. Inclusa per completezza di prospettive.
+    Copertura via GDELT.
+
+- slug: vnexpress-international
+  name: VnExpress International
+  domain: e.vnexpress.net
+  country: vn
+  language: en
+  region: world
+  feed_urls:
+  - https://e.vnexpress.net/rss/news.rss
+  gdelt_domain: vnexpress.net
+  wikidata_qid:
+  founded: 2001
+  enabled: true
+  terms_note: >-
+    Il quadro normativo vietnamita sulla stampa è un fatto di contesto
+    (livello 1 quando documentato).
+
+- slug: bangkok-post
+  name: Bangkok Post
+  domain: bangkokpost.com
+  country: th
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: bangkokpost.com
+  wikidata_qid:
+  founded: 1946
+  enabled: true
+  terms_note: >-
+    Nessun feed pubblico stabile noto: copertura via GDELT (titolo+link,
+    con citazione del GDELT Project).
+
+- slug: malaysiakini
+  name: Malaysiakini
+  domain: malaysiakini.com
+  country: my
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: malaysiakini.com
+  wikidata_qid:
+  founded: 1999
+  enabled: true
+  terms_note: >-
+    Testata indipendente in abbonamento. Copertura via GDELT.
+
+- slug: rappler
+  name: Rappler
+  domain: rappler.com
+  country: ph
+  language: en
+  region: world
+  feed_urls:
+  - https://www.rappler.com/feed/
+  gdelt_domain: rappler.com
+  wikidata_qid:
+  founded: 2012
+  enabled: true
+  terms_note: >-
+    Cofondata dalla premio Nobel Maria Ressa; le pressioni legali subite
+    sono fatti di livello 1 quando documentati.
+
+- slug: rnz
+  name: RNZ News
+  domain: rnz.co.nz
+  country: nz
+  language: en
+  region: world
+  feed_urls:
+  - https://www.rnz.co.nz/rss/national.xml
+  gdelt_domain: rnz.co.nz
+  wikidata_qid:
+  founded: 1925
+  enabled: true
+  terms_note: Emittente pubblica neozelandese (fatto di livello 1).
+
+- slug: the-national-ae
+  name: The National (UAE)
+  domain: thenationalnews.com
+  country: ae
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: thenationalnews.com
+  wikidata_qid:
+  founded: 2008
+  enabled: true
+  terms_note: >-
+    Proprietà International Media Investments (Abu Dhabi): fatto di
+    livello 1 quando documentato. Copertura via GDELT.
+
+- slug: nation-kenya
+  name: Nation (Kenya)
+  domain: nation.africa
+  country: ke
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: nation.africa
+  wikidata_qid:
+  founded: 1960
+  enabled: true
+  terms_note: >-
+    Gruppo Nation Media (fatto di livello 1 quando documentato).
+    Copertura via GDELT.
+
+- slug: el-tiempo
+  name: El Tiempo
+  domain: eltiempo.com
+  country: co
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: eltiempo.com
+  wikidata_qid:
+  founded: 1911
+  enabled: true
+  terms_note: >-
+    Gruppo Luis Carlos Sarmiento (fatto di livello 1 quando documentato).
+    Copertura via GDELT.
+
+- slug: la-tercera
+  name: La Tercera
+  domain: latercera.com
+  country: cl
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: latercera.com
+  wikidata_qid:
+  founded: 1950
+  enabled: true
+  terms_note: Copertura via GDELT (titolo+link, con citazione).
+
+- slug: el-comercio-pe
+  name: El Comercio (Perú)
+  domain: elcomercio.pe
+  country: pe
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: elcomercio.pe
+  wikidata_qid:
+  founded: 1839
+  enabled: true
+  terms_note: Copertura via GDELT (titolo+link, con citazione).
+
+- slug: axios
+  name: Axios
+  domain: axios.com
+  country: us
+  language: en
+  region: world
+  feed_urls:
+  - https://api.axios.com/feed/
+  gdelt_domain: axios.com
+  wikidata_qid:
+  founded: 2016
+  enabled: true
+  terms_note: >-
+    Proprietà Cox Enterprises (fatto di livello 1 quando documentato).
+    Nessuna restrizione nota per titolo+snippet+link.

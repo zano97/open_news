@@ -53,3 +53,27 @@ async def test_sync_idempotente(session: AsyncSession) -> None:
     ).scalar_one()
     assert ansa.enabled is False
     assert ansa.disabled_reason is not None
+
+
+def test_catalogo_invarianti_di_qualita() -> None:
+    """Regole che ogni voce del catalogo deve rispettare, per sempre:
+    slug puliti, paesi ISO, feed https dentro l'allowlist e — per ogni
+    fonte abilitata — un gdelt_domain: la copertura non deve mai dipendere
+    solo dal feed."""
+    import re
+    from urllib.parse import urlsplit
+
+    from core.net import host_allowed, reset_allowlist_cache
+
+    reset_allowlist_cache()
+    for src in load_catalog():
+        assert re.fullmatch(r"[a-z0-9-]+", src.slug), src.slug
+        assert re.fullmatch(r"[a-z]{2}", src.country), (src.slug, src.country)
+        assert src.language, src.slug
+        assert src.name.strip(), src.slug
+        if src.enabled:
+            assert src.gdelt_domain, f"{src.slug}: fonte abilitata senza gdelt_domain"
+        for url in src.feed_urls:
+            assert url.startswith("https://"), (src.slug, url)
+            host = urlsplit(url).hostname
+            assert host and host_allowed(host), (src.slug, url)

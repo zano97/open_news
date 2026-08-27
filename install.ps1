@@ -68,7 +68,10 @@ if ($env:OPENNEWS_DEMO -eq "1") {
   & $Exe seed --demo
 } elseif ($env:OPENNEWS_NO_SEED -ne "1") {
   Say "Scarico le ultime 24 ore di notizie vere (pochi minuti, solo la prima volta)"
-  & $Exe seed
+  # Il primo scaricamento non deve MAI bloccare l'installazione.
+  try { & $Exe seed } catch {
+    Say "Primo scaricamento non riuscito: l'app parte lo stesso e riproverà da sola ogni 10 minuti"
+  }
 }
 
 Say "Avvio il giornale"

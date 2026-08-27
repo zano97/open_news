@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     # `feed_backoff_hours` prima del tentativo successivo.
     feed_backoff_failures: int = 3
     feed_backoff_hours: int = 6
+    # Tetto di tempo della fase di raccolta del seed: scaduto, si prosegue
+    # con quanto già scaricato (i cicli automatici colmano il resto).
+    # L'esperienza del primo avvio non deve mai dipendere dal sito più lento.
+    seed_budget_seconds: int = 300
 
     # Clustering. La soglia è calibrata sul backend attivo con
     # scripts/calibrate_threshold.py (set: data/seeds/calibration_pairs.yaml).

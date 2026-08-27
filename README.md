@@ -43,8 +43,8 @@ French, German, Spanish — switchable from the masthead):
 
 ## How it works
 
-The collector reads the **RSS feeds of 90+ outlets from 43 countries**
-(132 feeds: front pages plus the world/politics/business sections of the
+The collector reads the **RSS feeds of 120+ outlets from 59 countries**
+(143 feeds: front pages plus the world/politics/business sections of the
 major ones) and complements them with **GDELT** (free) for articles the
 feeds miss — including Reuters and AP, which have no public feeds. Articles
 about the same event are grouped into "stories", so you see **how different

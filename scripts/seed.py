@@ -23,6 +23,7 @@ from core.bias.aggregate import compute_weekly_signals
 from core.bias.structure import load_ownership_seed
 from core.cluster.coverage import compute_coverage
 from core.cluster.incremental import cluster_pending
+from core.config import get_settings
 from core.db import get_engine, get_sessionmaker
 from core.ingest.catalog import sync_catalog
 from core.ingest.pipeline import ingest_all_feeds, ingest_gdelt_all
@@ -195,30 +196,48 @@ async def seed_online() -> None:
         # database in sequenza tramite un lock condiviso; RSS e GDELT
         # girano insieme perché parlano con host diversi.
         db_lock = asyncio.Lock()
-        da_feed, da_gdelt = await asyncio.gather(
-            ingest_all_feeds(
-                maker,
-                client=client,
-                limiter=limiter,
-                robots=robots,
-                max_feeds_per_source=MAX_FEEDS_PER_SOURCE,
-                retry_failed=True,
-                db_lock=db_lock,
-                progress=stampa_feed,
-            ),
-            ingest_gdelt_all(
-                maker,
-                client=client,
-                limiter=limiter,
-                db_lock=db_lock,
-                progress=stampa_gdelt,
-            ),
+        da_feed: dict[str, int] = {}
+        da_gdelt: dict[str, int] = {}
+        budget = get_settings().seed_budget_seconds
+        try:
+            # Tetto di tempo rigido: l'esperienza del primo avvio non deve
+            # mai dipendere dal sito più lento. Ogni feed viene salvato
+            # appena arriva, quindi allo scadere nulla di già scaricato
+            # va perso; il resto lo colmano i cicli automatici.
+            da_feed, da_gdelt = await asyncio.wait_for(
+                asyncio.gather(
+                    ingest_all_feeds(
+                        maker,
+                        client=client,
+                        limiter=limiter,
+                        robots=robots,
+                        max_feeds_per_source=MAX_FEEDS_PER_SOURCE,
+                        retry_failed=True,
+                        db_lock=db_lock,
+                        progress=stampa_feed,
+                    ),
+                    ingest_gdelt_all(
+                        maker,
+                        client=client,
+                        limiter=limiter,
+                        db_lock=db_lock,
+                        progress=stampa_gdelt,
+                    ),
+                ),
+                timeout=budget,
+            )
+        except TimeoutError:
+            print(
+                f"  tempo massimo raggiunto ({budget // 60} minuti): continuo "
+                "con quanto già scaricato — il resto arriva da solo coi "
+                "cicli automatici (feed ogni 10 minuti, GDELT ogni 30)"
+            )
+    if da_feed or da_gdelt:
+        print(
+            f"raccolta: +{sum(da_feed.values())} articoli dai feed, "
+            f"+{sum(da_gdelt.values())} da GDELT "
+            f"({len({*da_feed, *da_gdelt})} testate con novità)"
         )
-    print(
-        f"raccolta: +{sum(da_feed.values())} articoli dai feed, "
-        f"+{sum(da_gdelt.values())} da GDELT "
-        f"({len({*da_feed, *da_gdelt})} testate con novità)"
-    )
 
     await run_pipeline()
 

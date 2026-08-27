@@ -43,7 +43,7 @@ spagnolo — si cambia dalla testata):
 
 ## Come funziona
 
-Il raccoglitore legge i **feed RSS di oltre 90 testate di 43 paesi** (132
+Il raccoglitore legge i **feed RSS di oltre 120 testate di 59 paesi** (143
 feed: prime pagine più le sezioni esteri/politica/economia delle maggiori)
 e integra con **GDELT** (gratuito) gli articoli che nei feed non compaiono —
 comprese Reuters e AP, che feed pubblici non ne hanno. Gli articoli sullo

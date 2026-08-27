@@ -177,3 +177,99 @@ async def test_gdelt_interruttore_quando_irraggiungibile(
 
     assert len(route.calls) == 4  # il terzo gruppo non viene nemmeno tentato
     assert creati == {}
+
+
+@respx.mock
+async def test_intero_catalogo_reale_scaricabile(maker: async_sessionmaker) -> None:
+    """Prova generale del primo scaricamento sull'INTERO catalogo vero:
+    ogni feed risponde (rete simulata), ogni fonte abilitata con feed deve
+    produrre articoli, nessuna eccezione, e — usando il client con guardia
+    egress — ogni URL del catalogo deve essere dentro l'allowlist."""
+    from core.ingest.catalog import sync_catalog
+    from core.net import build_client, reset_allowlist_cache
+
+    reset_allowlist_cache()
+    async with maker() as session:
+        await sync_catalog(session)
+        await session.commit()
+
+    def feed_su_misura(request: httpx.Request) -> httpx.Response:
+        # Un piccolo feed valido, con titoli e URL unici per host+percorso
+        # (altrimenti il dedup globale li collasserebbe).
+        base = f"https://{request.url.host}{request.url.path}"
+        firma = f"{request.url.host}{request.url.path}".replace("/", " ")
+        items = "".join(
+            f"<item><title>Notizia {'molto ' * i}particolare {i} da {firma}</title>"
+            f"<link>{base}?voce={i}</link>"
+            f"<description>Estratto {i} di prova.</description></item>"
+            for i in range(3)
+        )
+        rss = (
+            "<?xml version='1.0'?><rss version='2.0'><channel>"
+            f"<title>{firma}</title>{items}</channel></rss>"
+        )
+        return httpx.Response(200, content=rss.encode())
+
+    respx.get(GDELT_DOC_URL).mock(
+        return_value=httpx.Response(200, json={"articles": []})
+    )
+    respx.route(method="GET", path__regex=r"/robots\.txt$").mock(
+        return_value=httpx.Response(404)
+    )
+    respx.route(method="GET").mock(side_effect=feed_su_misura)
+
+    async with build_client() as client:
+        creati = await ingest_all_feeds(
+            maker,
+            client=client,
+            limiter=_limiter(),
+            robots=RobotsCache(client),
+            max_feeds_per_source=4,
+        )
+        await ingest_gdelt_all(maker, client=client, limiter=_limiter())
+
+    async with maker() as session:
+        con_feed = [
+            s for s in (await session.execute(select(Source).where(Source.enabled))).scalars()
+            if s.feed_urls
+        ]
+    assert len(con_feed) >= 60
+    for fonte in con_feed:
+        assert creati.get(fonte.slug, 0) >= 1, f"{fonte.slug}: nessun articolo"
+
+
+@respx.mock
+async def test_tutto_fallisce_ma_niente_crash(maker: async_sessionmaker) -> None:
+    """Scenario catastrofico: ogni feed è rotto e GDELT è giù. La raccolta
+    deve finire senza eccezioni (l'installazione non si blocca mai)."""
+    async with maker() as session:
+        session.add(_fonte("a", "a.test", ["https://a.test/rss.xml"], "a.test"))
+        session.add(_fonte("b", "b.test", ["https://b.test/rss.xml"], "b.test"))
+        session.add(_fonte("c", "c.test", [], "c.test"))
+        await session.commit()
+
+    respx.route(method="GET", path__regex=r"/robots\.txt$").mock(
+        return_value=httpx.Response(404)
+    )
+    respx.get("https://a.test/rss.xml").mock(return_value=httpx.Response(500))
+    respx.get("https://b.test/rss.xml").mock(
+        side_effect=httpx.ConnectError("rete assente")
+    )
+    respx.get("https://a.test/").mock(return_value=httpx.Response(500))
+    respx.get("https://b.test/").mock(side_effect=httpx.ConnectError("rete assente"))
+    respx.get(GDELT_DOC_URL).mock(side_effect=httpx.ConnectTimeout("giù"))
+
+    async def niente_attesa(_secondi: float) -> None:
+        return None
+
+    async with httpx.AsyncClient() as client:
+        creati_feed = await ingest_all_feeds(
+            maker, client=client, limiter=_limiter(), robots=RobotsCache(client),
+            retry_failed=True,
+        )
+        creati_gdelt = await ingest_gdelt_all(
+            maker, client=client, limiter=_limiter(), sleep=niente_attesa
+        )
+
+    assert creati_feed == {"a": 0, "b": 0}
+    assert creati_gdelt == {}

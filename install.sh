@@ -125,7 +125,10 @@ if [ "${OPENNEWS_DEMO:-0}" = "1" ]; then
   "$APP/.venv/bin/opennews" seed --demo
 elif [ "${OPENNEWS_NO_SEED:-0}" != "1" ]; then
   say "Scarico le ultime 24 ore di notizie vere (pochi minuti, solo la prima volta)"
-  "$APP/.venv/bin/opennews" seed
+  # Il primo scaricamento non deve MAI bloccare l'installazione: se va male
+  # (rete assente, ecc.) l'app parte comunque e si riempie da sola.
+  "$APP/.venv/bin/opennews" seed \
+    || say "Primo scaricamento non riuscito: l'app parte lo stesso e riproverà da sola ogni 10 minuti"
 fi
 
 say "Avvio il giornale"
