@@ -58,6 +58,14 @@ docker compose --profile llm up -d          # avvia Ollama
 docker compose exec ollama ollama pull qwen2.5:7b
 ```
 
+**Ollama già installato sul tuo computer** (fuori da Docker)? Non serve il
+profilo `llm`: nel pannello imposta l'URL a
+`http://host.docker.internal:11434` (Docker Desktop su macOS/Windows; su
+Linux aggiungi `extra_hosts: ["host.docker.internal:host-gateway"]` ai
+servizi api/worker nel compose) e assicurati che il modello sia scaricato
+(`ollama list` sul computer). Il modello deve essere un tag Ollama reale:
+`qwen2.5:7b`, non nomi in stile LM Studio/MLX.
+
 Poi attiva i riassunti dal **pannello /impostazioni** (accedi col primo
 profilo registrato, che è amministratore): lì scegli anche il modello e
 l'URL di Ollama. In alternativa: `ENABLE_LLM=true` in `.env` e

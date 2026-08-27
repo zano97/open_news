@@ -246,3 +246,22 @@ class TestStatoLLM:
     async def test_genera_ora_negato_ai_non_admin(self, client: AsyncClient) -> None:
         resp = await client.post("/impostazioni/riassunti-prova")
         assert resp.status_code == 403
+
+
+async def test_url_ollama_host_docker_internal_accettato(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Chi ha Ollama sul computer (fuori dai container) usa l'alias Docker."""
+    settings = get_settings()
+    originale = settings.ollama_url
+    try:
+        await _registra(client, "admin-host")
+        resp = await client.post(
+            "/impostazioni",
+            data={"ollama_url": "http://host.docker.internal:11434"},
+            follow_redirects=False,
+        )
+        assert resp.status_code == 303
+        assert settings.ollama_url == "http://host.docker.internal:11434"
+    finally:
+        settings.ollama_url = originale

@@ -68,6 +68,10 @@ def host_allowed(host: str) -> bool:
     # Host interni allo stack (meilisearch, ollama, db) e loopback.
     if host in {"localhost"} or "." not in host:
         return True
+    # Alias Docker verso la macchina host (Docker Desktop su macOS/Windows):
+    # serve per raggiungere un Ollama che gira sul computer, fuori dai container.
+    if host in {"host.docker.internal", "gateway.docker.internal"}:
+        return True
     try:
         ipaddress.ip_address(host)
     except ValueError:

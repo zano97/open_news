@@ -58,3 +58,10 @@ async def test_client_consente_dominio_ammesso() -> None:
     assert route.called
     # Il client si identifica sempre con lo User-Agent del progetto.
     assert "OpenNewsBot" in route.calls[0].request.headers["User-Agent"]
+
+
+def test_host_docker_internal_ammesso() -> None:
+    """Ollama sul computer host (Docker Desktop): l'alias interno è locale."""
+    assert host_allowed("host.docker.internal")
+    assert host_allowed("gateway.docker.internal")
+    assert not host_allowed("host.docker.internal.evil.com")
