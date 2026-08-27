@@ -44,9 +44,16 @@ services:
       SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
       EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-hashing}
       ENABLE_LLM: ${ENABLE_LLM:-false}
-      OLLAMA_URL: http://ollama:11434
+      # Default: Ollama installato SUL COMPUTER (il caso più comune).
+      # host.docker.internal è l'alias con cui i container raggiungono la
+      # macchina host; su Linux funziona grazie a extra_hosts qui sotto.
+      # Se invece usi l'Ollama del profilo compose `llm`, imposta in .env:
+      # OLLAMA_URL=http://ollama:11434
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # rende l'alias valido anche su Linux
     depends_on:
       db:
         condition: service_healthy
@@ -58,6 +65,8 @@ services:
     build: .
     command: python -m apps.worker.main
     environment: *app_env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

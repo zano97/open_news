@@ -61,6 +61,25 @@ database migrations run automatically):
 ./update.sh        # or: make update
 ```
 
+**AI summaries, on request ("The story in brief").** On a story page the
+reader can press a button and watch a neutral summary stream in — generated
+by a **local open model via [Ollama](https://ollama.com)**, never a paid
+service. The default configuration expects **Ollama installed on your
+computer**:
+
+```bash
+OLLAMA_HOST=0.0.0.0 ollama serve      # so the Docker containers can reach it
+ollama pull qwen2.5:7b                # a real Ollama tag (qwen2.5:3b on small machines)
+```
+
+then in the admin panel (`/impostazioni`) turn the switch on. The Ollama URL
+field defaults to `http://host.docker.internal:11434`, which is **the special
+address containers use to reach your computer** — `localhost` would point at
+the container itself. If you prefer Ollama inside Docker instead, run
+`docker compose --profile llm up -d` and set the URL to `http://ollama:11434`.
+The panel's "Generator status" checks the connection live and tells you
+exactly what is missing.
+
 **News in your language.** Outlet headlines always stay in their original
 language — their wording is the very thing the project measures. With the
 optional open-source translator ([Argos Translate](https://www.argosopentech.com/),

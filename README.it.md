@@ -59,6 +59,25 @@ Anche **l'aggiornamento** è una riga, dalla cartella d'installazione
 ./update.sh        # oppure: make update
 ```
 
+**Riassunti con l'AI, su richiesta («Il fatto in breve»).** Nella pagina di
+una notizia il lettore può premere un pulsante e vedere comparire in
+streaming un riassunto neutro — generato da un **modello aperto locale via
+[Ollama](https://ollama.com)**, mai un servizio a pagamento. La
+configurazione predefinita si aspetta **Ollama installato sul tuo computer**:
+
+```bash
+OLLAMA_HOST=0.0.0.0 ollama serve      # così i container Docker possono raggiungerlo
+ollama pull qwen2.5:7b                # un tag Ollama reale (qwen2.5:3b su macchine piccole)
+```
+
+poi nel pannello admin (`/impostazioni`) attiva l'interruttore. Il campo URL
+di Ollama è preimpostato a `http://host.docker.internal:11434`, che è
+**l'indirizzo speciale con cui i container raggiungono il tuo computer** —
+`localhost` punterebbe al container stesso. Se preferisci Ollama dentro
+Docker, avvia `docker compose --profile llm up -d` e imposta l'URL a
+`http://ollama:11434`. Lo «Stato del generatore» nel pannello verifica la
+connessione in diretta e ti dice esattamente cosa manca.
+
 **Le notizie nella tua lingua.** I titoli delle testate restano sempre in
 lingua originale: la loro formulazione è esattamente ciò che il progetto
 misura. Con il traduttore open source opzionale
