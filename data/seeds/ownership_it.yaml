@@ -146,7 +146,7 @@ ownerships:
     from_year: null
     evidence_name: stampa specializzata
     evidence_url: null
-    note: "Testata riconducibile alla famiglia Angelucci; anno di acquisizione e quota puntuale da verificare. Antonio Angelucci è deputato in carica: vedi political_offices."
+    note: "Testata riconducibile alla famiglia Angelucci; anno di acquisizione e quota puntuale da verificare. Antonio Angelucci è deputato in carica: vedi cariche politiche."
   - source_slug: libero
     owner_name: "Antonio Angelucci"
     share_pct: null
