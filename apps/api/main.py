@@ -15,6 +15,11 @@ from core.config import get_settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Registro eventi in memoria: visibile dal pannello /impostazioni,
+    # così la diagnosi non richiede un terminale.
+    from core.logbuffer import install as install_logbuffer
+
+    install_logbuffer()
     # Gli override del pannello admin prevalgono sulle variabili d'ambiente.
     try:
         from core.db import get_sessionmaker

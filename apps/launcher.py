@@ -162,10 +162,32 @@ def _open_ui_later(url: str, *, app_window: bool, delay: float = 1.5) -> None:
     threading.Thread(target=apri, daemon=True).start()
 
 
+def _file_logging() -> None:
+    """Log su file in ~/.opennews/opennews.log: raggiungibile senza terminale
+    (il pannello /impostazioni ne mostra il percorso e gli ultimi eventi)."""
+    import logging
+    from logging.handlers import RotatingFileHandler
+
+    handler = RotatingFileHandler(
+        home_dir() / "opennews.log",
+        maxBytes=1_000_000,
+        backupCount=2,
+        encoding="utf-8",
+    )
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    )
+    root = logging.getLogger()
+    root.addHandler(handler)
+    if root.level > logging.INFO or root.level == logging.NOTSET:
+        root.setLevel(logging.INFO)
+
+
 def cmd_run(port: int, open_browser: bool, app_window: bool = True) -> None:
     import uvicorn
 
     _ensure_env()
+    _file_logging()
     _migrate()
     # Il raccoglitore gira nello stesso processo (un solo worker uvicorn).
     os.environ["OPENNEWS_EMBEDDED_WORKER"] = "1"

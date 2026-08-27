@@ -92,11 +92,13 @@
         })
         .catch(function (err) {
           btn.disabled = false;
-          btn.textContent = btn.getAttribute("data-errore") || etichetta;
+          btn.textContent = etichetta; // il motivo sta nel riquadro, non sul bottone
+          testo.hidden = false;
+          testo.classList.add("riassunto-errore");
           if (err && err.message) {
-            testo.hidden = false;
             testo.textContent = err.message;
-            testo.classList.add("riassunto-errore");
+          } else if (!testo.textContent.trim()) {
+            testo.textContent = btn.getAttribute("data-errore") || "";
           }
         });
     });

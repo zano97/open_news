@@ -427,9 +427,11 @@ async def genera_riassunto(
     from core.net import build_client
     from core.nlp.summarize import (
         METHOD_NAME,
-        NUM_PREDICT,
         ThinkFilter,
         build_prompt,
+        generation_payload,
+        record_generation,
+        think_rejected,
     )
     from core.provenance import record as record_provenance
 
@@ -460,33 +462,41 @@ async def genera_riassunto(
     # server diventano un vero errore HTTP col motivo, non un flusso vuoto.
     _riassunti_in_corso.add(story_id)
     client = build_client(timeout=300)
-    stream_cm = client.stream(
-        "POST",
-        f"{settings.ollama_url.rstrip('/')}/api/generate",
-        json={
-            "model": settings.ollama_model,
-            "prompt": prompt,
-            "stream": True,
-            # think:false spegne il ragionamento dei modelli "pensanti"
-            # (qwen3, deepseek-r1): senza, il budget di token finisce nel
-            # ragionamento e la risposta visibile resta vuota.
-            "think": False,
-            "options": {"temperature": 0.2, "num_predict": NUM_PREDICT},
-        },
-    )
+    url = f"{settings.ollama_url.rstrip('/')}/api/generate"
+    stream_cm = client.stream("POST", url, json=generation_payload(prompt, stream=True))
     try:
         resp = await stream_cm.__aenter__()
         if resp.status_code != 200:
             body = (await resp.aread()).decode("utf-8", "replace")
             await stream_cm.__aexit__(None, None, None)
-            raise HTTPException(
-                status_code=502,
-                detail=t("storia.riassunto_fallito", errore=_errore_ollama(body)),
-            )
+            if think_rejected(resp.status_code, body):
+                # Il server rifiuta il parametro think: si riprova senza.
+                stream_cm = client.stream(
+                    "POST", url,
+                    json=generation_payload(prompt, stream=True, include_think=False),
+                )
+                resp = await stream_cm.__aenter__()
+                if resp.status_code != 200:
+                    body = (await resp.aread()).decode("utf-8", "replace")
+                    await stream_cm.__aexit__(None, None, None)
+                    record_generation(_errore_ollama(body), ok=False)
+                    raise HTTPException(
+                        status_code=502,
+                        detail=t(
+                            "storia.riassunto_fallito", errore=_errore_ollama(body)
+                        ),
+                    )
+            else:
+                record_generation(_errore_ollama(body), ok=False)
+                raise HTTPException(
+                    status_code=502,
+                    detail=t("storia.riassunto_fallito", errore=_errore_ollama(body)),
+                )
     except httpx.HTTPError as exc:
         _riassunti_in_corso.discard(story_id)
         await client.aclose()
         log.warning("riassunto story %d: Ollama non risponde (%s)", story_id, _errore_ollama(exc))
+        record_generation(_errore_ollama(exc), ok=False)
         raise HTTPException(
             status_code=502,
             detail=t("storia.riassunto_fallito", errore=_errore_ollama(exc)),
@@ -522,8 +532,14 @@ async def genera_riassunto(
                     "riassunto story %d: risposta inutilizzabile (%d caratteri)",
                     story_id, len(testo),
                 )
+                record_generation(
+                    f"risposta inutilizzabile ({len(testo)} caratteri)", ok=False
+                )
                 yield "\n⚠ " + t("storia.riassunto_vuoto")
             if len(testo) >= 40:
+                record_generation(
+                    f"riassunto generato per la story {story_id}", ok=True
+                )
                 story.summary_neutral = testo
                 story.summary_method = "llm"
                 await record_provenance(
@@ -544,6 +560,7 @@ async def genera_riassunto(
             log.warning(
                 "riassunto story %d interrotto: %s", story_id, _errore_ollama(exc)
             )
+            record_generation(_errore_ollama(exc), ok=False)
             yield "\n⚠ " + t(
                 "storia.riassunto_fallito", errore=_errore_ollama(exc)
             )

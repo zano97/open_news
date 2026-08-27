@@ -50,6 +50,11 @@
         <p class="avviso-salvato">{{ t('imp.llm_ok', url=llm_status.url, model=llm_status.model) }}</p>
         {% endif %}
         <p class="fonte-meta">{{ t('imp.llm_conteggi', fatti=riassunti_fatti, in_attesa=riassunti_attesa) }}</p>
+        {% if ultima_generazione %}
+        <p class="{{ 'avviso-salvato' if ultima_generazione.ok else 'impostazione-errore' }}" role="status">
+          {{ t('imp.llm_ultima', quando=ultima_generazione.quando) }} {{ ultima_generazione.esito }}
+        </p>
+        {% endif %}
         {% if esito_riassunti is not none %}
         <p class="{{ 'avviso-salvato' if esito_riassunti > 0 else 'impostazione-errore' }}" role="status">
           {{ t('imp.llm_prova_ok', n=esito_riassunti) if esito_riassunti > 0
@@ -65,10 +70,28 @@
   </form>
 
   {% if llm_status is not none %}
-  <form method="post" action="/impostazioni/riassunti-prova" class="modulo-campi">
+  <form method="post" action="/impostazioni/prova-generatore" class="modulo-campi modulo-inline">
+    <button type="submit" class="bottone">{{ t('imp.llm_prova_diretta') }}</button>
+  </form>
+  <form method="post" action="/impostazioni/riassunti-prova" class="modulo-campi modulo-inline">
     <button type="submit" class="bottone">{{ t('imp.llm_prova') }}</button>
   </form>
   {% endif %}
+
+  <section class="scheda-sezione diagnostica">
+    <h3>{{ t('imp.diagnostica') }}</h3>
+    {% if log_file %}
+    <p class="fonte-meta">{{ t('imp.diag_file', path=log_file) }}</p>
+    {% else %}
+    <p class="fonte-meta">{{ t('imp.diag_nota_docker') }}</p>
+    {% endif %}
+    {% if log_records %}
+    <pre class="diagnostica-log">{% for r in log_records %}{{ r.when.strftime('%H:%M:%S') }} {{ r.level }} {{ r.logger }} — {{ r.message }}
+{% endfor %}</pre>
+    {% else %}
+    <p class="fonte-meta">{{ t('imp.diag_vuoto') }}</p>
+    {% endif %}
+  </section>
 
   <p class="fonte-meta">{{ t('imp.nota_env') }}</p>
   <p class="fonte-meta">{{ t('imp.nota_metodologia') | safe }}</p>

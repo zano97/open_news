@@ -15,6 +15,19 @@ WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 TEMPLATES_DIR = WEB_DIR / "templates"
 STATIC_DIR = WEB_DIR / "static"
 
+
+def _asset_version() -> str:
+    """Cache-busting: cambia quando cambiano css/js, così dopo un
+    aggiornamento il browser non serve mai asset vecchi dalla cache."""
+    files = [STATIC_DIR / "css/main.css", STATIC_DIR / "js/app.js"]
+    try:
+        return str(int(max(f.stat().st_mtime for f in files if f.exists())))
+    except ValueError:
+        return "0"
+
+
+ASSET_VERSION = _asset_version()
+
 # Nomi di giorni e mesi per la data in lettere della testata, per lingua.
 _GIORNI: dict[str, list[str]] = {
     "it": ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"],
@@ -86,6 +99,7 @@ def build_templates() -> Jinja2Templates:
     templates.env.filters["data_breve"] = _filtro_data_breve
     templates.env.globals["app_name"] = get_settings().app_name
     templates.env.globals["method_version"] = METHOD_VERSION
+    templates.env.globals["asset_v"] = ASSET_VERSION
     templates.env.globals["now"] = lambda: datetime.now(UTC)
 
     # Titolo della story nella lingua dell'interfaccia (traduzione marcata).

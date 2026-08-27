@@ -770,7 +770,27 @@ html:has(body.pagina-lampo) {
 .impostazione input[type="text"] { width: 100%; }
 .impostazione-aiuto { display: block; color: var(--seppia); font-weight: 400; }
 .impostazione-errore { color: var(--accento); font-weight: 700; margin: 0.2rem 0 0; }
-.riassunto-errore { color: var(--accento); font-style: italic; }
+.riassunto-errore {
+  color: var(--inchiostro);
+  background: var(--carta-scura);
+  border: 1px solid var(--accento);
+  padding: 0.6rem 0.9rem;
+  font-style: normal;
+}
+.bottone:disabled { opacity: 0.65; cursor: wait; }
+.modulo-inline { display: inline-block; margin-right: 0.8rem; }
+.diagnostica-log {
+  font-family: var(--font-macchina);
+  font-size: 0.78rem;
+  color: var(--inchiostro);
+  background: var(--carta-scura);
+  border: 1px solid var(--filetto, var(--accento));
+  padding: 0.8rem;
+  max-height: 22rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .avviso-salvato {
   border: 1px solid var(--accento);
   color: var(--accento);

@@ -7,6 +7,7 @@ d'ambiente e vengono applicate a caldo; il worker le ricarica entro 5 minuti.
 
 from typing import Annotated
 
+import httpx
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import func, select
@@ -21,9 +22,14 @@ from core.i18n import make_translator
 from core.models import AnnotatorProfile, Story
 from core.net import build_client
 from core.nlp.summarize import (
+    LAST_GENERATION,
     check_ollama,
+    generation_payload,
+    record_generation,
     stories_needing_summary,
+    strip_think,
     summarize_story,
+    think_rejected,
 )
 from core.runtime_settings import (
     EDITABLE,
@@ -52,6 +58,24 @@ async def _llm_panel(session: AsyncSession) -> dict[str, object]:
     return {"llm_status": status, "riassunti_fatti": fatti, "riassunti_attesa": in_attesa}
 
 
+def _diagnostics() -> dict[str, object]:
+    """Registro eventi e ultima generazione: la diagnosi senza terminale."""
+    import os
+
+    from core.logbuffer import recent
+
+    log_file = None
+    if os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1":
+        from apps.launcher import home_dir
+
+        log_file = str(home_dir() / "opennews.log")
+    return {
+        "log_records": recent(limit=60),
+        "log_file": log_file,
+        "ultima_generazione": dict(LAST_GENERATION) or None,
+    }
+
+
 async def _render(
     request: Request,
     session: AsyncSession,
@@ -73,6 +97,7 @@ async def _render(
             "ultima": await last_update(session),
             "esito_riassunti": esito_riassunti,
             **await _llm_panel(session),
+            **_diagnostics(),
         },
         status_code=status_code,
     )
@@ -120,6 +145,64 @@ async def riassunti_prova(
                     done += 1
         await session.commit()
     return RedirectResponse(f"/impostazioni?riassunti={done}", status_code=303)
+
+
+@router.post("/prova-generatore", response_model=None)
+async def prova_generatore(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    annotator: Annotated[AnnotatorProfile | None, Depends(current_annotator)],
+) -> HTMLResponse | RedirectResponse:
+    """Una richiesta VERA a /api/generate, con l'esito crudo nel pannello.
+
+    Lo «Stato del generatore» interroga solo /api/tags: può dire "tutto
+    pronto" anche quando la generazione poi fallisce. Questa prova fa
+    esattamente ciò che fa il pulsante del lettore, e mostra la risposta.
+    """
+    if annotator is None or not annotator.is_admin:
+        return _forbidden(request, annotator)
+    t = make_translator(request_locale(request))
+    settings = get_settings()
+    if not settings.enable_llm:
+        record_generation(t("imp.llm_spento"), ok=False)
+        return RedirectResponse("/impostazioni", status_code=303)
+
+    import time
+
+    url = f"{settings.ollama_url.rstrip('/')}/api/generate"
+    prompt = "Rispondi con una sola breve frase: il generatore funziona."
+    inizio = time.monotonic()
+    try:
+        async with build_client(timeout=180) as client:
+            resp = await client.post(url, json=generation_payload(prompt, stream=False))
+            if think_rejected(resp.status_code, resp.text):
+                resp = await client.post(
+                    url,
+                    json=generation_payload(prompt, stream=False, include_think=False),
+                )
+            secondi = round(time.monotonic() - inizio, 1)
+            if resp.status_code != 200:
+                corpo = resp.text.strip().replace("\n", " ")[:300]
+                record_generation(
+                    t("imp.prova_fallita", errore=f"HTTP {resp.status_code}: {corpo}"),
+                    ok=False,
+                )
+            else:
+                testo = strip_think(str(resp.json().get("response", "")))
+                if testo:
+                    record_generation(
+                        t("imp.prova_ok", secondi=secondi, testo=testo[:160]),
+                        ok=True,
+                    )
+                else:
+                    record_generation(
+                        t("imp.prova_fallita", errore=t("storia.riassunto_vuoto")),
+                        ok=False,
+                    )
+    except (httpx.HTTPError, ValueError) as exc:
+        dettaglio = f"{exc.__class__.__name__}: {exc}".strip().rstrip(":")
+        record_generation(t("imp.prova_fallita", errore=dettaglio), ok=False)
+    return RedirectResponse("/impostazioni", status_code=303)
 
 
 @router.post("", response_class=HTMLResponse, response_model=None)

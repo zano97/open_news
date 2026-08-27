@@ -88,6 +88,44 @@ def strip_think(text: str) -> str:
     filtro = ThinkFilter()
     return filtro.feed(text).strip()
 
+
+def generation_payload(
+    prompt: str, *, stream: bool, include_think: bool = True
+) -> dict[str, object]:
+    """Corpo della richiesta a /api/generate di Ollama.
+
+    `think: false` spegne il ragionamento dei modelli "pensanti" (qwen3,
+    deepseek-r1); alcune versioni di Ollama però RIFIUTANO il parametro sui
+    modelli che non lo supportano: chi chiama ritenta con
+    `include_think=False` quando `think_rejected` lo segnala.
+    """
+    settings = get_settings()
+    payload: dict[str, object] = {
+        "model": settings.ollama_model,
+        "prompt": prompt,
+        "stream": stream,
+        "options": {"temperature": 0.2, "num_predict": NUM_PREDICT},
+    }
+    if include_think:
+        payload["think"] = False
+    return payload
+
+
+def think_rejected(status_code: int, body: str) -> bool:
+    """Vero se il server ha rifiutato la richiesta per il parametro think."""
+    return status_code == 400 and "think" in body.lower()
+
+
+# Esito dell'ultima generazione (di prova o su richiesta del lettore):
+# mostrato nel pannello /impostazioni, così un fallimento non è mai muto.
+LAST_GENERATION: dict[str, str] = {}
+
+
+def record_generation(esito: str, *, ok: bool) -> None:
+    LAST_GENERATION["quando"] = utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    LAST_GENERATION["esito"] = esito
+    LAST_GENERATION["ok"] = "1" if ok else ""
+
 _PROMPTS = {
     "it": (
         "Sei un'agenzia di stampa neutrale. Scrivi un riassunto di 3-4 frasi "
@@ -132,28 +170,32 @@ async def summarize_story(
         return False
     if not story.articles:
         return False
+    url = f"{settings.ollama_url.rstrip('/')}/api/generate"
+    prompt = build_prompt(story)
     try:
         resp = await client.post(
-            f"{settings.ollama_url.rstrip('/')}/api/generate",
-            json={
-                "model": settings.ollama_model,
-                "prompt": build_prompt(story),
-                "stream": False,
-                # think:false spegne il ragionamento dei modelli "pensanti"
-                # (ignorato dagli altri); strip_think ripulisce comunque.
-                "think": False,
-                "options": {"temperature": 0.2, "num_predict": NUM_PREDICT},
-            },
-            timeout=180,
+            url, json=generation_payload(prompt, stream=False), timeout=180
         )
+        if think_rejected(resp.status_code, resp.text):
+            # Il server non accetta il parametro think: si riprova senza.
+            resp = await client.post(
+                url,
+                json=generation_payload(prompt, stream=False, include_think=False),
+                timeout=180,
+            )
         resp.raise_for_status()
         text = strip_think(str(resp.json().get("response", "")))
     except (httpx.HTTPError, ValueError) as exc:
         log.warning("riassunto story %d fallito: %s", story.id, exc)
+        record_generation(f"{exc.__class__.__name__}: {exc}", ok=False)
         return False
     if len(text) < 40:
         log.info("riassunto story %d troppo corto, scartato", story.id)
+        record_generation(
+            f"risposta inutilizzabile ({len(text)} caratteri)", ok=False
+        )
         return False
+    record_generation(f"riassunto salvato per la story {story.id}", ok=True)
 
     story.summary_neutral = text
     story.summary_method = "llm"
