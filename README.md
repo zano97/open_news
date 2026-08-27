@@ -8,6 +8,16 @@ citando sempre la provenienza di ogni dato. Per ogni notizia vedi chi l'ha
 coperta e con quali titoli; per ogni testata vedi chi la possiede, quanti
 soldi pubblici riceve, quali temi copre più della media e quali storie ignora.
 
+L'interfaccia è un **giornale nel browser**, in stile quotidiano d'inizio
+Novecento:
+
+| | |
+|---|---|
+| ![Prima pagina](docs/screenshots/01-prima-pagina.png) | ![Scheda di una testata](docs/screenshots/04-fonte-libero.png) |
+| *La prima pagina: titoli delle testate a confronto per ogni notizia* | *La scheda di una testata: proprietari, cariche politiche, soldi pubblici* |
+| ![Edizione lampo](docs/screenshots/02-lampo.png) | ![Mobile, edizione notturna](docs/screenshots/07-mobile-notte.png) |
+| *L'«edizione lampo»: il reel di carta delle notizie più calde* | *Su telefono, con l'edizione notturna* |
+
 - Solo software open source e risorse gratuite: **nessuna API a pagamento**,
   nessuna chiave di servizi commerciali (un test lo garantisce)
 - Ogni numero mostrato ha accanto **fonte, data del calcolo e metodo**
@@ -15,10 +25,30 @@ soldi pubblici riceve, quali temi copre più della media e quali storie ignora.
 
 ---
 
-## Avvio rapido (Docker, consigliato)
+## Installazione in una riga
 
-Requisiti: una macchina con 4 core / 8 GB RAM (anche ARM: Oracle Free,
-Raspberry Pi 5), Docker con il plugin `docker compose`.
+Su una macchina con [Docker](https://docs.docker.com/engine/install/)
+(4 core / 8 GB bastano; va bene anche ARM: Oracle Free, Raspberry Pi 5):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+Lo script clona il progetto, genera da solo i segreti, avvia lo stack e
+scarica le ultime 24 ore di notizie dalle testate reali (~10-15 minuti).
+Alla fine apri **<http://localhost:8000>**: quello è il giornale. Da lì in
+poi si aggiorna da solo (feed ogni 10 minuti, segnali di bias ogni lunedì).
+
+Vuoi solo **provare l'interfaccia subito, senza scaricare notizie vere**?
+Modalità demo (30 secondi, crea testate dimostrative dichiarate come tali —
+mai un titolo inventato attribuito a una testata reale):
+
+```bash
+OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+<details>
+<summary><strong>Installazione manuale</strong> (se preferisci vedere ogni passo)</summary>
 
 ```bash
 git clone https://github.com/zano97/open_news.git
@@ -28,9 +58,6 @@ docker compose up --build -d    # 2. avvia lo stack completo
 docker compose exec api python -m scripts.verify_feeds   # 3. verifica i feed reali
 docker compose exec api python -m scripts.seed           # 4. popola (~10-15 minuti)
 ```
-
-Poi apri **<http://localhost:8000>**. Il worker continua da solo: feed ogni
-10 minuti, GDELT ogni 30, clustering ogni 10, segnali di bias ogni lunedì.
 
 Nel file `.env` imposta almeno:
 
@@ -42,19 +69,13 @@ Nel file `.env` imposta almeno:
 | `DOMAIN` | (solo in produzione) il tuo dominio: Caddy ottiene da solo l'HTTPS |
 | `EMBEDDING_BACKEND` | `hashing` (default, zero download) o `e5` (multilingue, consigliato in produzione — vedi [docs/DEPLOY.md](docs/DEPLOY.md)) |
 
-### Provare l'interfaccia senza rete
-
-Se vuoi solo vedere com'è fatta l'applicazione, senza scaricare notizie vere:
-
-```bash
-docker compose exec api python -m scripts.seed --offline-demo
-```
-
-Crea 8 **testate dimostrative** (dichiarate come tali) con un giorno di
-notizie inventate: mai un titolo inventato viene attribuito a una testata
-reale.
+</details>
 
 ## Come si usa l'applicazione
+
+Non c'è niente da imparare: **l'interfaccia è il sito stesso**, si usa dal
+browser come un normale giornale online (anche da telefono). Il terminale
+serve solo per installare e amministrare. Le pagine:
 
 | Pagina | Che cosa ci trovi |
 |---|---|

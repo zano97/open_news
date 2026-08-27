@@ -10,7 +10,18 @@ da solo i certificati HTTPS.
 - un dominio (facoltativo ma consigliato, per l'HTTPS automatico)
 - porte 80 e 443 raggiungibili
 
-## Installazione (qualsiasi VPS Linux)
+## Installazione in una riga
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+Lo script genera i segreti, avvia lo stack e popola il giornale. Per il
+deploy pubblico, dopo l'installazione imposta `DOMAIN=...` in `.env` e
+riavvia (`docker compose up -d`): Caddy ottiene da solo il certificato.
+I passi manuali equivalenti sono qui sotto.
+
+## Installazione manuale (qualsiasi VPS Linux)
 
 ```bash
 git clone https://github.com/zano97/open_news.git && cd open_news
