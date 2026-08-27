@@ -1,4 +1,4 @@
-.PHONY: help install dev up down logs test test-e2e lint typecheck fmt check seed verify-feeds fonts migrate revision clean
+.PHONY: help install dev up down logs test test-e2e lint typecheck fmt check seed seed-demo calibrate verify-feeds fonts migrate revision clean
 
 PY ?= .venv/bin/python
 PIP ?= .venv/bin/pip
@@ -49,6 +49,12 @@ revision: ## Nuova migrazione: make revision m="messaggio"
 
 seed: ## Popola il sistema: fonti dal catalogo + assetti proprietari + ~24h di dati
 	$(PY) -m scripts.seed
+
+seed-demo: ## Come seed, ma senza rete: testate dimostrative e notizie inventate
+	$(PY) -m scripts.seed --offline-demo
+
+calibrate: ## Misura precision/recall della soglia di clustering sul set annotato
+	$(PY) -m scripts.calibrate_threshold
 
 verify-feeds: ## Verifica via HTTP reale tutti i feed in data/sources.yaml e aggiorna lo stato
 	$(PY) -m scripts.verify_feeds

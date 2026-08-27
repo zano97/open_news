@@ -48,11 +48,14 @@ class Settings(BaseSettings):
     http_timeout_seconds: float = 20.0
 
     # Clustering. La soglia è calibrata sul backend attivo con
-    # scripts/calibrate_threshold.py (set: data/seeds/calibration_pairs.yaml):
-    # hashing-ngram-v2 -> 0.10 (prec 0.80 / rec 0.80 monolingua);
-    # con backend e5 ricalibrare (valori tipici ~0.85) e impostare via env.
+    # scripts/calibrate_threshold.py (set: data/seeds/calibration_pairs.yaml).
+    # Con hashing-ngram-v2: 0.18 (pairwise: precisione 0.86 / richiamo 0.51
+    # monolingua; il richiamo effettivo del clustering è più alto perché basta
+    # che UNA variante superi la soglia). Il criterio è doppio (centroide E
+    # membro più vicino) per evitare la concatenazione di eventi diversi.
+    # Con backend e5 ricalibrare (valori tipici ~0.85) e impostare via env.
     cluster_window_hours: int = 72
-    cluster_similarity_threshold: float = 0.10
+    cluster_similarity_threshold: float = 0.18
     flash_min_sources: int = 5
     flash_window_hours: int = 2
 

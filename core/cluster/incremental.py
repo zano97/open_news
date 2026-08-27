@@ -132,6 +132,25 @@ async def assign_story(
     matches = await nearest_stories(session, embedding, since=since, limit=5)
     best = matches[0] if matches else None
 
+    # Doppio criterio anti-concatenazione: oltre alla similarità col centroide
+    # (che deriva man mano che il cluster cresce), l'articolo deve somigliare
+    # ad ALMENO UN membro reale della story. Vedi docs/METHODOLOGY.md §2.
+    if best is not None and best.similarity >= settings.cluster_similarity_threshold:
+        member_embeddings = (
+            await session.execute(
+                select(Article.embedding).where(
+                    Article.story_id == best.story_id,
+                    Article.embedding.is_not(None),
+                )
+            )
+        ).scalars()
+        best_member = max(
+            (cosine(embedding, m) for m in member_embeddings if m is not None),
+            default=0.0,
+        )
+        if best_member < settings.cluster_similarity_threshold:
+            best = None
+
     if best is not None and best.similarity >= settings.cluster_similarity_threshold:
         story = (
             await session.execute(select(Story).where(Story.id == best.story_id))

@@ -96,3 +96,51 @@ verificabili: proprietà, cariche, finanziamenti. Nessuna etichetta di
 orientamento viene importata; il bias è calcolato dalla metodologia interna
 (docs/METHODOLOGY.md) su quattro livelli mostrati separatamente, mai sommati
 in un punteggio unico.
+
+## ADR-0011 — SimHash implementato in casa
+
+**Decisione.** Il dedup dei quasi-duplicati usa un SimHash a 64 bit scritto
+nel progetto (shingle di 2 parole, blake2b) invece della dipendenza
+`datasketch` (MinHash) indicata come opzione: meno dipendenze, stesso
+risultato per il caso d'uso (titoli quasi identici), test dedicati.
+
+## ADR-0012 — Embedder hashing v2 e soglia di clustering 0.18 con doppio criterio
+
+**Contesto.** La calibrazione su 100 coppie annotate ha mostrato che (a) la
+variante unigrammi+bigrammi era debole sulle parafrasi (F1 0.67) e (b) una
+soglia bassa con centroide incrementale produce concatenazione: il centroide
+"deriva" e attira eventi diversi.
+**Decisione.** Embedder `hashing-ngram-v2` (parole piene senza stopword +
+4/5-grammi di caratteri; F1 0.82 pairwise) e soglia 0.18 (precisione 0.86,
+richiamo pairwise 0.51) con **doppio criterio**: similarità col centroide E
+con almeno un articolo membro. Si privilegia la precisione: un merge
+sbagliato inquina i confronti tra testate, una story frammentata al massimo
+sottostima la copertura. Numeri pubblici in METHODOLOGY.md; con backend e5
+la soglia va ricalibrata (`make calibrate`).
+
+## ADR-0013 — "Orientamenti dichiarati diversi" = almeno 2 fasce su 3
+
+**Contesto.** La regola di pubblicazione del livello 4 richiede annotatori
+con orientamenti dichiarati "diversi", da precisare operativamente.
+**Decisione.** L'auto-dichiarazione (−2..+2) è divisa in tre fasce
+(< −0.5, −0.5..0.5, > 0.5); un'etichetta esce solo se gli annotatori
+coprono almeno due fasce, e la media è pesata per fascia (nessuna fascia
+domina per numerosità). Interpretazione documentata in METHODOLOGY.md §4.
+
+## ADR-0014 — Entità con euristica dichiarata, QID mai indovinati
+
+**Decisione.** Le entità delle story si estraggono con un'euristica sulle
+maiuscole ricorrenti nei titoli (`entities-heuristic-v1`); il collegamento a
+Wikidata avviene in un job separato best-effort e l'interfaccia mostra
+"(non collegata)" finché il QID non è verificato. Con l'extra [ml]
+(spaCy/GLiNER) la qualità sale, il metodo resta dichiarato.
+
+## ADR-0015 — Demo offline con testate dimostrative, mai titoli inventati su testate reali
+
+**Contesto.** Serve un modo per provare l'interfaccia senza rete
+(`make seed-demo`), ma inventare titoli e attribuirli a testate vere
+violerebbe la missione del progetto.
+**Decisione.** La modalità `--offline-demo` crea 8 testate esplicitamente
+"(demo)" con dominio `.invalid` e `terms_note` che dichiara l'origine
+inventata delle notizie; le testate reali del catalogo non ricevono mai
+contenuti inventati.

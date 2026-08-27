@@ -75,13 +75,32 @@ Tutto è spiegato in linguaggio semplice nella pagina pubblica `/metodo`
 ## Stato delle fasi
 
 - [x] **Fase 0** — Scheletro: compose, modelli, migrazioni, CI, test
-- [ ] **Fase 1** — Ingestione: RSS, robots/rate-limit, dedup, GDELT
-- [ ] **Fase 2** — Story clustering incrementale
-- [ ] **Fase 3** — Trasparenza strutturale (proprietà, finanziamenti)
-- [ ] **Fase 4** — Bias livelli 2-3 (agenda, co-copertura, framing)
-- [ ] **Fase 5** — UI giornale d'epoca + reel `/lampo`
-- [ ] **Fase 6** — Annotazione umana (livello 4)
-- [ ] **Fase 7** — Metodo, legale, deploy, seed, export `/dati`
+- [x] **Fase 1** — Ingestione: RSS, robots/rate-limit, dedup, GDELT
+- [x] **Fase 2** — Story clustering incrementale (soglia calibrata su 100 coppie annotate)
+- [x] **Fase 3** — Trasparenza strutturale (proprietà, finanziamenti, grafo SVG)
+- [x] **Fase 4** — Bias livelli 2-3 (agenda con IC bootstrap, co-copertura PCA, blind spot, lessico, attori, tono)
+- [x] **Fase 5** — UI giornale d'epoca + reel `/lampo` (e2e Playwright)
+- [x] **Fase 6** — Annotazione umana cieca (Krippendorff's α, regole di pubblicazione)
+- [x] **Fase 7** — `/metodo`, `/dati`, LEGAL, DEPLOY, seed, test egress
+
+## Comandi utili
+
+```bash
+make seed          # popola con le fonti reali (~24h di notizie; richiede rete)
+make seed-demo     # senza rete: testate dimostrative dichiarate e notizie inventate
+make verify-feeds  # verifica HTTP reale di tutti i feed del catalogo
+make calibrate     # precision/recall della soglia di clustering sul set annotato
+make test-e2e      # test Playwright nel browser (desktop + mobile)
+```
+
+## Documentazione
+
+- [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — la metodologia completa,
+  leggibile da non tecnici (è la pagina pubblica `/metodo`)
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — le decisioni architetturali (ADR)
+- [`docs/LEGAL.md`](docs/LEGAL.md) — cosa mostriamo, come raccogliamo, licenze
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deploy su VPS, Oracle Always Free ARM,
+  Raspberry Pi 5, backup e monitoraggio
 
 ## Contribuire
 

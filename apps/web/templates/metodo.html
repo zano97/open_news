@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Come lo calcoliamo — {{ app_name }}{% endblock %}
+
+{% block content %}
+<article class="prosa">
+  {{ contenuto | safe }}
+</article>
+{% endblock %}
