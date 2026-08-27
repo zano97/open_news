@@ -265,3 +265,72 @@ async def test_url_ollama_host_docker_internal_accettato(
         assert settings.ollama_url == "http://host.docker.internal:11434"
     finally:
         settings.ollama_url = originale
+
+
+async def test_altro_processo_vede_le_impostazioni_salvate(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Regressione multi-worker: un salvataggio fatto da un processo deve
+    valere anche per gli altri, che ricaricano gli override a ogni richiesta."""
+    import httpx as httpx_mod
+    import respx as respx_mod
+
+    from core.models import Article, Source, Story, utcnow
+
+    settings = get_settings()
+    originale = settings.enable_llm
+    try:
+        # Una story con due testate, come nella pagina reale.
+        story = Story(
+            title_neutral="Evento multi-processo", first_seen=utcnow(),
+            last_seen=utcnow(), article_count=2, source_count=2,
+        )
+        session.add(story)
+        await session.flush()
+        for i in range(2):
+            fonte = Source(
+                slug=f"mp-{i}", name=f"MP {i}", domain=f"mp{i}.test",
+                country="it", language="it", region="italy",
+                feed_urls=[], terms_note="",
+            )
+            session.add(fonte)
+            await session.flush()
+            session.add(
+                Article(
+                    source_id=fonte.id, url=f"https://mp{i}.test/1",
+                    title=f"Evento, versione {i}", language="it",
+                    story_id=story.id,
+                )
+            )
+        await session.commit()
+
+        # "Processo A": l'admin attiva i riassunti dal pannello.
+        await _registra(client, "admin-mp")
+        resp = await client.post(
+            "/impostazioni", data={"enable_llm": "true"}, follow_redirects=False
+        )
+        assert resp.status_code == 303
+
+        # "Processo B": memoria vecchia (enable_llm spento)...
+        settings.enable_llm = False
+
+        # ...ma la pagina della story ricarica gli override: pulsante presente.
+        pagina = await client.get(f"/storia/{story.id}")
+        assert "data-riassunto-btn" in pagina.text
+
+        # ...e anche la generazione funziona dal "processo" con memoria vecchia.
+        settings.enable_llm = False
+        flusso = (
+            '{"response": "Riassunto di prova sufficientemente lungo '
+            'per il salvataggio.", "done": true}\n'
+        )
+        with respx_mod.mock:
+            respx_mod.post(
+                f"{settings.ollama_url.rstrip('/')}/api/generate"
+            ).mock(return_value=httpx_mod.Response(200, text=flusso))
+            gen = await client.post(f"/storia/{story.id}/riassunto")
+        assert gen.status_code == 200
+        await session.refresh(story)
+        assert story.summary_neutral is not None
+    finally:
+        settings.enable_llm = originale

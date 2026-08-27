@@ -79,10 +79,26 @@ async def _session_user(
     ).scalar_one_or_none()
 
 
+async def refresh_runtime_settings(session: AsyncSession) -> None:
+    """Applica gli override del pannello a QUESTO processo, a ogni richiesta.
+
+    L'API gira con più worker uvicorn: un salvataggio dal pannello aggiorna
+    il processo che lo riceve e il DB, ma gli altri processi resterebbero
+    indietro. Una piccola SELECT per richiesta li tiene tutti allineati.
+    """
+    try:
+        from core.runtime_settings import load_overrides
+
+        await load_overrides(session)
+    except Exception:  # tabella assente (primo avvio): valgono i default
+        pass
+
+
 async def page_context(
     request: Request, session: AsyncSession
 ) -> dict[str, Any]:
     """Contesto comune a tutte le pagine: numeri di testata + lingua + t()."""
+    await refresh_runtime_settings(session)
     locale = request_locale(request)
     return {
         **await masthead_context(session),
@@ -392,6 +408,7 @@ async def genera_riassunto(
     from core.nlp.summarize import METHOD_NAME, build_prompt
     from core.provenance import record as record_provenance
 
+    await refresh_runtime_settings(session)
     settings = get_settings()
     story = (
         await session.execute(select(Story).where(Story.id == story_id))
