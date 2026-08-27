@@ -85,3 +85,28 @@ def test_senza_chromium_si_ripiega_sul_browser(
     monkeypatch.setattr(launcher.sys, "platform", "linux")
     monkeypatch.setattr(launcher.shutil, "which", lambda nome: None)
     assert not launcher.open_app_window("http://127.0.0.1:8000")
+
+
+def test_su_mac_prima_la_finestra_nativa(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Con pyobjc installato, macOS usa la finestra nativa (icona nel Dock)."""
+    lanci: list[list[str]] = []
+    monkeypatch.setattr(launcher.sys, "platform", "darwin")
+    monkeypatch.setattr("importlib.util.find_spec", lambda nome: object())
+    monkeypatch.setattr(
+        launcher.subprocess, "Popen", lambda argv, **kw: lanci.append(argv)
+    )
+    assert launcher.open_native_window("http://127.0.0.1:8000")
+    assert lanci[0][1:] == ["-m", "apps.mac_window", "http://127.0.0.1:8000"]
+
+
+def test_senza_pyobjc_niente_finestra_nativa(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(launcher.sys, "platform", "darwin")
+    monkeypatch.setattr("importlib.util.find_spec", lambda nome: None)
+    assert not launcher.open_native_window("http://127.0.0.1:8000")
+    # Su Linux/Windows la finestra nativa macOS non esiste per definizione.
+    monkeypatch.setattr(launcher.sys, "platform", "linux")
+    assert not launcher.open_native_window("http://127.0.0.1:8000")

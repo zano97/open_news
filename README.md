@@ -90,8 +90,10 @@ news (a few minutes: collection runs in parallel) and opens the newspaper in you
 browser.
 
 The newspaper opens in a **dedicated app window** — no tabs, no address
-bar — when Chrome, Chromium, Edge, Brave or Vivaldi is installed;
-otherwise in your default browser. From then on:
+bar, with the Open News emblem in the Dock or taskbar: a native window on
+macOS (system WebKit), and on Windows and Linux a Chrome/Chromium/Edge/
+Brave app window when available; failing everything, your default
+browser. From then on:
 
 - **start** it by clicking the icon, or with `opennews` in a terminal
   (`opennews --port 8100` for another port, `--tab` to open in a normal

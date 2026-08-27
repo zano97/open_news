@@ -286,6 +286,7 @@ storia.riassunto_errore: "Generazione non riuscita: riprova (o controlla lo stat
 storia.riassunto_spento: "Il generatore è disattivato: un amministratore può attivarlo in Impostazioni."
 storia.riassunto_in_corso: "Una generazione è già in corso per questa notizia: attendi qualche secondo e riprova."
 storia.riassunto_fallito: "Generazione non riuscita — {errore}. Controlla lo «Stato del generatore» in Impostazioni."
+storia.riassunto_vuoto: "Il modello non ha prodotto un riassunto utilizzabile: riprova, o scegli un modello diverso nelle Impostazioni."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Chi è il proprietario (secondo Wikidata)"

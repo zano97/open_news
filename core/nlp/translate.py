@@ -138,3 +138,27 @@ def display_title(story: Story, locale: str) -> tuple[str, bool]:
     if translated:
         return translated, True
     return story.title_neutral, False
+
+
+def headline_for(story: Story, locale: str) -> tuple[str, bool]:
+    """Titolo della story nella lingua del lettore, quando esiste.
+
+    Il titolo neutro è già la formulazione di una testata (l'articolo più
+    vicino al centroide): se non è nella lingua dell'interfaccia ma la story
+    ha versioni in quella lingua, si mostra la prima pubblicata tra queste —
+    stesso criterio, vincolato alla lingua, e un originale batte sempre una
+    traduzione automatica. Ordine: neutro se già in lingua → originale in
+    lingua → traduzione automatica → neutro com'è.
+    Richiede story.articles già caricati (le pagine che la usano li hanno).
+    """
+    articles = list(story.articles or [])
+    neutral_language = next(
+        (a.language for a in articles if a.title == story.title_neutral), None
+    )
+    if neutral_language == locale:
+        return story.title_neutral, False
+    in_lingua = [a for a in articles if a.language == locale and a.title]
+    if in_lingua:
+        primo = min(in_lingua, key=lambda a: a.published_at or a.fetched_at)
+        return primo.title, False
+    return display_title(story, locale)

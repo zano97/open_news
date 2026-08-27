@@ -102,6 +102,34 @@ def _app_browser_command() -> list[str] | None:
     return None
 
 
+def open_native_window(url: str) -> bool:
+    """Su macOS: finestra WebKit nativa con l'icona di Open News nel Dock.
+
+    Il browser in modalità --app mostrerebbe l'icona del browser; la
+    finestra nativa (apps/mac_window.py, extra [mac]) mostra la nostra.
+    Falso se pyobjc non è disponibile: si ripiega sulla modalità --app.
+    """
+    if sys.platform == "darwin":
+        import importlib.util
+
+        if (
+            importlib.util.find_spec("AppKit") is None
+            or importlib.util.find_spec("WebKit") is None
+        ):
+            return False
+        try:
+            subprocess.Popen(
+                [sys.executable, "-m", "apps.mac_window", url],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+        except OSError:
+            return False
+        return True
+    return False
+
+
 def open_app_window(url: str) -> bool:
     """Apre l'URL come finestra applicazione. Falso se non c'è un browser adatto."""
     cmd = _app_browser_command()
@@ -127,8 +155,9 @@ def _open_ui_later(url: str, *, app_window: bool, delay: float = 1.5) -> None:
         import time
 
         time.sleep(delay)
-        if not (app_window and open_app_window(url)):
-            webbrowser.open(url)
+        if app_window and (open_native_window(url) or open_app_window(url)):
+            return
+        webbrowser.open(url)
 
     threading.Thread(target=apri, daemon=True).start()
 

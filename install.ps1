@@ -61,6 +61,7 @@ $Lnk.TargetPath = $Exe
 $Lnk.WorkingDirectory = $App
 $Lnk.Description = "Chi paga l'informazione · come la racconta · che cosa ignora"
 $Lnk.IconLocation = (Join-Path $App "apps\web\static\icons\favicon.ico")
+$Lnk.WindowStyle = 7  # console minimizzata: resta solo la finestra del giornale
 $Lnk.Save()
 
 if ($env:OPENNEWS_DEMO -eq "1") {

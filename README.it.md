@@ -89,8 +89,10 @@ il comando `opennews`, scarica le ultime 24 ore di notizie vere (pochi
 minuti: la raccolta è parallela) e apre il giornale nel browser.
 
 Il giornale si apre in una **finestra applicazione dedicata** — senza tab
-né barra degli indirizzi — se sul computer c'è Chrome, Chromium, Edge,
-Brave o Vivaldi; altrimenti nel browser predefinito. Da lì in poi:
+né barra degli indirizzi, con l'emblema di Open News nel Dock o nella
+taskbar: su macOS è una finestra nativa (WebKit di sistema), su Windows e
+Linux la finestra usa Chrome/Chromium/Edge/Brave se presenti; in mancanza
+di tutto, il browser predefinito. Da lì in poi:
 
 - **avvii** con un clic sull'icona, oppure con `opennews` nel terminale
   (`opennews --port 8100` per un'altra porta, `--tab` per aprire nel

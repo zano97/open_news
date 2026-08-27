@@ -285,6 +285,7 @@ storia.riassunto_errore: "Generación fallida: reinténtalo (o revisa el estado 
 storia.riassunto_spento: "El generador está desactivado: una persona administradora puede activarlo en Ajustes."
 storia.riassunto_in_corso: "Ya se está generando un resumen para esta noticia: espera unos segundos y vuelve a intentarlo."
 storia.riassunto_fallito: "La generación ha fallado — {errore}. Revisa el «Estado del generador» en Ajustes."
+storia.riassunto_vuoto: "El modelo no ha producido un resumen utilizable: vuelve a intentarlo o elige otro modelo en Ajustes."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Quién es el propietario (según Wikidata)"

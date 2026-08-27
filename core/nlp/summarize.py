@@ -29,6 +29,64 @@ log = logging.getLogger(__name__)
 
 METHOD_NAME = "ollama-summary-v1"
 MAX_INPUT_ARTICLES = 8
+# Budget di token della risposta: abbondante, perché i modelli "pensanti"
+# possono comunque spenderne una parte in ragionamento.
+NUM_PREDICT = 400
+
+
+class ThinkFilter:
+    """Toglie da un flusso di testo il blocco <think>…</think> iniziale.
+
+    I modelli "pensanti" (qwen3, deepseek-r1, …) premettono il ragionamento
+    alla risposta; chiediamo `think: false` ma alcune build lo emettono nel
+    testo comunque. Il ragionamento non va mai mostrato né salvato.
+    """
+
+    _PREFIX = "<think>"
+    _SUFFIX = "</think>"
+
+    def __init__(self) -> None:
+        self._buffer = ""
+        self._decided = False
+        self._hiding = False
+        self._trim_lead = False
+
+    def feed(self, chunk: str) -> str:
+        """Restituisce la parte visibile di questo pezzo di flusso."""
+        if self._decided and not self._hiding:
+            if self._trim_lead:
+                chunk = chunk.lstrip("\n")
+                if chunk:
+                    self._trim_lead = False
+            return chunk
+        self._buffer += chunk
+        if not self._decided:
+            stripped = self._buffer.lstrip()
+            if not stripped:
+                return ""
+            if stripped.startswith(self._PREFIX):
+                self._decided = True
+                self._hiding = True
+            elif self._PREFIX.startswith(stripped[: len(self._PREFIX)]):
+                return ""  # troppo presto per decidere ("<thi…")
+            else:
+                self._decided = True
+                out, self._buffer = self._buffer, ""
+                return out
+        end = self._buffer.find(self._SUFFIX)
+        if end == -1:
+            return ""
+        out = self._buffer[end + len(self._SUFFIX) :].lstrip("\n")
+        self._buffer = ""
+        self._hiding = False
+        self._trim_lead = not out  # il ritorno a capo dopo </think> non si mostra
+        return out
+
+
+def strip_think(text: str) -> str:
+    """Versione non-streaming del filtro, per le risposte intere."""
+    filtro = ThinkFilter()
+    return filtro.feed(text).strip()
 
 _PROMPTS = {
     "it": (
@@ -81,12 +139,15 @@ async def summarize_story(
                 "model": settings.ollama_model,
                 "prompt": build_prompt(story),
                 "stream": False,
-                "options": {"temperature": 0.2, "num_predict": 260},
+                # think:false spegne il ragionamento dei modelli "pensanti"
+                # (ignorato dagli altri); strip_think ripulisce comunque.
+                "think": False,
+                "options": {"temperature": 0.2, "num_predict": NUM_PREDICT},
             },
             timeout=180,
         )
         resp.raise_for_status()
-        text = str(resp.json().get("response", "")).strip()
+        text = strip_think(str(resp.json().get("response", "")))
     except (httpx.HTTPError, ValueError) as exc:
         log.warning("riassunto story %d fallito: %s", story.id, exc)
         return False

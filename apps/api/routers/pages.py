@@ -425,7 +425,12 @@ async def genera_riassunto(
     """
     from core.config import get_settings
     from core.net import build_client
-    from core.nlp.summarize import METHOD_NAME, build_prompt
+    from core.nlp.summarize import (
+        METHOD_NAME,
+        NUM_PREDICT,
+        ThinkFilter,
+        build_prompt,
+    )
     from core.provenance import record as record_provenance
 
     t = make_translator(request_locale(request))
@@ -462,7 +467,11 @@ async def genera_riassunto(
             "model": settings.ollama_model,
             "prompt": prompt,
             "stream": True,
-            "options": {"temperature": 0.2, "num_predict": 260},
+            # think:false spegne il ragionamento dei modelli "pensanti"
+            # (qwen3, deepseek-r1): senza, il budget di token finisce nel
+            # ragionamento e la risposta visibile resta vuota.
+            "think": False,
+            "options": {"temperature": 0.2, "num_predict": NUM_PREDICT},
         },
     )
     try:
@@ -489,6 +498,7 @@ async def genera_riassunto(
 
     async def stream() -> AsyncIterator[str]:
         parts: list[str] = []
+        filtro = ThinkFilter()  # mai mostrare/salvare il ragionamento inline
         try:
             async for line in resp.aiter_lines():
                 if not line.strip():
@@ -497,13 +507,22 @@ async def genera_riassunto(
                     payload = json.loads(line)
                 except ValueError:
                     continue
-                token = str(payload.get("response", ""))
+                token = filtro.feed(str(payload.get("response", "")))
                 if token:
                     parts.append(token)
                     yield token
                 if payload.get("done"):
                     break
             testo = "".join(parts).strip()
+            if len(testo) < 40:
+                # Mai un fallimento muto: il modello non ha prodotto testo
+                # utilizzabile (capita coi modelli "pensanti" o troppo
+                # piccoli) e il lettore deve saperlo.
+                log.warning(
+                    "riassunto story %d: risposta inutilizzabile (%d caratteri)",
+                    story_id, len(testo),
+                )
+                yield "\n⚠ " + t("storia.riassunto_vuoto")
             if len(testo) >= 40:
                 story.summary_neutral = testo
                 story.summary_method = "llm"

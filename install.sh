@@ -77,7 +77,14 @@ if [ -z "$UV" ]; then
 fi
 cd "$APP"
 "$UV" venv --quiet --allow-existing --python 3.12 .venv
-"$UV" pip install --quiet --python .venv/bin/python -e .
+# Su macOS anche l'extra [mac]: finestra nativa con l'icona nel Dock
+# (se non si installa, si ripiega sull'installazione base senza finestra).
+if [ "$(uname -s)" = "Darwin" ]; then
+  "$UV" pip install --quiet --python .venv/bin/python -e ".[mac]" \
+    || "$UV" pip install --quiet --python .venv/bin/python -e .
+else
+  "$UV" pip install --quiet --python .venv/bin/python -e .
+fi
 
 say "Creo il comando «opennews» e l'icona"
 mkdir -p "$BIN_DIR"
@@ -134,8 +141,9 @@ fi
 say "Avvio il giornale"
 nohup "$APP/.venv/bin/opennews" --no-browser > "$OPENNEWS_HOME/log.txt" 2>&1 &
 for _ in $(seq 1 40); do curl -fsS "$URL/healthz" >/dev/null 2>&1 && break; sleep 1; done
-# Finestra applicazione dedicata se c'è un browser Chromium; altrimenti tab.
-if ! "$APP/.venv/bin/python" -c "import sys; from apps.launcher import open_app_window; sys.exit(0 if open_app_window('$URL') else 1)" 2>/dev/null; then
+# Finestra dedicata: nativa su macOS (icona nel Dock), altrimenti --app
+# di un browser Chromium; in mancanza, tab del browser predefinito.
+if ! "$APP/.venv/bin/python" -c "import sys; from apps.launcher import open_app_window, open_native_window; sys.exit(0 if (open_native_window('$URL') or open_app_window('$URL')) else 1)" 2>/dev/null; then
   if command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
   elif command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true; fi
 fi

@@ -271,6 +271,7 @@ storia.riassunto_errore: "Generation failed: try again (or check the status in /
 storia.riassunto_spento: "The generator is switched off: an administrator can enable it in Settings."
 storia.riassunto_in_corso: "A summary is already being generated for this story: wait a few seconds and try again."
 storia.riassunto_fallito: "Generation failed — {errore}. Check the \"Generator status\" in Settings."
+storia.riassunto_vuoto: "The model did not produce a usable summary: try again, or pick a different model in Settings."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Who the owner is (according to Wikidata)"

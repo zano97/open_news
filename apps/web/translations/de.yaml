@@ -285,6 +285,7 @@ storia.riassunto_errore: "Erzeugung fehlgeschlagen: erneut versuchen (oder Statu
 storia.riassunto_spento: "Der Generator ist ausgeschaltet: Eine Administratorin oder ein Administrator kann ihn in den Einstellungen aktivieren."
 storia.riassunto_in_corso: "Für diese Meldung läuft bereits eine Generierung: einen Moment warten und erneut versuchen."
 storia.riassunto_fallito: "Generierung fehlgeschlagen — {errore}. Prüfen Sie den „Status des Generators“ in den Einstellungen."
+storia.riassunto_vuoto: "Das Modell hat keine brauchbare Zusammenfassung erzeugt: erneut versuchen oder in den Einstellungen ein anderes Modell wählen."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Wer der Eigentümer ist (laut Wikidata)"

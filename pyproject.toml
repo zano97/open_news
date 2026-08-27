@@ -44,6 +44,9 @@ ml = [
     "joblib>=1.4",
 ]
 icons = ["pillow", "icnsutil", "fonttools"]  # rigenerare logo/icone (scripts/make_icons.py)
+# Finestra nativa macOS con icona nel Dock (apps/mac_window.py); senza,
+# si ripiega sulla finestra --app del browser.
+mac = ['pyobjc-framework-WebKit>=10; sys_platform == "darwin"']
 dev = [
     "pytest>=8.2",
     "pytest-asyncio>=0.23",

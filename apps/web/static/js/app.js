@@ -84,7 +84,9 @@
           return leggi();
         })
         .then(function () {
-          if (testo.textContent.trim().length < 40) throw new Error("");
+          var esito = testo.textContent.trim();
+          // "⚠" è la sentinella del server per un esito non valido.
+          if (esito.length < 40 || esito.indexOf("\u26a0") !== -1) throw new Error("");
           btn.remove();
           if (nota) nota.hidden = false;
         })

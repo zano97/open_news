@@ -206,3 +206,23 @@ class TestRiassuntoSuRichiesta:
         await session.commit()
         pagina = await client.get(f"/storia/{story.id}")
         assert "data-riassunto-btn" not in pagina.text
+
+
+def test_think_filter_nasconde_il_ragionamento() -> None:
+    """I modelli "pensanti" premettono <think>…</think>: mai mostrarlo,
+    anche quando i tag arrivano spezzati su più pezzi di flusso."""
+    from core.nlp.summarize import ThinkFilter, strip_think
+
+    filtro = ThinkFilter()
+    visibile = "".join(
+        filtro.feed(pezzo)
+        for pezzo in ["<th", "ink>ragiono ", "molto</think>", "\nIl fatto: ", "accordo."]
+    )
+    assert visibile == "Il fatto: accordo."
+
+    # Senza blocco think: tutto passa, anche se inizia con "<" ambiguo.
+    normale = ThinkFilter()
+    assert "".join(normale.feed(p) for p in ["<b>Tit", "olo</b> resto"]) == "<b>Titolo</b> resto"
+
+    assert strip_think("<think>bla bla</think>\nRiassunto vero.") == "Riassunto vero."
+    assert strip_think("Riassunto senza ragionamento.") == "Riassunto senza ragionamento."
