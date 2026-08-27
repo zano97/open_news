@@ -4,6 +4,7 @@ import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from apps.worker.jobs.analyze import cluster_job
 from apps.worker.jobs.ingest import (
     fetch_fulltext_job,
     ingest_feeds_job,
@@ -31,4 +32,7 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     )
     scheduler.add_job(
         fetch_fulltext_job, "interval", minutes=15, id="fetch_fulltext", max_instances=1
+    )
+    scheduler.add_job(
+        cluster_job, "interval", minutes=10, id="cluster", max_instances=1
     )

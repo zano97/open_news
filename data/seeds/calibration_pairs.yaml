@@ -1,0 +1,610 @@
+# Open News — calibration set per la soglia di similarità del clustering di storie.
+# 100 coppie di titoli annotate a mano: 50 same_story=true, 50 same_story=false.
+# Eventi inventati ma realistici; nessun riferimento a fatti reali recenti.
+version: 1
+annotator: "seed iniziale del progetto (annotazione manuale)"
+pairs:
+  # ---------- POSITIVI (same_story: true) ----------
+  # p001-p035: stessa lingua; p036-p050: cross-language.
+  - id: p001
+    title_a: "Alluvione nella valle alpina: esondano due torrenti, evacuate 300 persone"
+    title_b: "Notte di paura in valle: l'acqua travolge tutto, centinaia in fuga dalle case"
+    same_story: true
+    cross_language: false
+    note: "Stessa alluvione raccontata con tono neutro e con tono sensazionalistico."
+  - id: p002
+    title_a: "Il Consiglio dei ministri approva la riforma delle pensioni: uscita a 64 anni con 25 di contributi"
+    title_b: "Pensioni, stretta in arrivo: il governo cambia le regole per l'uscita anticipata"
+    same_story: true
+    cross_language: false
+    note: "Stessa riforma pensionistica, un titolo tecnico e uno allarmistico."
+  - id: p003
+    title_a: "Sciopero del trasporto locale a Milano: metro chiuse e bus a singhiozzo per 24 ore"
+    title_b: "Milano paralizzata dallo sciopero dei mezzi: pendolari infuriati alle fermate"
+    same_story: true
+    cross_language: false
+    note: "Stesso sciopero cittadino visto dal lato servizio e dal lato disagi."
+  - id: p004
+    title_a: "La Coppa nazionale va alla squadra ospite: decisivi i rigori dopo lo 0-0"
+    title_b: "Follia dal dischetto: la finale di Coppa si decide all'ultimo rigore"
+    same_story: true
+    cross_language: false
+    note: "Stessa finale di coppa, cronaca asciutta contro titolo enfatico."
+  - id: p005
+    title_a: "Scoperta in Toscana una necropoli etrusca intatta con corredi funerari"
+    title_b: "Il tesoro sepolto degli Etruschi riemerge dopo 2500 anni: archeologi increduli"
+    same_story: true
+    cross_language: false
+    note: "Stesso ritrovamento archeologico con due registri molto diversi."
+  - id: p006
+    title_a: "Carburanti, nuovo aumento alla pompa: la benzina supera i due euro al litro"
+    title_b: "Stangata benzina: pieno sempre più caro per gli automobilisti"
+    same_story: true
+    cross_language: false
+    note: "Stesso rincaro dei carburanti, taglio informativo contro taglio popolare."
+  - id: p007
+    title_a: "Incendio in un'azienda chimica nell'hinterland: nessun ferito, colonna di fumo visibile a chilometri"
+    title_b: "Paura nella zona industriale: rogo nel capannone chimico, aria irrespirabile"
+    same_story: true
+    cross_language: false
+    note: "Stesso incendio industriale, una testata rassicura e l'altra drammatizza."
+  - id: p008
+    title_a: "Via libera al bonus famiglie: assegno maggiorato per i nuclei con tre figli"
+    title_b: "Più soldi alle famiglie numerose: il governo firma il nuovo assegno"
+    same_story: true
+    cross_language: false
+    note: "Stessa misura economica descritta con lessico diverso."
+  - id: p009
+    title_a: "Terremoto di magnitudo 4.2 nell'Appennino centrale: gente in strada, nessun danno grave"
+    title_b: "La terra trema nell'Appennino: scossa avvertita in tre regioni"
+    same_story: true
+    cross_language: false
+    note: "Stessa scossa sismica, dettagli tecnici contro racconto emotivo."
+  - id: p010
+    title_a: "Sgominata la banda degli assalti ai bancomat: sei arresti all'alba"
+    title_b: "Esplosivo e auto rubate: così agiva la banda dei bancomat fermata dai carabinieri"
+    same_story: true
+    cross_language: false
+    note: "Stessa operazione di polizia, titolo di sintesi contro titolo di dettaglio."
+  - id: p011
+    title_a: "Ondata di caldo africano sul Mezzogiorno: attese punte di 44 gradi"
+    title_b: "Caldo record in arrivo al Sud: termometri verso quota 44"
+    same_story: true
+    cross_language: false
+    note: "Stessa ondata di caldo annunciata da due testate."
+  - id: p012
+    title_a: "Referendum regionale sull'acqua pubblica: vince il sì con il 62 per cento"
+    title_b: "L'acqua torna pubblica: il referendum regionale premia il comitato del sì"
+    same_story: true
+    cross_language: false
+    note: "Stesso esito referendario, un titolo sul dato e uno sull'effetto."
+  - id: p013
+    title_a: "Startup italiana dell'agritech chiude un round da 40 milioni di euro"
+    title_b: "Maxi investimento nell'agritech: 40 milioni alla giovane azienda dei sensori per i campi"
+    same_story: true
+    cross_language: false
+    note: "Stesso round di finanziamento raccontato con angolazioni diverse."
+  - id: p014
+    title_a: "Chiude per due mesi il ponte sul fiume: lavori urgenti ai piloni"
+    title_b: "Ponte chiuso, città spaccata in due: al via il cantiere sui piloni ammalorati"
+    same_story: true
+    cross_language: false
+    note: "Stessa chiusura del ponte, avviso di servizio contro titolo d'impatto."
+  - id: p015
+    title_a: "Inaugurata la nuova linea ad alta velocità: quaranta minuti in meno tra le due città"
+    title_b: "Il treno veloce cambia la vita ai pendolari: tagliati i tempi sulla nuova linea"
+    same_story: true
+    cross_language: false
+    note: "Stessa inaugurazione ferroviaria con enfasi diversa."
+  - id: p016
+    title_a: "Al via la campagna di vaccinazione antinfluenzale: dosi gratuite per over 60 e fragili"
+    title_b: "Influenza, si parte con i vaccini: le regioni aprono le prenotazioni"
+    same_story: true
+    cross_language: false
+    note: "Stesso avvio della campagna vaccinale stagionale."
+  - id: p017
+    title_a: "Blackout di tre ore nel centro storico: guasto a una cabina elettrica"
+    title_b: "Città al buio per il guasto elettrico: negozi chiusi e semafori spenti in centro"
+    same_story: true
+    cross_language: false
+    note: "Stesso blackout urbano, causa tecnica contro effetti sulla città."
+  - id: p018
+    title_a: "Riapre dopo cinque anni di restauro il museo archeologico cittadino"
+    title_b: "Fine dei lavori: il museo archeologico torna ai visitatori con dieci nuove sale"
+    same_story: true
+    cross_language: false
+    note: "Stessa riapertura del museo con dettagli complementari."
+  - id: p019
+    title_a: "Il sindaco del capoluogo si dimette dopo la bocciatura del bilancio"
+    title_b: "Terremoto politico in Comune: il sindaco lascia, si va verso il voto anticipato"
+    same_story: true
+    cross_language: false
+    note: "Stesse dimissioni del sindaco, titolo fattuale contro titolo drammatico."
+  - id: p020
+    title_a: "Frana sulla statale di montagna: strada chiusa e paese isolato"
+    title_b: "Massi sulla carreggiata: la statale resterà chiusa per settimane, valle tagliata fuori"
+    same_story: true
+    cross_language: false
+    note: "Stessa frana, focus sull'evento contro focus sulle conseguenze."
+  - id: p021
+    title_a: "Scuola, bandito il concorso per 30mila nuovi docenti"
+    title_b: "Trentamila cattedre in palio: pubblicato il bando del concorso per insegnanti"
+    same_story: true
+    cross_language: false
+    note: "Stesso bando di concorso con formulazioni diverse dello stesso numero."
+  - id: p022
+    title_a: "Siccità, il grande fiume ai minimi storici: razionamenti in vista per l'agricoltura"
+    title_b: "Il fiume si ritira: allarme siccità e campi a secco nella pianura"
+    same_story: true
+    cross_language: false
+    note: "Stessa crisi idrica raccontata con immagini diverse."
+  - id: p023
+    title_a: "Software giant cuts 8,000 jobs in largest layoff round of the year"
+    title_b: "Tech bloodbath: thousands of engineers shown the door as giant slashes workforce"
+    same_story: true
+    cross_language: false
+    note: "Stessi licenziamenti tech, titolo neutro contro titolo sensazionalistico."
+  - id: p024
+    title_a: "Hurricane strengthens to Category 4 as it nears the Gulf coast"
+    title_b: "Monster storm barrels toward coast: mass evacuations under way"
+    same_story: true
+    cross_language: false
+    note: "Stesso uragano in avvicinamento descritto con toni opposti."
+  - id: p025
+    title_a: "Central bank raises interest rates by a quarter point to tame inflation"
+    title_b: "Borrowers brace as central bank hikes rates yet again"
+    same_story: true
+    cross_language: false
+    note: "Stessa decisione sui tassi, angolo macro contro angolo dei mutuatari."
+  - id: p026
+    title_a: "Rare lynx photographed in national park for first time in decades"
+    title_b: "Ghost cat returns: camera trap captures elusive lynx in the park"
+    same_story: true
+    cross_language: false
+    note: "Stesso avvistamento naturalistico con due stili di titolazione."
+  - id: p027
+    title_a: "National rail strike halts most intercity trains on Friday"
+    title_b: "Commuter chaos as rail workers walk out nationwide"
+    same_story: true
+    cross_language: false
+    note: "Stesso sciopero ferroviario nazionale, servizio contro caos."
+  - id: p028
+    title_a: "Underdogs clinch league title with stoppage-time winner on final day"
+    title_b: "Last-gasp goal seals fairytale title for unfancied side"
+    same_story: true
+    cross_language: false
+    note: "Stessa vittoria del campionato con lessico completamente diverso."
+  - id: p029
+    title_a: "Grève des contrôleurs aériens : un vol sur deux annulé vendredi"
+    title_b: "Pagaille dans les aéroports : les contrôleurs aériens cessent le travail"
+    same_story: true
+    cross_language: false
+    note: "Stesso sciopero dei controllori di volo in francese, toni diversi."
+  - id: p030
+    title_a: "Canicule : alerte rouge dans le sud du pays, jusqu'à 42 degrés attendus"
+    title_b: "Le sud suffoque : la vague de chaleur bat des records"
+    same_story: true
+    cross_language: false
+    note: "Stessa ondata di caldo francese, bollettino contro racconto."
+  - id: p031
+    title_a: "Réforme du lycée : le ministère annonce de nouvelles épreuves en juin"
+    title_b: "Lycéens sous pression : le calendrier des examens chamboulé par la réforme"
+    same_story: true
+    cross_language: false
+    note: "Stessa riforma scolastica francese vista dal ministero e dagli studenti."
+  - id: p032
+    title_a: "Incendio forestal en la sierra: mil hectáreas quemadas y dos pueblos desalojados"
+    title_b: "El fuego devora la sierra: vecinos evacuados en plena noche"
+    same_story: true
+    cross_language: false
+    note: "Stesso incendio boschivo in spagnolo, dati contro dramma."
+  - id: p033
+    title_a: "Los médicos de atención primaria convocan una huelga indefinida"
+    title_b: "Sanidad en pie de guerra: paro indefinido de los médicos de familia"
+    same_story: true
+    cross_language: false
+    note: "Stesso sciopero dei medici in spagnolo con framing diverso."
+  - id: p034
+    title_a: "Lokführer streiken erneut: Fernverkehr weitgehend lahmgelegt"
+    title_b: "Wieder Stillstand auf der Schiene: Streik trifft Millionen Pendler"
+    same_story: true
+    cross_language: false
+    note: "Stesso sciopero dei macchinisti in tedesco, due prospettive."
+  - id: p035
+    title_a: "Hochwasser nach Dauerregen: Fluss tritt über die Ufer, Keller vollgelaufen"
+    title_b: "Land unter nach dem Regen: Anwohner kämpfen gegen die Fluten"
+    same_story: true
+    cross_language: false
+    note: "Stessa piena fluviale in tedesco, cronaca contro pathos."
+  - id: p036
+    title_a: "Il vulcano dell'isola torna a eruttare: cenere in cielo e voli cancellati"
+    title_b: "Island volcano erupts, ash cloud grounds flights for second day"
+    same_story: true
+    cross_language: true
+    note: "Stessa eruzione vulcanica in italiano e in inglese."
+  - id: p037
+    title_a: "Pensioni, il governo vara la riforma: età di uscita legata all'aspettativa di vita"
+    title_b: "Government approves pension overhaul tying retirement age to life expectancy"
+    same_story: true
+    cross_language: true
+    note: "Stessa riforma delle pensioni, titolo italiano e titolo inglese."
+  - id: p038
+    title_a: "Frana sopra il traforo alpino: il tunnel chiuso in entrambe le direzioni"
+    title_b: "Éboulement au-dessus du tunnel alpin : la galerie fermée dans les deux sens"
+    same_story: true
+    cross_language: true
+    note: "Stessa chiusura del traforo alpino in italiano e in francese."
+  - id: p039
+    title_a: "Calciomercato, il bomber Ferrero passa al club campione per 120 milioni"
+    title_b: "Striker Ferrero completes record 120 million move to champions"
+    same_story: true
+    cross_language: true
+    note: "Stesso trasferimento record dello stesso giocatore, italiano e inglese."
+  - id: p040
+    title_a: "Tropical storm floods island capital, thousands seek shelter"
+    title_b: "La tormenta tropical inunda la capital de la isla: miles de personas en refugios"
+    same_story: true
+    cross_language: true
+    note: "Stessa tempesta tropicale in inglese e in spagnolo."
+  - id: p041
+    title_a: "Ripristinati i controlli al valico alpino: code di camion alla frontiera"
+    title_b: "Grenzkontrollen am Alpenpass wieder eingeführt: lange Lkw-Staus"
+    same_story: true
+    cross_language: true
+    note: "Stesso ripristino dei controlli di frontiera, italiano e tedesco."
+  - id: p042
+    title_a: "European leaders reach late-night deal on new migration pact"
+    title_b: "Accord arraché dans la nuit : les dirigeants européens s'entendent sur le pacte migratoire"
+    same_story: true
+    cross_language: true
+    note: "Stesso accordo del vertice europeo in inglese e in francese."
+  - id: p043
+    title_a: "Forte terremoto colpisce l'arcipelago del sud-est asiatico: allerta tsunami rientrata"
+    title_b: "Powerful quake strikes southeast Asian archipelago, tsunami alert lifted"
+    same_story: true
+    cross_language: true
+    note: "Stesso terremoto con allerta tsunami, italiano e inglese."
+  - id: p044
+    title_a: "Il tenore Almaviva annuncia la tournée d'addio dopo quarant'anni di carriera"
+    title_b: "El tenor Almaviva anuncia su gira de despedida tras cuarenta años de carrera"
+    same_story: true
+    cross_language: true
+    note: "Stesso annuncio dello stesso tenore, italiano e spagnolo."
+  - id: p045
+    title_a: "Carmaker recalls 200,000 electric vehicles over battery fire risk"
+    title_b: "Autobauer ruft 200.000 Elektroautos wegen Brandgefahr der Batterie zurück"
+    same_story: true
+    cross_language: true
+    note: "Stesso richiamo di auto elettriche in inglese e in tedesco."
+  - id: p046
+    title_a: "Salvati 90 migranti da un barcone alla deriva nel Mediterraneo"
+    title_b: "Méditerranée : 90 migrants secourus sur une embarcation à la dérive"
+    same_story: true
+    cross_language: true
+    note: "Stesso soccorso in mare, italiano e francese, stesso numero di persone."
+  - id: p047
+    title_a: "Dalle bucce d'arancia una plastica biodegradabile: la scoperta di un ateneo del Sud"
+    title_b: "Researchers turn orange peel into biodegradable plastic in lab breakthrough"
+    same_story: true
+    cross_language: true
+    note: "Stessa scoperta scientifica in italiano e in inglese."
+  - id: p048
+    title_a: "Teenager Miralles stuns world number one to win first major title"
+    title_b: "La joven Miralles derriba a la número uno y conquista su primer grande"
+    same_story: true
+    cross_language: true
+    note: "Stessa vittoria tennistica della stessa atleta, inglese e spagnolo."
+  - id: p049
+    title_a: "La cantante italiana trionfa al concorso europeo della canzone"
+    title_b: "Italienerin gewinnt den europäischen Gesangswettbewerb"
+    same_story: true
+    cross_language: true
+    note: "Stessa vittoria musicale raccontata in italiano e in tedesco."
+  - id: p050
+    title_a: "La compagnie aérienne annule 300 vols : les pilotes en grève trois jours"
+    title_b: "Airline cancels 300 flights as pilots begin three-day strike"
+    same_story: true
+    cross_language: true
+    note: "Stesso sciopero dei piloti in francese e in inglese."
+  # ---------- NEGATIVI (same_story: false) ----------
+  # p051-p075: negativi difficili (stesso tema, eventi distinti); p076-p100: negativi facili.
+  - id: p051
+    title_a: "Terremoto di magnitudo 5.1 al largo delle isole greche: nessun ferito"
+    title_b: "Scossa di magnitudo 4.6 nell'Appennino meridionale: scuole chiuse per verifiche"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due terremoti diversi in luoghi diversi."
+  - id: p052
+    title_a: "Calciomercato, il portiere della nazionale rinnova fino al 2030"
+    title_b: "Colpo in attacco: il club della capitale prende l'ala uruguaiana"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due operazioni di mercato distinte."
+  - id: p053
+    title_a: "Il governo vara il decreto energia: sconti in bolletta per le imprese"
+    title_b: "Approvato il decreto lavoro: incentivi per le assunzioni degli under 30"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due decreti governativi diversi."
+  - id: p054
+    title_a: "Alluvione lampo sulla costa ligure: sottopassi allagati e treni fermi"
+    title_b: "Nubifragio nel Catanese: strade come fiumi e scantinati sommersi"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due alluvioni in regioni diverse."
+  - id: p055
+    title_a: "Sciopero dei treni regionali lunedì: garantite solo le fasce pendolari"
+    title_b: "Venerdì nero negli aeroporti: sciopero del personale di terra"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due scioperi di settori diversi in giorni diversi."
+  - id: p056
+    title_a: "Vasto incendio nelle campagne sarde: in azione due canadair"
+    title_b: "Fiamme su un'isola greca: turisti allontanati dalle spiagge"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due incendi estivi in paesi diversi."
+  - id: p057
+    title_a: "Rapina in banca nel centro di una città del nord: bottino da 200mila euro"
+    title_b: "Assalto al caveau in una filiale del litorale: svuotate le cassette di sicurezza"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due rapine distinte con modalità diverse."
+  - id: p058
+    title_a: "Central bank lifts rates by half a point, citing stubborn inflation"
+    title_b: "Neighbouring country's central bank cuts rates for first time in three years"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due decisioni monetarie opposte di banche diverse."
+  - id: p059
+    title_a: "Streaming platform lays off 900 staff in restructuring drive"
+    title_b: "Chipmaker announces 2,500 job cuts as demand slows"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due tornate di licenziamenti in aziende diverse."
+  - id: p060
+    title_a: "Alert level raised at northern volcano after swarm of tremors"
+    title_b: "Lava fountains light up the night as southern island volcano erupts"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due vulcani diversi in fasi diverse."
+  - id: p061
+    title_a: "Tamponamento a catena in autostrada nella nebbia: dodici feriti lievi"
+    title_b: "Camion si ribalta sulla tangenziale: traffico in tilt per ore"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due incidenti stradali distinti."
+  - id: p062
+    title_a: "Maxi sequestro di cocaina al porto: due tonnellate nascoste tra le banane"
+    title_b: "Blitz antidroga alla stazione: smantellata rete di spaccio al dettaglio"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due operazioni antidroga diverse per scala e luogo."
+  - id: p063
+    title_a: "Caldo record nel capoluogo: superato il primato di luglio di due gradi"
+    title_b: "Notte tropicale da primato sulla costa adriatica: mai così caldo a settembre"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due record di caldo in periodi e luoghi diversi."
+  - id: p064
+    title_a: "Furto al museo civico: rubata una tela del Seicento"
+    title_b: "Colpo nella notte alla mostra degli ori: spariti monili antichi"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due furti d'arte con refurtiva diversa."
+  - id: p065
+    title_a: "Pensioni, approvata la riforma dell'uscita anticipata"
+    title_b: "Pensioni d'oro, i sindacati in piazza contro il taglio degli assegni più alti"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: stesso tema pensioni ma due provvedimenti distinti."
+  - id: p066
+    title_a: "La Coppa nazionale alla squadra della capitale: 2-1 in finale"
+    title_b: "La Supercoppa si giocherà all'estero: ufficiale la sede della finale"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due competizioni calcistiche diverse."
+  - id: p067
+    title_a: "Deraglia un treno merci nello scalo: nessun ferito, linea rallentata"
+    title_b: "Regionale esce dai binari in aperta campagna: passeggeri evacuati"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due deragliamenti distinti su linee diverse."
+  - id: p068
+    title_a: "Terremoto nella regione andina: crolli in alcuni villaggi di montagna"
+    title_b: "Strong earthquake shakes central Asian valley, power cut in several towns"
+    same_story: false
+    cross_language: true
+    note: "Negativo difficile cross-language: due terremoti in continenti diversi."
+  - id: p069
+    title_a: "Hurricane makes landfall on Atlantic coast, ripping roofs from homes"
+    title_b: "Un tifón azota el archipiélago del Pacífico: puertos cerrados y vuelos cancelados"
+    same_story: false
+    cross_language: true
+    note: "Negativo difficile cross-language: due tempeste in oceani diversi."
+  - id: p070
+    title_a: "Sciopero dei piloti della compagnia low cost: cancellati 200 voli"
+    title_b: "Les cheminots en grève : le trafic ferroviaire fortement perturbé"
+    same_story: false
+    cross_language: true
+    note: "Negativo difficile cross-language: due scioperi di settori diversi."
+  - id: p071
+    title_a: "Antinfluenzale, la campagna parte in anticipo: prime dosi ai fragili"
+    title_b: "Approvato il nuovo vaccino contro il meningococco B per gli adolescenti"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due notizie vaccinali su malattie diverse."
+  - id: p072
+    title_a: "Elezioni anticipate in una regione del nord: si vota in primavera"
+    title_b: "Ballottaggio nel capoluogo del sud: sfida all'ultimo voto per il municipio"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due appuntamenti elettorali distinti."
+  - id: p073
+    title_a: "Weather satellite lifts off on mission to track extreme storms"
+    title_b: "Cargo capsule docks with orbital station carrying fresh supplies"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due missioni spaziali diverse."
+  - id: p074
+    title_a: "Emergono i mosaici di una villa romana durante i lavori per il gasdotto"
+    title_b: "Scoperto un villaggio neolitico sul fondale di un lago alpino"
+    same_story: false
+    cross_language: false
+    note: "Negativo difficile: due scoperte archeologiche di epoche diverse."
+  - id: p075
+    title_a: "Warnstreik im Nahverkehr: Busse und Bahnen stehen still"
+    title_b: "Sciopero dei mezzi nella città portuale: corse ridotte per l'intera giornata"
+    same_story: false
+    cross_language: true
+    note: "Negativo difficile cross-language: due scioperi locali in paesi diversi."
+  - id: p076
+    title_a: "Il festival del tartufo apre con un record di visitatori"
+    title_b: "La borsa chiude in rialzo trainata dai titoli bancari"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: gastronomia e finanza, nessuna relazione."
+  - id: p077
+    title_a: "La finale di pallavolo femminile assegna lo scudetto stasera"
+    title_b: "Nuove regole per i monopattini in centro: obbligo di casco"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: sport e mobilità urbana, eventi scollegati."
+  - id: p078
+    title_a: "Astronomers spot distant comet brightening ahead of flyby"
+    title_b: "City council approves budget for new cycle lanes"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: astronomia e politica locale."
+  - id: p079
+    title_a: "Torna la neve sulle Alpi: impianti pronti ad aprire in anticipo"
+    title_b: "Aumentano gli abbonamenti ai musei civici: boom di tessere tra i giovani"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: meteo montano e cultura cittadina."
+  - id: p080
+    title_a: "Uno chef stellato apre un bistrot nel borgo medievale"
+    title_b: "Approvata la ztl notturna nel quartiere della movida"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: ristorazione e viabilità, nessun legame."
+  - id: p081
+    title_a: "Il porto amplia il terminal container: al via i dragaggi"
+    title_b: "Premiato il miglior gelato artigianale: vince un gusto al basilico"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: logistica portuale e concorso gastronomico."
+  - id: p082
+    title_a: "Scoperto un pianeta roccioso attorno a una stella vicina"
+    title_b: "Il campionato di rugby riparte con il derby cittadino"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: scienza e sport."
+  - id: p083
+    title_a: "Rincara il caffè al bar: la tazzina sfiora un euro e mezzo"
+    title_b: "Consegnate le nuove ambulanze al servizio di emergenza regionale"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: consumi e sanità."
+  - id: p084
+    title_a: "Library unveils rare medieval manuscript after restoration"
+    title_b: "Fishing quotas for the northern sea cut by ten percent"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: cultura e pesca, temi lontani."
+  - id: p085
+    title_a: "Il coro dell'università in tournée nelle capitali europee"
+    title_b: "Sequestrata una discarica abusiva nella zona industriale"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: musica e cronaca ambientale."
+  - id: p086
+    title_a: "Meteo, weekend di sole su gran parte del paese"
+    title_b: "La banda ultralarga arriva nei piccoli comuni montani"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: previsioni meteo e infrastrutture digitali."
+  - id: p087
+    title_a: "Vandali imbrattano la fontana monumentale: caccia ai responsabili"
+    title_b: "Il premio letterario nazionale va a un esordiente"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: cronaca cittadina e letteratura."
+  - id: p088
+    title_a: "Nasce il parco eolico offshore: quaranta turbine al largo della costa"
+    title_b: "La squadra di basket promossa nella massima serie"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: energia e sport."
+  - id: p089
+    title_a: "Ritirato un lotto di formaggio per rischio listeria"
+    title_b: "Il planetario riapre con uno spettacolo dedicato a Marte"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: sicurezza alimentare e divulgazione scientifica."
+  - id: p090
+    title_a: "Il mercatino di Natale apre con due settimane di anticipo"
+    title_b: "Researchers map deep seabed canyon off the northern coast"
+    same_story: false
+    cross_language: true
+    note: "Negativo facile cross-language: eventi del tutto scollegati."
+  - id: p091
+    title_a: "Zoo announces birth of rare snow leopard cubs"
+    title_b: "Motorway toll prices to rise three percent in January"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: natura e tariffe autostradali."
+  - id: p092
+    title_a: "Il liceo classico celebra i duecento anni con una mostra"
+    title_b: "Ritrovato il relitto di un mercantile dell'Ottocento al largo dell'isola"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: anniversario scolastico e ritrovamento marino."
+  - id: p093
+    title_a: "Via alla potatura dei platani monumentali del viale"
+    title_b: "Record di iscritti alla maratona cittadina: ventimila al via"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: verde pubblico e sport di massa."
+  - id: p094
+    title_a: "Farmers protest new irrigation fees outside regional offices"
+    title_b: "Opera house season opens with sold-out premiere"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: protesta agricola e lirica."
+  - id: p095
+    title_a: "Un'app segnala in tempo reale i posti liberi nei parcheggi"
+    title_b: "Riaperta al culto la chiesa romanica dopo il restauro del tetto"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: tecnologia urbana e patrimonio religioso."
+  - id: p096
+    title_a: "La flotta di autobus elettrici entra in servizio sulle linee urbane"
+    title_b: "Il censimento dei lupi conta trenta branchi sull'Appennino"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: trasporti e fauna selvatica."
+  - id: p097
+    title_a: "Le salon du livre attend 100 000 visiteurs ce week-end"
+    title_b: "Controlli antidoping a sorpresa nel ciclismo dilettantistico"
+    same_story: false
+    cross_language: true
+    note: "Negativo facile cross-language: editoria e sport, nessun legame."
+  - id: p098
+    title_a: "Bike sharing, mille nuove biciclette nei quartieri periferici"
+    title_b: "Scoperta una grotta carsica durante gli scavi dell'acquedotto"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: mobilità dolce e speleologia."
+  - id: p099
+    title_a: "Ferry line adds fast catamaran, halving the island commute"
+    title_b: "Choir festival brings forty ensembles to the cathedral square"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: trasporti marittimi e musica corale."
+  - id: p100
+    title_a: "Il mercato rionale sperimenta la consegna a domicilio"
+    title_b: "Inaugurato il nuovo osservatorio astronomico sull'altopiano"
+    same_story: false
+    cross_language: false
+    note: "Negativo facile: commercio di quartiere e astronomia."

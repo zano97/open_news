@@ -47,9 +47,12 @@ class Settings(BaseSettings):
     rate_limit_seconds: float = 2.0
     http_timeout_seconds: float = 20.0
 
-    # Clustering
+    # Clustering. La soglia è calibrata sul backend attivo con
+    # scripts/calibrate_threshold.py (set: data/seeds/calibration_pairs.yaml):
+    # hashing-ngram-v2 -> 0.10 (prec 0.80 / rec 0.80 monolingua);
+    # con backend e5 ricalibrare (valori tipici ~0.85) e impostare via env.
     cluster_window_hours: int = 72
-    cluster_similarity_threshold: float = 0.83
+    cluster_similarity_threshold: float = 0.10
     flash_min_sources: int = 5
     flash_window_hours: int = 2
 

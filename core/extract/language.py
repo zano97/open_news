@@ -470,6 +470,9 @@ _STOPWORDS: dict[str, frozenset[str]] = {
     ),
 }
 
+ALL_STOPWORDS: frozenset[str] = frozenset().union(*_STOPWORDS.values())
+"""Unione delle stopword di tutte le lingue coperte (usata dall'embedder hashing)."""
+
 _MIN_SCORE = 0.10
 _MIN_MARGIN = 0.02
 
