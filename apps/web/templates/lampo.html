@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block bodyclass %}pagina-lampo{% endblock %}
 {% block title %}{{ t('nav.lampo') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
@@ -7,7 +8,10 @@
   {% for scheda in schede %}
   <article class="reel-scheda" id="lampo-{{ loop.index }}">
     <p class="reel-timbro">{{ t('lampo.timbro') }} · {{ loop.index }} / {{ schede | length }}</p>
-    <h2 class="reel-titolo telegramma">{{ scheda.story.title_neutral }}</h2>
+    <h2 class="reel-titolo telegramma">{{ titolo_story(scheda.story, locale) }}</h2>
+    {% if titolo_tradotto(scheda.story, locale) %}
+    <p class="reel-timbro">{{ t('trad.automatica') }}</p>
+    {% endif %}
     <p class="reel-copertura">
       {{ t('lampo.coperta_da',
            testate=scheda.story.source_count,

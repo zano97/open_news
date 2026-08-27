@@ -13,7 +13,8 @@
   {% if story.topic %}
   <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
   {% endif %}
-  <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ story.title_neutral }}</a></h2>
+  <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ titolo_story(story, locale) }}</a>
+    {%- if titolo_tradotto(story, locale) %} <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span>{% endif %}</h2>
   <p class="story-meta">
     {{ story.source_count }} {{ t('comune.testata') if story.source_count == 1 else t('comune.testate') }}
     · {{ story.article_count }} {{ t('comune.articoli') }}
@@ -21,7 +22,7 @@
     {% if story.is_flash %}<span class="badge badge-lampo">{{ t('badge.lampo') }}</span>{% endif %}
     {{ badge_cieco(coverage) }}
   </p>
-  {% set versioni = story.articles[:4 if lead else 3] %}
+  {% set versioni = versions_map.get(story.id, story.articles)[:4 if lead else 3] %}
   {% if versioni | length > 1 %}
   <ul class="story-versioni">
     {% for a in versioni %}
@@ -42,14 +43,15 @@
 {% if countries and countries | length > 1 %}
 <nav class="filtro-paesi" aria-label="{{ t('filtro.aria') }}">
   <a href="/" class="{{ 'paese-attivo' if not paese }}">{{ t('filtro.tutto_mondo') }}</a>
-  {% for c in countries %}
+  {% for c, n in countries %}
   <a href="/?paese={{ c }}" class="{{ 'paese-attivo' if paese == c }}"
-     hreflang="{{ c }}">{{ c | upper }}</a>
+     hreflang="{{ c }}">{{ c | upper }}&nbsp;<span class="filtro-conteggio">{{ n }}</span></a>
   {% endfor %}
 </nav>
 {% endif %}
 {% if paese %}
-<p class="filtro-nota">{{ t('filtro.nota', paese=paese | upper) }}</p>
+<p class="filtro-nota">{{ t('filtro.nota', paese=paese | upper) }}
+  <strong>{{ t('filtro.risultati', n=n_story) }}</strong></p>
 {% endif %}
 {% if stories %}
 {% set apertura = stories[0] %}

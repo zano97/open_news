@@ -10,6 +10,7 @@ from apps.worker.jobs.analyze import (
     refresh_settings_job,
     signals_job,
     summarize_job,
+    translate_titles_job,
 )
 from apps.worker.jobs.ingest import (
     fetch_fulltext_job,
@@ -49,6 +50,11 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     )
     scheduler.add_job(
         link_entities_job, "interval", minutes=30, id="link_entities", max_instances=1
+    )
+    # Traduzioni dei titoli neutri: attive solo con l'extra [translate].
+    scheduler.add_job(
+        translate_titles_job, "interval", minutes=15, id="translate_titles",
+        max_instances=1,
     )
     # Riassunti neutri con LLM locale: attivo solo con ENABLE_LLM=true.
     scheduler.add_job(

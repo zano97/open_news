@@ -31,7 +31,7 @@ English, French, German, Spanish — switchable from the masthead):
 
 ---
 
-## One-line install
+## One-line install (and one-line updates)
 
 On any machine with [Docker](https://docs.docker.com/engine/install/)
 (4 cores / 8 GB is plenty; ARM works too: Oracle Free tier, Raspberry Pi 5):
@@ -52,6 +52,24 @@ an invented headline is never attributed to a real outlet):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+**Updating** is one line too, from the install folder (data is preserved;
+database migrations run automatically):
+
+```bash
+./update.sh        # or: make update
+```
+
+**News in your language.** Outlet headlines always stay in their original
+language — their wording is the very thing the project measures. With the
+optional open-source translator ([Argos Translate](https://www.argosopentech.com/),
+local, free) the *neutral* story titles are translated into the interface
+language, always marked as automatic:
+
+```bash
+docker compose exec worker pip install argostranslate
+docker compose exec worker python -m scripts.fetch_translation_models
 ```
 
 <details>

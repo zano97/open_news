@@ -30,7 +30,7 @@ spagnolo — si cambia dalla testata):
 
 ---
 
-## Installazione in una riga
+## Installazione in una riga (e aggiornamento in una riga)
 
 Su una macchina con [Docker](https://docs.docker.com/engine/install/)
 (4 core / 8 GB bastano; va bene anche ARM: Oracle Free, Raspberry Pi 5):
@@ -50,6 +50,25 @@ mai un titolo inventato attribuito a una testata reale):
 
 ```bash
 OPENNEWS_DEMO=1 curl -fsSL https://raw.githubusercontent.com/zano97/open_news/main/install.sh | bash
+```
+
+Anche **l'aggiornamento** è una riga, dalla cartella d'installazione
+(i dati restano; le migrazioni del database girano da sole):
+
+```bash
+./update.sh        # oppure: make update
+```
+
+**Le notizie nella tua lingua.** I titoli delle testate restano sempre in
+lingua originale: la loro formulazione è esattamente ciò che il progetto
+misura. Con il traduttore open source opzionale
+([Argos Translate](https://www.argosopentech.com/), locale e gratuito) i
+titoli *neutri* delle story vengono tradotti nella lingua dell'interfaccia,
+sempre marcati come automatici:
+
+```bash
+docker compose exec worker pip install argostranslate
+docker compose exec worker python -m scripts.fetch_translation_models
 ```
 
 <details>

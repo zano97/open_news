@@ -9,7 +9,7 @@
   <script src="/static/js/htmx.min.js" defer></script>
   <script src="/static/js/app.js" defer></script>
 </head>
-<body>
+<body class="{% block bodyclass %}{% endblock %}">
 <a class="salta" href="#contenuto">{{ t('masthead.salta') }}</a>
 
 <header class="masthead" role="banner">
@@ -24,6 +24,9 @@
            {% if code == locale %}aria-current="true" class="lingua-attiva"{% endif %}>{{ code | upper }}</a>
         {% endfor %}
       </nav>
+      {% if current_user and current_user.is_admin %}
+      <a class="tema-toggle" href="/impostazioni">{{ t('imp.titolo') }}</a>
+      {% endif %}
       <button type="button" class="tema-toggle" data-tema-toggle
               data-label-notte="{{ t('tema.notturna') }}"
               data-label-giorno="{{ t('tema.diurna') }}"

@@ -259,3 +259,9 @@ imp.signal_window_days: "Signal-Fenster (Tage)"
 imp.signal_window_days_help: "Breite des gleitenden Fensters für Agenda, Framing, Ton und blinde Flecken."
 imp.blindspot_coverage_pct: "Schwelle der blinden Flecken"
 imp.blindspot_coverage_pct_help: "Anteil (0–1) der anderen Quellen desselben Landes, die eine Story abgedeckt haben müssen, damit ihr Ignorieren als blinder Fleck zählt."
+filtro.risultati: "{n} Storys gefunden."
+
+# Traduzione titoli neutri
+trad.badge: "Übers."
+trad.automatica: "automatische Übersetzung (Argos Translate, lokal): kann Ungenauigkeiten enthalten"
+trad.originale: "Originaltitel: „{titolo}“"

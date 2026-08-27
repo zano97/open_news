@@ -41,12 +41,13 @@ def test_reel_lampo_scroll_e_tastiera(page: Page, base_url: str) -> None:
     expect(schede).to_have_count(2)
     expect(schede.first).to_contain_text("Coperta da")
     expect(schede.first.get_by_text("Leggi le fonti")).to_be_visible()
+    # La rotella scorre la pagina (regressione: niente riquadri annidati).
+    page.mouse.wheel(0, 800)
+    page.wait_for_function("window.scrollY > 100")
     # Navigazione da tastiera (miglioramento progressivo).
-    prima = page.locator("#reel").evaluate("el => el.scrollTop")
+    prima = page.evaluate("window.scrollY")
     page.keyboard.press("ArrowDown")
-    page.wait_for_function(
-        "prev => document.getElementById('reel').scrollTop > prev", arg=prima
-    )
+    page.wait_for_function("prev => window.scrollY > prev", arg=prima)
 
 
 def test_scheda_fonte_e_ansa_disabilitata(page: Page, base_url: str) -> None:

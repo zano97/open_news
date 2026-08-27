@@ -135,10 +135,31 @@ sono dati preziosi: vivono nel repository, quindi committali.
 
 ## Aggiornamenti
 
+Una riga, dalla cartella dell'installazione:
+
 ```bash
-git pull
-docker compose up --build -d     # le migrazioni Alembic girano all'avvio dell'api
+./update.sh        # oppure: make update
 ```
+
+Lo script fa `git pull` (solo fast-forward), ricostruisce le immagini,
+riavvia lo stack (le migrazioni Alembic girano da sole all'avvio dell'api),
+attende l'healthcheck e ripulisce le immagini vecchie. I dati restano nei
+volumi Docker. Equivalente manuale: `git pull && docker compose up --build -d`.
+
+### Titoli neutri tradotti (opzionale, Argos Translate)
+
+I titoli delle testate restano in lingua originale (sono il dato); i titoli
+neutri delle story possono essere tradotti in it/en/fr/de/es con Argos
+Translate, open source e offline:
+
+```bash
+docker compose exec worker pip install argostranslate
+docker compose exec worker python -m scripts.fetch_translation_models
+```
+
+Il worker traduce i titoli delle story recenti ogni 15 minuti; in
+interfaccia la traduzione è sempre marcata «traduzione automatica» con
+l'originale dichiarato accanto.
 
 ## Risoluzione problemi
 

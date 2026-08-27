@@ -98,3 +98,35 @@ async def refresh_settings_job() -> None:
             await load_overrides(session)
     except Exception:  # DB non pronto: si riprova al prossimo giro
         log.info("override impostazioni non caricati (DB non pronto)")
+
+
+async def translate_titles_job() -> None:
+    """Traduce i titoli neutri delle story recenti (solo se Argos è installato)."""
+    from datetime import timedelta
+
+    from core.models import utcnow
+    from core.nlp.translate import get_translator, translate_story_title
+
+    if get_translator() is None:
+        return
+    maker = get_sessionmaker()
+    since = utcnow() - timedelta(hours=48)
+    async with maker() as session:
+        stories = (
+            (
+                await session.execute(
+                    select(Story)
+                    .where(Story.last_seen >= since)
+                    .order_by(Story.last_seen.desc())
+                    .limit(40)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        added = 0
+        for story in stories:
+            added += await translate_story_title(session, story)
+        await session.commit()
+    if added:
+        log.info("titoli neutri tradotti: %d", added)

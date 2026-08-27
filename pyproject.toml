@@ -58,6 +58,9 @@ e2e = [
     "playwright>=1.44",
     "pytest-playwright>=0.5",
 ]
+translate = [
+    "argostranslate>=1.9",
+]
 
 [tool.setuptools]
 packages = { find = { include = ["core*", "apps*"] } }

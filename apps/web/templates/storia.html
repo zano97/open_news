@@ -7,7 +7,11 @@
     {% if story.topic %}
     <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
     {% endif %}
-    <h2 class="storia-titolo">{{ story.title_neutral }}</h2>
+    <h2 class="storia-titolo">{{ titolo_story(story, locale) }}
+      {%- if titolo_tradotto(story, locale) %} <span class="badge badge-trad">{{ t('trad.badge') }}</span>{% endif %}</h2>
+    {% if titolo_tradotto(story, locale) %}
+    <p class="fonte-meta">{{ t('trad.originale', titolo=story.title_neutral) }} — {{ t('trad.automatica') }}</p>
+    {% endif %}
     <p class="story-meta">
       {{ t('storia.titolo_centroide') if story.title_method == "centroide" else t('storia.titolo_llm') }}
       · {{ t('storia.apparsa', data=story.first_seen | data_breve, ora=story.first_seen | ora_breve) }}

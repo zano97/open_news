@@ -259,3 +259,9 @@ imp.signal_window_days: "Fenêtre des signaux (jours)"
 imp.signal_window_days_help: "Largeur de la fenêtre glissante pour agenda, cadrage, ton et angles morts."
 imp.blindspot_coverage_pct: "Seuil des angles morts"
 imp.blindspot_coverage_pct_help: "Part (0–1) des autres sources du même pays devant avoir couvert une story pour que l’ignorer compte comme angle mort."
+filtro.risultati: "{n} stories trouvées."
+
+# Traduzione titoli neutri
+trad.badge: "trad."
+trad.automatica: "traduction automatique (Argos Translate, en local) : peut contenir des imprécisions"
+trad.originale: "Titre original : « {titolo} »"

@@ -259,3 +259,9 @@ imp.signal_window_days: "Ventana de las señales (días)"
 imp.signal_window_days_help: "Anchura de la ventana móvil para agenda, framing, tono y puntos ciegos."
 imp.blindspot_coverage_pct: "Umbral de los puntos ciegos"
 imp.blindspot_coverage_pct_help: "Cuota (0–1) de las demás fuentes del mismo país que deben haber cubierto una historia para que ignorarla cuente como punto ciego."
+filtro.risultati: "{n} historias encontradas."
+
+# Traduzione titoli neutri
+trad.badge: "trad."
+trad.automatica: "traducción automática (Argos Translate, en local): puede contener imprecisiones"
+trad.originale: "Titular original: «{titolo}»"

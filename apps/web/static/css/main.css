@@ -591,17 +591,17 @@ hr.filetto {
 .elenco-entita li { display: inline-block; margin: 0 0.8rem 0.3rem 0; }
 
 /* ---------- Edizione lampo: reel di carta ---------- */
-/* Funziona anche senza JavaScript: è una semplice lista verticale con
-   scroll-snap; i tasti freccia sono un miglioramento progressivo. */
-.reel {
-  scroll-snap-type: y mandatory;
-  overflow-y: auto;
-  height: calc(100vh - 1rem);
+/* Il contenitore di scorrimento è LA PAGINA (niente riquadri annidati che
+   si rubano la rotella): lo snap sta sulla radice, in modalità proximity,
+   così rotella, touch e tastiera scorrono sempre. Senza JavaScript resta
+   una semplice lista verticale. */
+html:has(body.pagina-lampo) {
+  scroll-snap-type: y proximity;
   scroll-behavior: smooth;
 }
 .reel-scheda {
   scroll-snap-align: start;
-  min-height: calc(100vh - 1rem);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -811,3 +811,11 @@ hr.filetto {
     scroll-behavior: auto !important;
   }
 }
+
+.filtro-conteggio {
+  font-size: 0.7rem;
+  color: var(--seppia);
+  vertical-align: super;
+}
+
+.badge-trad { color: var(--seppia); }

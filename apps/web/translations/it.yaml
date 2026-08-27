@@ -260,3 +260,9 @@ imp.signal_window_days: "Finestra dei segnali (giorni)"
 imp.signal_window_days_help: "Ampiezza della finestra mobile per agenda, framing, tono e blind spot."
 imp.blindspot_coverage_pct: "Soglia degli angoli ciechi"
 imp.blindspot_coverage_pct_help: "Quota (0–1) delle altre fonti dello stesso paese che devono aver coperto una story perché ignorarla conti come angolo cieco."
+filtro.risultati: "{n} story trovate."
+
+# Traduzione titoli neutri
+trad.badge: "trad."
+trad.automatica: "traduzione automatica (Argos Translate, in locale): può contenere imprecisioni"
+trad.originale: "Titolo originale: «{titolo}»"

@@ -245,3 +245,9 @@ imp.signal_window_days: "Signals window (days)"
 imp.signal_window_days_help: "Width of the rolling window for agenda, framing, tone and blind spots."
 imp.blindspot_coverage_pct: "Blind-spot threshold"
 imp.blindspot_coverage_pct_help: "Share (0–1) of the other same-country sources that must have covered a story for ignoring it to count as a blind spot."
+filtro.risultati: "{n} stories found."
+
+# Traduzione titoli neutri
+trad.badge: "transl."
+trad.automatica: "automatic translation (Argos Translate, local): may contain inaccuracies"
+trad.originale: "Original headline: “{titolo}”"

@@ -25,6 +25,7 @@ STATIC_ALLOWED_SUFFIXES: frozenset[str] = frozenset(
         "informazioneeditoria.gov.it",  # contributi diretti all'editoria
         "media-ownership.eu",  # EurOMo, CC BY 4.0
         "raw.githubusercontent.com",  # font OFL e asset vendorizzati (solo script di setup)
+        "argosopentech.com",  # modelli di traduzione Argos (solo script di setup)
         "test",  # dominio riservato RFC 2606: usato solo nei test
     }
 )

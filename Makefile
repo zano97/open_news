@@ -1,4 +1,4 @@
-.PHONY: help install dev up down logs test test-e2e lint typecheck fmt check seed seed-demo calibrate verify-feeds fonts migrate revision clean
+.PHONY: help install dev up down logs test test-e2e lint typecheck fmt check seed seed-demo calibrate verify-feeds fonts migrate revision clean update
 
 PY ?= .venv/bin/python
 PIP ?= .venv/bin/pip
@@ -55,6 +55,9 @@ seed-demo: ## Come seed, ma senza rete: testate dimostrative e notizie inventate
 
 calibrate: ## Misura precision/recall della soglia di clustering sul set annotato
 	$(PY) -m scripts.calibrate_threshold
+
+update: ## Aggiorna all'ultima versione (git pull + rebuild + migrazioni + healthcheck)
+	./update.sh
 
 verify-feeds: ## Verifica via HTTP reale tutti i feed in data/sources.yaml e aggiorna lo stato
 	$(PY) -m scripts.verify_feeds

@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.signal_views import shape_signals
 from apps.api.svg import cocoverage_scatter_svg, coverage_bar_svg, ownership_graph_svg
 from apps.api.templating import templates
+from core.auth import SESSION_COOKIE, read_session_token
 from core.bias.selection import cocoverage_map
 from core.bias.structure import source_profile
 from core.db import get_session
@@ -23,7 +24,17 @@ from core.i18n import (
     normalize_locale,
     resolve_locale,
 )
-from core.models import Article, BiasSignal, Coverage, Owner, Ownership, Source, Story, utcnow
+from core.models import (
+    AnnotatorProfile,
+    Article,
+    BiasSignal,
+    Coverage,
+    Owner,
+    Ownership,
+    Source,
+    Story,
+    utcnow,
+)
 from core.nlp.topics import load_topics
 from core.provenance import for_entity
 
@@ -44,6 +55,22 @@ def request_locale(request: Request) -> str:
     )
 
 
+async def _session_user(
+    request: Request, session: AsyncSession
+) -> AnnotatorProfile | None:
+    token = request.cookies.get(SESSION_COOKIE)
+    if not token:
+        return None
+    annotator_id = read_session_token(token)
+    if annotator_id is None:
+        return None
+    return (
+        await session.execute(
+            select(AnnotatorProfile).where(AnnotatorProfile.id == annotator_id)
+        )
+    ).scalar_one_or_none()
+
+
 async def page_context(
     request: Request, session: AsyncSession
 ) -> dict[str, Any]:
@@ -57,6 +84,7 @@ async def page_context(
             (code, LOCALE_NAMES[code]) for code in SUPPORTED_LOCALES
         ],
         "current_path": request.url.path,
+        "current_user": await _session_user(request, session),
     }
 
 
@@ -170,6 +198,21 @@ def diverse_articles(
     return chosen
 
 
+def order_versions(
+    articles: list[Article], paese: str | None, locale: str
+) -> list[Article]:
+    """Versioni in ordine utile al lettore: prima le testate del paese
+    filtrato, poi quelle nella lingua dell'interfaccia, poi le altre."""
+    return sorted(
+        articles,
+        key=lambda a: (
+            0 if paese and a.source.country == paese else 1,
+            0 if a.language == locale else 1,
+            a.published_at or a.fetched_at,
+        ),
+    )
+
+
 async def masthead_context(session: AsyncSession) -> dict[str, Any]:
     """Numeri del colonnino di testata, presenti su ogni pagina."""
     source_count = (
@@ -205,31 +248,60 @@ async def index(
     session: Annotated[AsyncSession, Depends(get_session)],
     paese: str | None = None,
 ) -> HTMLResponse:
-    # Paesi delle testate attive: alimentano il filtro "un paese in dettaglio".
-    countries = sorted(
-        (
-            await session.execute(
-                select(Source.country).where(Source.enabled).distinct()
-            )
-        ).scalars()
-    )
-    paese = paese.lower() if paese and paese.lower() in countries else None
+    # Filtro per paese: solo paesi con almeno una story, col conteggio accanto
+    # (così l'effetto del filtro è verificabile a colpo d'occhio).
+    country_rows = (
+        await session.execute(
+            select(Source.country, func.count(func.distinct(Article.story_id)))
+            .join(Article, Article.source_id == Source.id)
+            .where(Article.story_id.is_not(None))
+            .group_by(Source.country)
+            .order_by(Source.country)
+        )
+    ).all()
+    countries = [(c, int(n)) for c, n in country_rows if n]
+    valid = {c for c, _ in countries}
+    paese = paese.lower() if paese and paese.lower() in valid else None
 
-    query = (
-        select(Story)
-        .order_by(Story.source_count.desc(), Story.last_seen.desc())
-        .limit(36)
-    )
+    locale = request_locale(request)
     if paese:
-        covered_by_country = (
-            select(Article.story_id)
+        # Solo story coperte da almeno una testata del paese, ordinate per
+        # quanto QUEL paese le ha coperte.
+        from_country = (
+            select(Article.story_id, func.count(Article.id).label("n"))
             .join(Source, Article.source_id == Source.id)
             .where(Source.country == paese, Article.story_id.is_not(None))
+            .group_by(Article.story_id)
+            .subquery()
         )
-        query = query.where(Story.id.in_(covered_by_country))
-    stories = (await session.execute(query)).scalars().all()
+        rows = (
+            await session.execute(
+                select(Story)
+                .join(from_country, Story.id == from_country.c.story_id)
+                .order_by(
+                    from_country.c.n.desc(),
+                    Story.source_count.desc(),
+                    Story.last_seen.desc(),
+                )
+                .limit(36)
+            )
+        ).scalars()
+        stories = list(rows)
+    else:
+        stories = list(
+            (
+                await session.execute(
+                    select(Story)
+                    .order_by(Story.source_count.desc(), Story.last_seen.desc())
+                    .limit(36)
+                )
+            ).scalars()
+        )
     coverages = await _coverages_for(session, [s.id for s in stories])
-    topic_labels = topic_labels_for(request_locale(request))
+    versions_map = {
+        s.id: order_versions(s.articles, paese, locale) for s in stories
+    }
+    topic_labels = topic_labels_for(locale)
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -237,9 +309,11 @@ async def index(
             **await page_context(request, session),
             "stories": stories,
             "coverages": coverages,
+            "versions_map": versions_map,
             "topic_labels": topic_labels,
             "countries": countries,
             "paese": paese,
+            "n_story": len(stories),
         },
     )
 

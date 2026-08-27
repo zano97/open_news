@@ -24,6 +24,9 @@ class Story(Base):
     # Metodo con cui è stato scelto il titolo neutro: "centroide" oppure "llm".
     title_method: Mapped[str] = mapped_column(String(20), default="centroide")
     summary_neutral: Mapped[str | None] = mapped_column(Text)
+    # Traduzioni automatiche del titolo neutro, per lingua dell'interfaccia:
+    # {"en": "...", "fr": "..."} — sempre marcate come automatiche nella UI.
+    title_translations: Mapped[dict[str, str]] = mapped_column(JSONVariant, default=dict)
     summary_method: Mapped[str | None] = mapped_column(String(20))  # solo "llm", sempre marcato
     first_seen: Mapped[datetime] = mapped_column(TZDateTime(), default=utcnow)
     last_seen: Mapped[datetime] = mapped_column(TZDateTime(), default=utcnow)
