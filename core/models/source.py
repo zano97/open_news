@@ -67,6 +67,10 @@ class Owner(Base):
     # [{"office": str, "holder_note": str, "from_year": int|None,
     #   "to_year": int|None, "evidence_url": str}]
     political_offices: Mapped[list[dict[str, Any]]] = mapped_column(JSONVariant, default=list)
+    # Fatti raccolti da Wikidata (CC0) per il proprietario con QID confermato:
+    # {"facts": [{"meaning", "label", "qid", "start", "end"}], "retrieved_at": iso}
+    # Mostrati sempre come "secondo Wikidata", mai come valutazioni nostre.
+    details: Mapped[dict[str, Any]] = mapped_column(JSONVariant, default=dict)
     source_url: Mapped[str | None] = mapped_column(Text)
     retrieved_at: Mapped[datetime] = mapped_column(TZDateTime(), default=utcnow)
 

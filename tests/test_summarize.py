@@ -140,3 +140,69 @@ async def test_pagina_storia_mostra_riassunto_marcato(
     # La marcatura "automatico" è sempre accanto al riassunto.
     assert "automaticamente" in testo
     assert "fanno fede gli articoli originali" in testo
+
+
+class TestRiassuntoSuRichiesta:
+    """Il riassunto si genera SOLO quando il lettore lo chiede, in streaming."""
+
+    async def test_streaming_genera_salva_e_marca(
+        self, client: AsyncClient, session: AsyncSession, llm_attivo: None
+    ) -> None:
+        story = await _story_multi_fonte(session)
+        await session.commit()
+        flusso = (
+            '{"response": "Le testate riferiscono lo stesso evento: "}\n'
+            '{"response": "accordo raggiunto dopo mesi di trattative, '
+            'nessuna vittima segnalata.", "done": true}\n'
+        )
+        with respx.mock:
+            respx.post("http://localhost:11434/api/generate").mock(
+                return_value=httpx.Response(200, text=flusso)
+            )
+            resp = await client.post(f"/storia/{story.id}/riassunto")
+        assert resp.status_code == 200
+        assert "accordo raggiunto" in resp.text
+
+        await session.refresh(story)
+        assert story.summary_neutral is not None
+        assert story.summary_method == "llm"
+        prova = await provenance.for_entity(session, "story", story.id)
+        riga = next(p for p in prova if p.field == "summary")
+        assert riga.inputs["trigger"] == "richiesta del lettore"
+
+        # Seconda richiesta: torna il salvato, senza rigenerare.
+        with respx.mock:  # nessuna rotta: una chiamata a Ollama fallirebbe
+            di_nuovo = await client.post(f"/storia/{story.id}/riassunto")
+        assert di_nuovo.status_code == 200
+        assert di_nuovo.text == story.summary_neutral
+
+    async def test_generatore_spento_503(
+        self, client: AsyncClient, session: AsyncSession
+    ) -> None:
+        story = await _story_multi_fonte(session)
+        await session.commit()
+        resp = await client.post(f"/storia/{story.id}/riassunto")
+        assert resp.status_code == 503
+
+    async def test_story_inesistente_404(
+        self, client: AsyncClient, llm_attivo: None
+    ) -> None:
+        resp = await client.post("/storia/99999/riassunto")
+        assert resp.status_code == 404
+
+    async def test_pagina_mostra_il_pulsante_quando_attivo(
+        self, client: AsyncClient, session: AsyncSession, llm_attivo: None
+    ) -> None:
+        story = await _story_multi_fonte(session)
+        await session.commit()
+        pagina = await client.get(f"/storia/{story.id}")
+        assert "data-riassunto-btn" in pagina.text
+        assert "Genera «Il fatto in breve»" in pagina.text
+
+    async def test_pagina_senza_pulsante_quando_spento(
+        self, client: AsyncClient, session: AsyncSession
+    ) -> None:
+        story = await _story_multi_fonte(session)
+        await session.commit()
+        pagina = await client.get(f"/storia/{story.id}")
+        assert "data-riassunto-btn" not in pagina.text

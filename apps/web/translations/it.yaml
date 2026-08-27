@@ -273,8 +273,26 @@ imp.llm_spento: "I riassunti sono disattivati: attiva l'interruttore qui sopra e
 imp.llm_ok: "Ollama raggiungibile su {url} · modello «{model}» installato: tutto pronto."
 imp.llm_no_modello: "Ollama risponde su {url}, ma il modello «{model}» NON è installato. Scaricalo: docker compose exec ollama ollama pull {model} — modelli presenti: {modelli}."
 imp.llm_irraggiungibile: "Ollama NON raggiungibile su {url} ({errore}). Avvialo: docker compose --profile llm up -d"
-imp.llm_conteggi: "Riassunti già generati: {fatti} · story in attesa: {in_attesa} (il worker genera ogni 15 minuti)."
+imp.llm_conteggi: "Riassunti già generati: {fatti} · story candidabili: {in_attesa}. Si generano su richiesta: dal pulsante nella pagina di ogni story, o qui sotto."
 imp.llm_prova: "Genera 3 riassunti ora"
 imp.llm_prova_ok: "Generati {n} riassunti: li trovi nelle pagine delle story («Il fatto in breve»)."
 imp.llm_prova_zero: "Nessun riassunto generato: controlla lo stato qui sopra e i log (docker compose logs worker)."
 imp.llm_nessuna_story: "Nessuna story in attesa: servono story recenti coperte da almeno 2 testate."
+
+# Riassunto su richiesta
+storia.riassunto_genera: "Genera «Il fatto in breve»"
+storia.riassunto_attendi: "Generazione in corso…"
+storia.riassunto_errore: "Generazione non riuscita: riprova (o controlla lo stato in /impostazioni)"
+
+# Proprietario secondo Wikidata
+fonte.owner_wikidata: "Chi è il proprietario (secondo Wikidata)"
+fonte.owner_wikidata_nota: "Fatti pubblici da Wikidata (CC0), aggiornati ogni giorno per i proprietari con entità confermata: cariche ricoperte, iscrizioni a partiti, occupazioni, aziende possedute. Se un fatto è sbagliato, correggilo su Wikidata: qui arriva la correzione."
+wd.position_held: "cariche ricoperte"
+wd.party: "iscrizione a partito"
+wd.occupation: "occupazione"
+wd.employer: "datore di lavoro"
+wd.owner_of: "proprietario di"
+wd.owned_by: "controllata da"
+wd.founded_by: "fondata da"
+wd.publisher: "editore"
+wd.country: "paese"

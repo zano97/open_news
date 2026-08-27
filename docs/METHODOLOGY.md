@@ -75,11 +75,13 @@ dalla prima apparizione.
 
 **Il fatto in breve.** Il testo integrale degli articoli appartiene alle
 testate e non viene mai mostrato (vedi le note legali). Se l'istanza attiva
-il modello locale opzionale (Ollama, `ENABLE_LLM=true`), la pagina della
-story mostra un **riassunto neutro** generato in locale dai soli titoli ed
-estratti pubblici, sempre **marcato come automatico**, con il modello usato
-registrato nella provenienza. Il riassunto descrive l'evento e non giudica
-mai le testate; a fare fede sono gli articoli originali, linkati accanto.
+il modello locale opzionale (Ollama), la pagina della story offre un
+pulsante «Genera il fatto in breve»: il **riassunto neutro** viene generato
+**solo su richiesta del lettore**, in locale, dai soli titoli ed estratti
+pubblici, con la risposta che compare in diretta; una volta generato resta
+salvato, sempre **marcato come automatico**, con il modello registrato
+nella provenienza. Il riassunto descrive l'evento e non giudica mai le
+testate; a fare fede sono gli articoli originali, linkati accanto.
 
 ### <a id="agenda"></a>Il profilo di agenda
 

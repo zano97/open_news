@@ -258,8 +258,26 @@ imp.llm_spento: "Summaries are disabled: turn on the switch above and save to se
 imp.llm_ok: "Ollama reachable at {url} · model “{model}” installed: ready."
 imp.llm_no_modello: "Ollama responds at {url}, but model “{model}” is NOT installed. Pull it: docker compose exec ollama ollama pull {model} — installed models: {modelli}."
 imp.llm_irraggiungibile: "Ollama NOT reachable at {url} ({errore}). Start it: docker compose --profile llm up -d"
-imp.llm_conteggi: "Summaries generated: {fatti} · stories waiting: {in_attesa} (the worker generates every 15 minutes)."
+imp.llm_conteggi: "Summaries generated: {fatti} · candidate stories: {in_attesa}. Generated on request: from the button on each story page, or below."
 imp.llm_prova: "Generate 3 summaries now"
 imp.llm_prova_ok: "Generated {n} summaries: find them on the story pages (“The story in brief”)."
 imp.llm_prova_zero: "No summary generated: check the status above and the logs (docker compose logs worker)."
 imp.llm_nessuna_story: "No stories waiting: recent stories covered by at least 2 outlets are needed."
+
+# Riassunto su richiesta
+storia.riassunto_genera: "Generate “The story in brief”"
+storia.riassunto_attendi: "Generating…"
+storia.riassunto_errore: "Generation failed: try again (or check the status in /impostazioni)"
+
+# Proprietario secondo Wikidata
+fonte.owner_wikidata: "Who the owner is (according to Wikidata)"
+fonte.owner_wikidata_nota: "Public facts from Wikidata (CC0), refreshed daily for owners with a confirmed entity: positions held, party memberships, occupations, companies owned. If a fact is wrong, fix it on Wikidata: the correction lands here."
+wd.position_held: "positions held"
+wd.party: "party membership"
+wd.occupation: "occupation"
+wd.employer: "employer"
+wd.owner_of: "owner of"
+wd.owned_by: "owned by"
+wd.founded_by: "founded by"
+wd.publisher: "publisher"
+wd.country: "country"

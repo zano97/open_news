@@ -272,8 +272,26 @@ imp.llm_spento: "Zusammenfassungen sind deaktiviert: Schalter oben aktivieren un
 imp.llm_ok: "Ollama erreichbar unter {url} · Modell „{model}“ installiert: bereit."
 imp.llm_no_modello: "Ollama antwortet unter {url}, aber das Modell „{model}“ ist NICHT installiert. Laden: docker compose exec ollama ollama pull {model} — vorhandene Modelle: {modelli}."
 imp.llm_irraggiungibile: "Ollama NICHT erreichbar unter {url} ({errore}). Starten: docker compose --profile llm up -d"
-imp.llm_conteggi: "Erzeugte Zusammenfassungen: {fatti} · wartende Storys: {in_attesa} (der Worker erzeugt alle 15 Minuten)."
+imp.llm_conteggi: "Erzeugte Zusammenfassungen: {fatti} · Kandidaten-Storys: {in_attesa}. Erzeugung auf Anfrage: über den Knopf auf jeder Story-Seite oder unten."
 imp.llm_prova: "Jetzt 3 Zusammenfassungen erzeugen"
 imp.llm_prova_ok: "{n} Zusammenfassungen erzeugt: auf den Story-Seiten („Das Wichtigste in Kürze“)."
 imp.llm_prova_zero: "Keine Zusammenfassung erzeugt: Status oben und Logs prüfen (docker compose logs worker)."
 imp.llm_nessuna_story: "Keine wartenden Storys: nötig sind aktuelle Storys mit mindestens 2 Zeitungen."
+
+# Riassunto su richiesta
+storia.riassunto_genera: "„Das Wichtigste in Kürze“ erzeugen"
+storia.riassunto_attendi: "Wird erzeugt…"
+storia.riassunto_errore: "Erzeugung fehlgeschlagen: erneut versuchen (oder Status in /impostazioni prüfen)"
+
+# Proprietario secondo Wikidata
+fonte.owner_wikidata: "Wer der Eigentümer ist (laut Wikidata)"
+fonte.owner_wikidata_nota: "Öffentliche Fakten aus Wikidata (CC0), täglich aktualisiert für Eigentümer mit bestätigter Entität: bekleidete Ämter, Parteimitgliedschaften, Berufe, Unternehmensbeteiligungen. Ein Fakt ist falsch? Auf Wikidata korrigieren – die Korrektur landet hier."
+wd.position_held: "bekleidete Ämter"
+wd.party: "Parteimitgliedschaft"
+wd.occupation: "Beruf"
+wd.employer: "Arbeitgeber"
+wd.owner_of: "Eigentümer von"
+wd.owned_by: "im Besitz von"
+wd.founded_by: "gegründet von"
+wd.publisher: "Herausgeber"
+wd.country: "Land"

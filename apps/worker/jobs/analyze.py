@@ -111,3 +111,32 @@ async def translate_titles_job() -> None:
         await session.commit()
     if added:
         log.info("titoli neutri tradotti: %d", added)
+
+
+async def enrich_owners_job() -> None:
+    """Fatti Wikidata sui proprietari con QID confermato (best-effort, 1/giorno)."""
+    from core.bias.structure import enrich_owner_from_wikidata
+    from core.models import Owner
+
+    maker = get_sessionmaker()
+    async with build_client() as client, maker() as session:
+        owners = (
+            (
+                await session.execute(
+                    select(Owner).where(Owner.wikidata_qid.is_not(None)).limit(30)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        arricchiti = 0
+        for owner in owners:
+            try:
+                if await enrich_owner_from_wikidata(session, owner, client):
+                    arricchiti += 1
+            except Exception as exc:  # rete assente: si riprova domani
+                log.info("arricchimento %s rimandato: %s", owner.name, exc)
+                break
+        await session.commit()
+    if arricchiti:
+        log.info("proprietari arricchiti da Wikidata: %d", arricchiti)

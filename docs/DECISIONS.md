@@ -160,3 +160,19 @@ dall'Accept-Language, per avere un comportamento deterministico e testabile.
 Le date della testata sono localizzate; i contenuti delle notizie restano
 nella lingua delle testate; i documenti lunghi (metodologia) esistono in
 it/en con fallback inglese dichiarato per le altre lingue.
+
+## ADR-0017 — PixelRAG valutato: non adottato per l'estrazione, interessante altrove
+
+**Contesto.** Proposta di usare PixelRAG (StarTrail-org/PixelRAG, Apache-2.0,
+Berkeley) per migliorare lo "scraping" degli articoli.
+**Valutazione.** PixelRAG è retrieval visivo: renderizza pagine in screenshot
+e cerca sulle immagini con un embedding Qwen3-VL fine-tuned. La nostra
+pipeline ha bisogno di TESTO (lessico, attori citati, tono, embedding dei
+titoli): gli screenshot non alimentano queste analisi, e il modello visivo
+(2B, GPU/MPS consigliati; indici da centinaia di GB) è fuori misura per la
+macchina target (4 core / 8 GB, senza GPU). L'endpoint ospitato pubblico è
+un servizio esterno, contro la nostra politica self-host/allowlist.
+**Decisione.** Per l'estrazione resta trafilatura. PixelRAG resta annotato
+come candidato per un'estensione futura coerente con la missione: catturare
+le PRIME PAGINE delle testate come immagini per studiare risalto e
+gerarchia visiva delle notizie (un segnale di agenda che l'HTML non rende).

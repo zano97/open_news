@@ -65,13 +65,13 @@ async def ingest_gdelt_job() -> None:
     async with build_client() as client:
         limiter = DomainRateLimiter()
         async with maker() as session:
+            # Complemento di copertura per TUTTE le fonti: GDELT vede anche
+            # articoli assenti dai feed RSS (il dedup per URL evita i doppi).
             sources = list(
                 (
                     await session.execute(
                         select(Source).where(
-                            Source.enabled,
-                            Source.gdelt_domain.is_not(None),
-                            Source.feed_urls == [],
+                            Source.enabled, Source.gdelt_domain.is_not(None)
                         )
                     )
                 ).scalars()

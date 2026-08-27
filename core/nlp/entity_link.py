@@ -30,6 +30,20 @@ CLAIM_PROPERTIES = {
     "P571": "inception",
 }
 
+# Fatti ammessi sulle PERSONE proprietarie: cariche, iscrizioni, occupazioni,
+# aziende possedute. Sono fatti verificabili, non etichette di orientamento:
+# l'iscrizione a un partito è un fatto pubblico, l'orientamento di una testata
+# resta calcolato solo dalla nostra metodologia (ADR-0010).
+PERSON_PROPERTIES = {
+    "P39": "position_held",
+    "P102": "party",
+    "P106": "occupation",
+    "P108": "employer",
+    "P1830": "owner_of",
+}
+
+_MAX_FACTS_PER_MEANING = 8
+
 
 @dataclass(frozen=True)
 class EntityCandidate:
@@ -154,6 +168,82 @@ async def resolve_labels(
             label = (labels.get("it") or labels.get("en") or {}).get("value")
             resolved.append(
                 ClaimFact(fact.property, fact.meaning, fact.target_qid, label)
+            )
+        else:
+            resolved.append(fact)
+    return resolved
+
+
+def _qualifier_year(claim: dict[str, Any], prop: str) -> int | None:
+    try:
+        time_str = claim["qualifiers"][prop][0]["datavalue"]["value"]["time"]
+        return int(str(time_str)[1:5])
+    except (KeyError, IndexError, TypeError, ValueError):
+        return None
+
+
+def parse_person_claims(entity: dict[str, Any]) -> list[ClaimFact]:
+    """Fatti ammessi su una persona, con gli anni di inizio/fine se presenti.
+
+    Gli anni (P580/P582) viaggiano nel campo target_label come suffisso
+    "|start|end" per non cambiare la dataclass: chi consuma usa
+    `fact_years()` per estrarli.
+    """
+    facts: list[ClaimFact] = []
+    claims = entity.get("claims", {})
+    for prop, meaning in PERSON_PROPERTIES.items():
+        rows = claims.get(prop, [])[: _MAX_FACTS_PER_MEANING]
+        for claim in rows:
+            value = claim.get("mainsnak", {}).get("datavalue", {}).get("value")
+            if not (isinstance(value, dict) and "id" in value):
+                continue
+            start = _qualifier_year(claim, "P580")
+            end = _qualifier_year(claim, "P582")
+            marker = f"|{start or ''}|{end or ''}" if (start or end) else ""
+            facts.append(
+                ClaimFact(
+                    property=prop,
+                    meaning=meaning,
+                    target_qid=str(value["id"]),
+                    target_label=marker or None,
+                )
+            )
+    return facts
+
+
+def fact_years(fact: ClaimFact) -> tuple[str | None, int | None, int | None]:
+    """(etichetta, anno inizio, anno fine) da un ClaimFact risolto."""
+    label = fact.target_label
+    start: int | None = None
+    end: int | None = None
+    if label and "|" in label:
+        base, s_str, e_str = label.rsplit("|", 2)
+        label = base or None
+        start = int(s_str) if s_str.isdigit() else None
+        end = int(e_str) if e_str.isdigit() else None
+    return label, start, end
+
+
+async def resolve_labels_keep_years(
+    client: httpx.AsyncClient, facts: list[ClaimFact]
+) -> list[ClaimFact]:
+    """Come resolve_labels, ma conserva il suffisso anni di parse_person_claims."""
+    resolved: list[ClaimFact] = []
+    for fact in facts:
+        marker = ""
+        label = fact.target_label
+        if label and label.startswith("|"):
+            marker = label
+            label = None
+        if fact.target_qid and label is None:
+            entity = await fetch_entity(client, fact.target_qid)
+            labels = entity.get("labels", {})
+            nome = (labels.get("it") or labels.get("en") or {}).get("value")
+            resolved.append(
+                ClaimFact(
+                    fact.property, fact.meaning, fact.target_qid,
+                    (nome or fact.target_qid) + marker,
+                )
             )
         else:
             resolved.append(fact)

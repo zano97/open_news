@@ -77,11 +77,13 @@ hours** of its first appearance.
 
 **The story in brief.** The articles' full text belongs to the outlets and
 is never shown (see the legal notes). If the instance enables the optional
-local model (Ollama, `ENABLE_LLM=true`), the story page shows a **neutral
-summary** generated locally from the public headlines and excerpts only,
-always **marked as automatic**, with the model used recorded in the
-provenance. The summary describes the event and never judges the outlets;
-the original articles, linked next to it, are authoritative.
+local model (Ollama), the story page offers a "Generate the story in brief"
+button: the **neutral summary** is generated **only when the reader asks**,
+locally, from the public headlines and excerpts only, with the answer
+streaming in live; once generated it is saved, always **marked as
+automatic**, with the model recorded in the provenance. The summary
+describes the event and never judges the outlets; the original articles,
+linked next to it, are authoritative.
 
 ### <a id="agenda"></a>The agenda profile
 

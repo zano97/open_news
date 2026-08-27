@@ -63,10 +63,12 @@ profilo registrato, che è amministratore): lì scegli anche il modello e
 l'URL di Ollama. In alternativa: `ENABLE_LLM=true` in `.env` e
 `docker compose up -d api worker`.
 
-Il worker riassume le story multi-fonte ogni 15 minuti; il riassunto è
-sempre marcato "automatico" e usa solo titoli ed estratti (mai il testo
-integrale). Su macchine con 8 GB scegli un modello quantizzato piccolo
-(es. `qwen2.5:3b`) dal pannello /impostazioni.
+I riassunti si generano **solo su richiesta**: il lettore preme «Genera il
+fatto in breve» nella pagina della story e vede la risposta comparire in
+streaming; l'admin può pre-generarne 3 dal pannello. Sempre marcati
+"automatico", solo da titoli ed estratti (mai il testo integrale). Su
+macchine con 8 GB scegli un modello quantizzato piccolo (es. `qwen2.5:3b`)
+dal pannello /impostazioni.
 
 ### Pannello /impostazioni
 

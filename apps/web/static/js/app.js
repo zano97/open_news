@@ -48,6 +48,44 @@
     applica(nuovo);
   });
 
+  // "Il fatto in breve" su richiesta: streaming del riassunto nella pagina.
+  var bottoneRiassunto = document.querySelector("[data-riassunto-btn]");
+  if (bottoneRiassunto && window.fetch) {
+    bottoneRiassunto.addEventListener("click", function () {
+      var btn = bottoneRiassunto;
+      var testo = document.querySelector("[data-riassunto-testo]");
+      var nota = document.querySelector("[data-riassunto-nota]");
+      var etichetta = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = btn.getAttribute("data-attendi") || "…";
+      testo.hidden = false;
+      testo.textContent = "";
+      fetch(btn.getAttribute("data-url"), { method: "POST" })
+        .then(function (resp) {
+          if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+          var reader = resp.body.getReader();
+          var decoder = new TextDecoder();
+          function leggi() {
+            return reader.read().then(function (blocco) {
+              if (blocco.done) return;
+              testo.textContent += decoder.decode(blocco.value, { stream: true });
+              return leggi();
+            });
+          }
+          return leggi();
+        })
+        .then(function () {
+          if (testo.textContent.trim().length < 40) throw new Error("vuoto");
+          btn.remove();
+          if (nota) nota.hidden = false;
+        })
+        .catch(function () {
+          btn.disabled = false;
+          btn.textContent = btn.getAttribute("data-errore") || etichetta;
+        });
+    });
+  }
+
   // Edizione lampo: navigazione con i tasti freccia (miglioramento progressivo;
   // senza JS il reel resta una lista verticale scorrevole).
   var reel = document.getElementById("reel");

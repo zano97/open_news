@@ -9,6 +9,7 @@ di rilevamento; i valori non noti restano null e l'interfaccia mostra
 from dataclasses import dataclass
 from pathlib import Path
 
+import httpx
 import yaml
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -184,3 +185,54 @@ async def source_profile(session: AsyncSession, slug: str) -> SourceProfile | No
         fundings=list(fundings),
         signals=list(signals),
     )
+
+
+async def enrich_owner_from_wikidata(
+    session: AsyncSession, owner: Owner, client: httpx.AsyncClient
+) -> int:
+    """Raccoglie fatti pubblici sul proprietario da Wikidata (CC0).
+
+    Solo per proprietari con QID CONFERMATO nel seed (mai indovinato):
+    cariche ricoperte con date, iscrizioni a partiti, occupazioni, aziende
+    possedute, più i fatti societari. Tutto mostrato "secondo Wikidata".
+    """
+    from core.nlp.entity_link import (
+        fact_years,
+        fetch_entity,
+        parse_company_claims,
+        parse_person_claims,
+        resolve_labels_keep_years,
+    )
+
+    if not owner.wikidata_qid:
+        return 0
+    entity = await fetch_entity(client, owner.wikidata_qid)
+    raw_facts = parse_person_claims(entity) + [
+        f for f in parse_company_claims(entity) if f.meaning != "inception"
+    ]
+    resolved = await resolve_labels_keep_years(client, raw_facts)
+    facts: list[dict[str, object]] = []
+    for fact in resolved:
+        label, start, end = fact_years(fact)
+        facts.append(
+            {
+                "meaning": fact.meaning,
+                "label": label or fact.target_qid,
+                "qid": fact.target_qid,
+                "start": start,
+                "end": end,
+            }
+        )
+    owner.details = {"facts": facts, "retrieved_at": utcnow().isoformat()}
+    await session.flush()
+    await record(
+        session,
+        entity_type="owner",
+        entity_id=owner.id,
+        field="wikidata_facts",
+        method="wikidata-owner-v1",
+        inputs={"qid": owner.wikidata_qid, "n_facts": len(facts)},
+        source_name="Wikidata",
+        source_url=f"https://www.wikidata.org/wiki/{owner.wikidata_qid}",
+    )
+    return len(facts)

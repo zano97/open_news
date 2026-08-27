@@ -2,8 +2,8 @@
 
 Modalità:
 - predefinita (rete necessaria): verifica lo schema, sincronizza il catalogo,
-  importa gli assetti proprietari, scarica i feed RSS (max 2 per fonte) e la
-  copertura GDELT delle agenzie, poi esegue clustering, coperture, entità,
+  importa gli assetti proprietari, scarica i feed RSS (max 4 per fonte) e la
+  copertura GDELT come complemento per tutte le fonti, poi esegue clustering, coperture, entità,
   temi e segnali. Pensata per stare sotto i 15 minuti su una macchina modesta.
 - `--offline-demo` (nessuna rete): crea 8 testate dimostrative dichiarate
   come tali e un giorno di notizie plausibili MA INVENTATE, poi esegue la
@@ -32,7 +32,7 @@ from core.models import Article, Base, Source, Story
 from core.net import build_client
 from core.nlp.entities import assign_story_entities
 
-MAX_FEEDS_PER_SOURCE = 2
+MAX_FEEDS_PER_SOURCE = 4
 
 # Eventi dimostrativi: inventati, attribuiti SOLO a testate dimostrative.
 _DEMO_SOURCES = [
@@ -187,19 +187,19 @@ async def seed_online() -> None:
         for source in sources:
             async with maker() as session:
                 merged = await session.merge(source, load=False)
-                if merged.feed_urls:
-                    for feed_url in merged.feed_urls[:MAX_FEEDS_PER_SOURCE]:
-                        stats = await ingest_feed(
-                            session, merged, feed_url,
-                            client=client, limiter=limiter, robots=robots,
-                        )
-                        esito = stats.error or f"+{stats.created} articoli"
-                        print(f"  {merged.slug}: {esito}")
-                elif merged.gdelt_domain:
+                for feed_url in merged.feed_urls[:MAX_FEEDS_PER_SOURCE]:
+                    stats = await ingest_feed(
+                        session, merged, feed_url,
+                        client=client, limiter=limiter, robots=robots,
+                    )
+                    esito = stats.error or f"+{stats.created} articoli"
+                    print(f"  {merged.slug}: {esito}")
+                if merged.gdelt_domain:
                     created = await ingest_gdelt_source(
                         session, merged, client=client, limiter=limiter
                     )
-                    print(f"  {merged.slug}: +{created} articoli (GDELT)")
+                    if created or not merged.feed_urls:
+                        print(f"  {merged.slug}: +{created} articoli (GDELT)")
                 await session.commit()
 
     await run_pipeline()

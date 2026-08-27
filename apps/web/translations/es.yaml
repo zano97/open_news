@@ -272,8 +272,26 @@ imp.llm_spento: "Los resúmenes están desactivados: activa el interruptor de ar
 imp.llm_ok: "Ollama accesible en {url} · modelo «{model}» instalado: listo."
 imp.llm_no_modello: "Ollama responde en {url}, pero el modelo «{model}» NO está instalado. Descárgalo: docker compose exec ollama ollama pull {model} — modelos presentes: {modelli}."
 imp.llm_irraggiungibile: "Ollama NO accesible en {url} ({errore}). Arráncalo: docker compose --profile llm up -d"
-imp.llm_conteggi: "Resúmenes generados: {fatti} · historias en espera: {in_attesa} (el worker genera cada 15 minutos)."
+imp.llm_conteggi: "Resúmenes generados: {fatti} · historias candidatas: {in_attesa}. Se generan bajo demanda: con el botón en cada página de historia, o abajo."
 imp.llm_prova: "Generar 3 resúmenes ahora"
 imp.llm_prova_ok: "{n} resúmenes generados: están en las páginas de las historias («La historia en breve»)."
 imp.llm_prova_zero: "Ningún resumen generado: revisa el estado de arriba y los registros (docker compose logs worker)."
 imp.llm_nessuna_story: "Ninguna historia en espera: hacen falta historias recientes cubiertas por al menos 2 periódicos."
+
+# Riassunto su richiesta
+storia.riassunto_genera: "Generar «La historia en breve»"
+storia.riassunto_attendi: "Generando…"
+storia.riassunto_errore: "Generación fallida: reinténtalo (o revisa el estado en /impostazioni)"
+
+# Proprietario secondo Wikidata
+fonte.owner_wikidata: "Quién es el propietario (según Wikidata)"
+fonte.owner_wikidata_nota: "Hechos públicos de Wikidata (CC0), actualizados a diario para los propietarios con entidad confirmada: cargos ocupados, afiliaciones a partidos, ocupaciones, empresas en propiedad. ¿Un dato erróneo? Corrígelo en Wikidata: la corrección llega aquí."
+wd.position_held: "cargos ocupados"
+wd.party: "afiliación a partido"
+wd.occupation: "ocupación"
+wd.employer: "empleador"
+wd.owner_of: "propietario de"
+wd.owned_by: "propiedad de"
+wd.founded_by: "fundada por"
+wd.publisher: "editor"
+wd.country: "país"

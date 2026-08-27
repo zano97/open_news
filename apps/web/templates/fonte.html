@@ -63,6 +63,27 @@
     </table>
     {% endif %}
 
+    {% set con_wikidata = profile.ownerships | selectattr("owner.details") | list %}
+    {% if con_wikidata %}
+    <h4>{{ t('fonte.owner_wikidata') }}</h4>
+    {% for entry in con_wikidata %}
+    <p><strong>{{ entry.owner.name }}</strong>
+      {% if entry.owner.wikidata_qid %}
+      <a href="https://www.wikidata.org/wiki/{{ entry.owner.wikidata_qid }}"><small>[{{ entry.owner.wikidata_qid }}]</small></a>
+      {% endif %}
+    </p>
+    <ul class="elenco-cariche">
+      {% for f in entry.owner.details.facts %}
+      <li>{{ t('wd.' + f.meaning) }}:
+        {% if f.qid %}<a href="https://www.wikidata.org/wiki/{{ f.qid }}">{{ f.label }}</a>{% else %}{{ f.label }}{% endif %}
+        {% if f.start or f.end %}({{ f.start or "?" }}–{{ f.end or t('comune.in_corso') }}){% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+    <p class="fonte-meta">{{ t('fonte.owner_wikidata_nota') }}</p>
+    {% endif %}
+
     {% set con_cariche = profile.ownerships | selectattr("owner.political_offices") | list %}
     {% if con_cariche %}
     <h4>{{ t('fonte.cariche') }}</h4>

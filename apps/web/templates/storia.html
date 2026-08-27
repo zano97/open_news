@@ -27,11 +27,22 @@
     {% endif %}
   </header>
 
-  {% if story.summary_neutral %}
+  {% if story.summary_neutral or llm_on %}
   <section class="riassunto-neutro scheda-sezione">
     <h3>{{ t('storia.riassunto_titolo') }}</h3>
+    {% if story.summary_neutral %}
     <p class="riassunto-testo">{{ story.summary_neutral }}</p>
     <p class="fonte-meta">{{ t('storia.riassunto_nota') }}</p>
+    {% else %}
+    <p class="riassunto-testo" data-riassunto-testo hidden></p>
+    <button type="button" class="bottone" data-riassunto-btn
+            data-url="/storia/{{ story.id }}/riassunto"
+            data-attendi="{{ t('storia.riassunto_attendi') }}"
+            data-errore="{{ t('storia.riassunto_errore') }}">
+      {{ t('storia.riassunto_genera') }}
+    </button>
+    <p class="fonte-meta" data-riassunto-nota hidden>{{ t('storia.riassunto_nota') }}</p>
+    {% endif %}
   </section>
   {% endif %}
 

@@ -1,11 +1,19 @@
 """Pagine HTML (Jinja2 + HTMX)."""
 
+import json
 import math
+from collections.abc import AsyncIterator
 from datetime import timedelta
 from typing import Annotated, Any
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import (
+    HTMLResponse,
+    PlainTextResponse,
+    RedirectResponse,
+    StreamingResponse,
+)
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -346,6 +354,8 @@ async def storia(
         )
     provenances = await for_entity(session, "story", story.id)
     topic_labels = topic_labels_for(locale)
+    from core.config import get_settings as _gs
+
     return templates.TemplateResponse(
         request,
         "storia.html",
@@ -358,7 +368,105 @@ async def storia(
             "paesi_svg": paesi_svg,
             "provenances": provenances,
             "topic_labels": topic_labels,
+            "llm_on": _gs().enable_llm,
         },
+    )
+
+
+# Story con una generazione già in corso (mai due richieste sovrapposte).
+_riassunti_in_corso: set[int] = set()
+
+
+@router.post("/storia/{story_id}/riassunto", response_model=None)
+async def genera_riassunto(
+    story_id: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> PlainTextResponse | StreamingResponse:
+    """Riassunto SOLO su richiesta del lettore, con streaming dei token.
+
+    Generato in locale (Ollama) dai soli titoli ed estratti; al termine viene
+    salvato, marcato come automatico, con provenance. Se esiste già, si
+    restituisce quello salvato senza rigenerare.
+    """
+    from core.config import get_settings
+    from core.nlp.summarize import METHOD_NAME, build_prompt
+    from core.provenance import record as record_provenance
+
+    settings = get_settings()
+    story = (
+        await session.execute(select(Story).where(Story.id == story_id))
+    ).scalar_one_or_none()
+    if story is None:
+        raise HTTPException(status_code=404, detail="story sconosciuta")
+    if story.summary_neutral:
+        return PlainTextResponse(story.summary_neutral)
+    if not settings.enable_llm:
+        raise HTTPException(status_code=503, detail="generatore disattivato")
+    if not story.articles:
+        raise HTTPException(status_code=409, detail="story senza articoli")
+    if story_id in _riassunti_in_corso:
+        raise HTTPException(status_code=409, detail="generazione già in corso")
+
+    prompt = build_prompt(story)
+    n_articles = len(story.articles)
+
+    async def stream() -> AsyncIterator[str]:
+        _riassunti_in_corso.add(story_id)
+        parts: list[str] = []
+        try:
+            from core.net import build_client
+
+            async with build_client(timeout=300) as client, client.stream(
+                "POST",
+                f"{settings.ollama_url.rstrip('/')}/api/generate",
+                json={
+                    "model": settings.ollama_model,
+                    "prompt": prompt,
+                    "stream": True,
+                    "options": {"temperature": 0.2, "num_predict": 260},
+                },
+            ) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line.strip():
+                        continue
+                    try:
+                        payload = json.loads(line)
+                    except ValueError:
+                        continue
+                    token = str(payload.get("response", ""))
+                    if token:
+                        parts.append(token)
+                        yield token
+                    if payload.get("done"):
+                        break
+            testo = "".join(parts).strip()
+            if len(testo) >= 40:
+                story.summary_neutral = testo
+                story.summary_method = "llm"
+                await record_provenance(
+                    session,
+                    entity_type="story",
+                    entity_id=story.id,
+                    field="summary",
+                    method=METHOD_NAME,
+                    inputs={
+                        "model": settings.ollama_model,
+                        "n_articles": n_articles,
+                        "trigger": "richiesta del lettore",
+                        "input": "titoli+estratti (mai testo integrale)",
+                    },
+                )
+                await session.commit()
+        except httpx.HTTPError:
+            yield "\n"  # il client rileva l'interruzione dal flusso troncato
+        finally:
+            _riassunti_in_corso.discard(story_id)
+
+    return StreamingResponse(
+        stream(),
+        media_type="text/plain; charset=utf-8",
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
     )
 
 
