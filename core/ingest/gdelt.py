@@ -32,8 +32,14 @@ log = logging.getLogger(__name__)
 
 GDELT_DOC_URL = "https://api.gdeltproject.org/api/v2/doc/doc"
 GDELT_HOST = "api.gdeltproject.org"
+# 429/5xx: vale la pena aspettare (il servizio c'è, chiede calma).
 RETRY_ATTEMPTS = 3
 RETRY_BASE_SECONDS = 10.0
+# Errori di trasporto (connessione persa, timeout): il transport ha già
+# ritentato per conto suo — un solo altro tentativo rapido, poi si passa
+# oltre. Insistere quando GDELT non risponde brucia minuti a vuoto.
+TRANSPORT_ATTEMPTS = 2
+TRANSPORT_RETRY_SECONDS = 2.0
 
 
 class GdeltFormatError(ValueError):
@@ -141,9 +147,11 @@ async def _get_artlist(
                     f"risposta non JSON ({snippet or 'vuota'})"
                 ) from exc
             return parse_artlist(payload)
-        except (httpx.TimeoutException, httpx.TransportError) as exc:
+        except httpx.TransportError as exc:
             last_error = exc
-            await sleep(RETRY_BASE_SECONDS * (2**attempt))
+            if attempt + 1 >= TRANSPORT_ATTEMPTS:
+                break
+            await sleep(TRANSPORT_RETRY_SECONDS)
     assert last_error is not None
     raise last_error
 

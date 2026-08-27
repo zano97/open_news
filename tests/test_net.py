@@ -77,7 +77,7 @@ def test_client_senza_proxy_forza_ipv4_e_retry(
         monkeypatch.delenv(k, raising=False)
     client = build_client()
     assert isinstance(client._transport, httpx.AsyncHTTPTransport)
-    assert client._transport._pool._retries == 2
+    assert client._transport._pool._retries == 1
     assert client._transport._pool._local_address == "0.0.0.0"
 
 

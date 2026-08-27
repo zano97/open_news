@@ -116,7 +116,7 @@ def build_client(
     )
     if not proxy_attivo:
         extra["transport"] = httpx.AsyncHTTPTransport(
-            retries=2,
+            retries=1,
             local_address="0.0.0.0" if settings.http_ipv4_only else None,
         )
     return httpx.AsyncClient(

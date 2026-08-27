@@ -235,3 +235,13 @@ giro, e l'autodiscovery dei feed prova i percorsi convenzionali (/feed/,
 **Alternative scartate.** Implementare l'happy-eyeballs in casa (fuori
 scala); aumentare i timeout (allunga l'attesa senza cambiare l'esito sul
 percorso IPv6 rotto).
+
+**Aggiornamento (stesso giorno).** Il terzo seed reale ha mostrato che
+quando GDELT non accetta connessioni i retry costano minuti a vuoto (9
+fonti solo-GDELT × tentativi × timeout). Ora gli errori di trasporto hanno
+al massimo 2 tentativi rapidi (il transport ha già ritentato per conto
+suo; il backoff paziente resta per i 429), e un interruttore di circuito
+ferma tutto: dopo 2 gruppi consecutivi senza connessione i rimanenti si
+saltano subito — li recupera il ciclo di raccolta successivo (feed ogni 10
+minuti, GDELT ogni 30). Anche robots.txt ha un timeout corto (8 s): un
+robots che non arriva non deve trattenere il feed per 20.

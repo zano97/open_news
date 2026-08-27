@@ -174,7 +174,8 @@ async def ingest_gdelt_all(
         if progress is not None:
             progress(source.slug, n)
 
-    async def attempt(gruppo: list[Source]) -> bool:
+    async def attempt(gruppo: list[Source]) -> str:
+        """Esito: "ok", "connessione" (trasporto) o "errore" (risposta)."""
         domains = [s.gdelt_domain for s in gruppo if s.gdelt_domain]
         query = (
             f"domain:{domains[0]}"
@@ -188,9 +189,12 @@ async def ingest_gdelt_all(
                 max_records=100 if len(domains) == 1 else 250,
                 sleep=sleep,
             )
+        except httpx.TransportError as exc:
+            log.warning("GDELT %s: %s", ", ".join(domains), error_text(exc))
+            return "connessione"
         except (httpx.HTTPError, GdeltFormatError) as exc:
             log.warning("GDELT %s: %s", ", ".join(domains), error_text(exc))
-            return False
+            return "errore"
         by_source: dict[int, list[GdeltArticle]] = {}
         for item in items:
             matched = match_source(item, gruppo)
@@ -198,12 +202,37 @@ async def ingest_gdelt_all(
                 by_source.setdefault(matched.id, []).append(item)
         for source in gruppo:
             await store(source, by_source.get(source.id, []), query)
-        return True
+        return "ok"
+
+    async def run_groups(gruppi: list[list[Source]]) -> tuple[list[list[Source]], bool]:
+        """Esegue i gruppi con interruttore: dopo 2 gruppi consecutivi senza
+        connessione GDELT è considerato giù e i rimanenti si saltano — il
+        raccoglitore periodico recupererà al prossimo ciclo. Ritorna
+        (gruppi falliti, interruttore scattato)."""
+        falliti: list[list[Source]] = []
+        consecutivi = 0
+        for i, gruppo in enumerate(gruppi):
+            if consecutivi >= 2:
+                log.warning(
+                    "GDELT non risponde alla connessione: salto i %d gruppi "
+                    "rimanenti (riproverà il prossimo ciclo di raccolta)",
+                    len(gruppi) - i,
+                )
+                return falliti, True
+            esito = await attempt(gruppo)
+            if esito == "connessione":
+                consecutivi += 1
+                falliti.append(gruppo)
+            elif esito == "errore":
+                consecutivi = 0
+                falliti.append(gruppo)
+            else:
+                consecutivi = 0
+        return falliti, False
 
     gruppi = [[s] for s in solo] + _chunk(complement, batch_size)
-    falliti = [g for g in gruppi if not await attempt(g)]
-    if falliti:
+    falliti, saltato = await run_groups(gruppi)
+    if falliti and not saltato:
         log.info("GDELT: secondo passaggio su %d gruppi falliti", len(falliti))
-        for gruppo in falliti:
-            await attempt(gruppo)
+        await run_groups(falliti)
     return created

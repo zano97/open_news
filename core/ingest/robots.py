@@ -30,7 +30,9 @@ class RobotsCache:
     async def _load(self, scheme: str, host: str) -> RobotFileParser | None:
         url = f"{scheme}://{host}/robots.txt"
         try:
-            resp = await self._client.get(url)
+            # Timeout corto: un robots.txt che non arriva in 8 s non arriva
+            # più; inutile trattenere il fetch del feed per 20.
+            resp = await self._client.get(url, timeout=8)
         except httpx.HTTPError as exc:
             log.warning(
                 "robots.txt non raggiungibile per %s (%s: %s): consento",

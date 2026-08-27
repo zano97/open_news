@@ -151,3 +151,29 @@ async def test_gdelt_secondo_passaggio_sui_falliti(maker: async_sessionmaker) ->
 
     assert len(route.calls) == 4  # 3 tentativi + 1 del secondo passaggio
     assert creati == {"solo": 2}
+
+
+@respx.mock
+async def test_gdelt_interruttore_quando_irraggiungibile(
+    maker: async_sessionmaker,
+) -> None:
+    """GDELT giù: dopo 2 gruppi consecutivi senza connessione i rimanenti
+    si saltano subito (niente minuti persi), secondo passaggio compreso."""
+    async with maker() as session:
+        for slug in ("uno", "due", "tre"):
+            session.add(_fonte(slug, f"{slug}.test", [], f"{slug}.test"))
+        await session.commit()
+
+    route = respx.get(GDELT_DOC_URL)
+    route.side_effect = [httpx.ConnectTimeout("giù")] * 4  # 2 tentativi x 2 gruppi
+
+    async def niente_attesa(_secondi: float) -> None:
+        return None
+
+    async with httpx.AsyncClient() as client:
+        creati = await ingest_gdelt_all(
+            maker, client=client, limiter=_limiter(), sleep=niente_attesa
+        )
+
+    assert len(route.calls) == 4  # il terzo gruppo non viene nemmeno tentato
+    assert creati == {}
