@@ -261,6 +261,8 @@ imp.llm_irraggiungibile: "Ollama NOT reachable at {url} ({errore}). Start it: do
 imp.llm_conteggi: "Summaries generated: {fatti} · candidate stories: {in_attesa}. Generated on request: from the button on each story page, or below."
 imp.llm_prova: "Generate 3 summaries now"
 imp.diagnostica: "Diagnostics"
+imp.diag_riavvio: "A newer version is installed than the one running: close and reopen Open News to activate it."
+imp.diag_avvio: "Process started on {quando}."
 imp.diag_file: "Full log file: {path}"
 imp.diag_nota_docker: "Log of the web process. In server mode, collector logs: docker compose logs worker"
 imp.diag_vuoto: "No warnings or errors since this start: all quiet."

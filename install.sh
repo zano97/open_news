@@ -139,6 +139,9 @@ elif [ "${OPENNEWS_NO_SEED:-0}" != "1" ]; then
 fi
 
 say "Avvio il giornale"
+# Ferma l'eventuale istanza precedente: il codice nuovo deve anche GIRARE
+# (un processo vecchio produce rotte mancanti e pagine a metà).
+pkill -f "$APP/.venv/bin/opennews" 2>/dev/null && sleep 2 || true
 nohup "$APP/.venv/bin/opennews" --no-browser > "$OPENNEWS_HOME/log.txt" 2>&1 &
 for _ in $(seq 1 40); do curl -fsS "$URL/healthz" >/dev/null 2>&1 && break; sleep 1; done
 # Finestra dedicata: nativa su macOS (icona nel Dock), altrimenti --app

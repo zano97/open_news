@@ -33,6 +33,7 @@
 
 /* ---------- Palette: carta e inchiostro, un solo accento ---------- */
 :root {
+  color-scheme: light;
   --carta: #f4ecd8;
   --carta-scura: #eadfc4;      /* riquadri, schede */
   --inchiostro: #1a1a1a;
@@ -54,6 +55,7 @@
 /* Edizione notturna: carta scura, inchiostro chiaro. Stessi ruoli, ruoli invertiti. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="giorno"]) {
+    color-scheme: dark;
     --carta: #201d17;
     --carta-scura: #2a2620;
     --inchiostro: #e8e0cd;
@@ -64,6 +66,7 @@
   }
 }
 :root[data-theme="notte"] {
+  color-scheme: dark;
   --carta: #201d17;
   --carta-scura: #2a2620;
   --inchiostro: #e8e0cd;
@@ -668,6 +671,12 @@ html:has(body.pagina-lampo) {
   display: inline-block;
   border: 2px solid var(--accento);
   color: var(--accento);
+  /* niente sfondo di sistema: i <button> nativi arrivano grigi */
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  cursor: pointer;
   padding: 0.4rem 1.2rem;
   text-decoration: none;
   font-variant: small-caps;

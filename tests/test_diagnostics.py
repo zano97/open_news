@@ -108,3 +108,21 @@ async def test_prova_generatore_dal_pannello(
     pagina = await client.get("/impostazioni")
     assert "model runner has unexpectedly stopped" in pagina.text
     assert "Diagnostica" in pagina.text
+
+
+def test_avviso_riavvio_dopo_aggiornamento(monkeypatch) -> None:
+    """Codice su disco più nuovo del processo: il pannello deve dirlo."""
+    from datetime import UTC, datetime
+
+    from apps.api.routers.settings_panel import update_pending
+    from core import logbuffer
+
+    monkeypatch.setattr(
+        logbuffer, "STARTED_AT", datetime(2000, 1, 1, tzinfo=UTC)
+    )
+    assert update_pending()  # i file del repo sono ovviamente più recenti
+
+    monkeypatch.setattr(
+        logbuffer, "STARTED_AT", datetime(2100, 1, 1, tzinfo=UTC)
+    )
+    assert not update_pending()

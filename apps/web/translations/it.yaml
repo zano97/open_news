@@ -276,6 +276,8 @@ imp.llm_irraggiungibile: "Ollama NON raggiungibile su {url} ({errore}). Avvialo:
 imp.llm_conteggi: "Riassunti già generati: {fatti} · story candidabili: {in_attesa}. Si generano su richiesta: dal pulsante nella pagina di ogni story, o qui sotto."
 imp.llm_prova: "Genera 3 riassunti ora"
 imp.diagnostica: "Diagnostica"
+imp.diag_riavvio: "È installata una versione più nuova di quella in esecuzione: chiudi e riapri Open News per attivarla."
+imp.diag_avvio: "Processo avviato il {quando}."
 imp.diag_file: "Registro completo su file: {path}"
 imp.diag_nota_docker: "Registro del processo web. In modalità server i log del raccoglitore si leggono con: docker compose logs worker"
 imp.diag_vuoto: "Nessun avviso o errore da questo avvio: tutto tranquillo."

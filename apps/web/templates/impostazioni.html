@@ -80,6 +80,10 @@
 
   <section class="scheda-sezione diagnostica">
     <h3>{{ t('imp.diagnostica') }}</h3>
+    {% if riavvio_necessario %}
+    <p class="impostazione-errore" role="alert">{{ t('imp.diag_riavvio') }}</p>
+    {% endif %}
+    <p class="fonte-meta">{{ t('imp.diag_avvio', quando=avviato_alle.strftime('%Y-%m-%d %H:%M UTC')) }}</p>
     {% if log_file %}
     <p class="fonte-meta">{{ t('imp.diag_file', path=log_file) }}</p>
     {% else %}

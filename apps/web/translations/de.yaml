@@ -275,6 +275,8 @@ imp.llm_irraggiungibile: "Ollama NICHT erreichbar unter {url} ({errore}). Starte
 imp.llm_conteggi: "Erzeugte Zusammenfassungen: {fatti} · Kandidaten-Storys: {in_attesa}. Erzeugung auf Anfrage: über den Knopf auf jeder Story-Seite oder unten."
 imp.llm_prova: "Jetzt 3 Zusammenfassungen erzeugen"
 imp.diagnostica: "Diagnose"
+imp.diag_riavvio: "Es ist eine neuere Version installiert als die laufende: Open News schließen und neu öffnen, um sie zu aktivieren."
+imp.diag_avvio: "Prozess gestartet am {quando}."
 imp.diag_file: "Vollständiges Protokoll in Datei: {path}"
 imp.diag_nota_docker: "Protokoll des Web-Prozesses. Im Server-Modus, Sammler-Logs: docker compose logs worker"
 imp.diag_vuoto: "Keine Warnungen oder Fehler seit diesem Start: alles ruhig."

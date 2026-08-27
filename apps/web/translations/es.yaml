@@ -275,6 +275,8 @@ imp.llm_irraggiungibile: "Ollama NO accesible en {url} ({errore}). Arráncalo: d
 imp.llm_conteggi: "Resúmenes generados: {fatti} · historias candidatas: {in_attesa}. Se generan bajo demanda: con el botón en cada página de historia, o abajo."
 imp.llm_prova: "Generar 3 resúmenes ahora"
 imp.diagnostica: "Diagnóstico"
+imp.diag_riavvio: "Hay instalada una versión más nueva que la que está en ejecución: cierra y vuelve a abrir Open News para activarla."
+imp.diag_avvio: "Proceso iniciado el {quando}."
 imp.diag_file: "Registro completo en archivo: {path}"
 imp.diag_nota_docker: "Registro del proceso web. En modo servidor, registros del recolector: docker compose logs worker"
 imp.diag_vuoto: "Ningún aviso ni error desde este arranque: todo en orden."

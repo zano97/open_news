@@ -76,6 +76,9 @@ if ($env:OPENNEWS_DEMO -eq "1") {
 }
 
 Say "Avvio il giornale"
+# Ferma l'eventuale istanza precedente: il codice nuovo deve anche girare.
+Get-Process opennews -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Seconds 2
 Start-Process -FilePath $Exe -WindowStyle Minimized
 Start-Sleep -Seconds 3
 

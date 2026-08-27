@@ -15,6 +15,10 @@ from datetime import UTC, datetime
 
 MAX_RECORDS = 400
 
+# Quando è partito questo processo: il pannello lo confronta con la data dei
+# file installati per accorgersi di un aggiornamento non ancora riavviato.
+STARTED_AT = datetime.now(UTC)
+
 
 @dataclass(frozen=True)
 class LogEntry:

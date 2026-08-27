@@ -5,6 +5,7 @@ Le modifiche finiscono in `app_settings`, prevalgono sulle variabili
 d'ambiente e vengono applicate a caldo; il worker le ricarica entro 5 minuti.
 """
 
+from pathlib import Path
 from typing import Annotated
 
 import httpx
@@ -58,11 +59,33 @@ async def _llm_panel(session: AsyncSession) -> dict[str, object]:
     return {"llm_status": status, "riassunti_fatti": fatti, "riassunti_attesa": in_attesa}
 
 
+def update_pending() -> bool:
+    """Vero se su disco c'è codice più nuovo del processo in esecuzione.
+
+    Dopo un aggiornamento i template si ricaricano da soli ma le rotte no:
+    un processo non riavviato produce 404 ed etichette miste. Meglio dirlo.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from core import logbuffer
+
+    riferimenti = [
+        Path(__file__).resolve().parents[2] / "api" / "main.py",
+        Path(__file__).resolve().parents[3] / "pyproject.toml",
+    ]
+    try:
+        ultimo = max(p.stat().st_mtime for p in riferimenti if p.exists())
+    except ValueError:
+        return False
+    installato = datetime.fromtimestamp(ultimo, tz=UTC)
+    return installato > logbuffer.STARTED_AT + timedelta(seconds=5)
+
+
 def _diagnostics() -> dict[str, object]:
     """Registro eventi e ultima generazione: la diagnosi senza terminale."""
     import os
 
-    from core.logbuffer import recent
+    from core.logbuffer import STARTED_AT, recent
 
     log_file = None
     if os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1":
@@ -73,6 +96,8 @@ def _diagnostics() -> dict[str, object]:
         "log_records": recent(limit=60),
         "log_file": log_file,
         "ultima_generazione": dict(LAST_GENERATION) or None,
+        "avviato_alle": STARTED_AT,
+        "riavvio_necessario": update_pending(),
     }
 
 
