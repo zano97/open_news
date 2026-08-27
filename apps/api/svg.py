@@ -88,6 +88,65 @@ def ownership_graph_svg(profile: SourceProfile) -> str:
     return "".join(parts)
 
 
+def cocoverage_scatter_svg(
+    positions: dict[str, tuple[float, float]],
+    *,
+    highlight: str | None = None,
+    names: dict[str, str] | None = None,
+) -> str:
+    """Mappa di co-copertura: ogni punto è una fonte; gli assi sono emergenti.
+
+    La scala è adattata ai dati; la lettura corretta è relativa (chi sta vicino
+    copre le stesse story), mai assoluta.
+    """
+    if not positions:
+        return (
+            '<p class="dato-mancante">Mappa di co-copertura: dato non disponibile '
+            "(servono almeno 3 fonti con story condivise).</p>"
+        )
+    width, height, pad = 720, 480, 50
+    xs = [p[0] for p in positions.values()]
+    ys = [p[1] for p in positions.values()]
+    x_min, x_max = min(xs), max(xs)
+    y_min, y_max = min(ys), max(ys)
+    x_span = (x_max - x_min) or 1.0
+    y_span = (y_max - y_min) or 1.0
+
+    def sx(x: float) -> float:
+        return pad + (x - x_min) / x_span * (width - 2 * pad)
+
+    def sy(y: float) -> float:
+        return height - pad - (y - y_min) / y_span * (height - 2 * pad)
+
+    parts = [
+        f'<svg viewBox="0 0 {width} {height}" role="img" class="mappa-cocopertura" '
+        'aria-label="Mappa di co-copertura delle fonti (dimensioni emergenti)">',
+        f'<line x1="{pad}" y1="{height - pad}" x2="{width - pad}" '
+        f'y2="{height - pad}" class="grafo-arco" />',
+        f'<line x1="{pad}" y1="{pad}" x2="{pad}" y2="{height - pad}" '
+        'class="grafo-arco" />',
+        f'<text x="{width / 2}" y="{height - 10}" text-anchor="middle" '
+        'class="grafo-etichetta-piccola">dimensione 1 '
+        "(emergente: leggi le story che la separano)</text>",
+        f'<text x="14" y="{height / 2}" text-anchor="middle" '
+        f'transform="rotate(-90 14 {height / 2})" '
+        'class="grafo-etichetta-piccola">dimensione 2 (emergente)</text>',
+    ]
+    for slug, (x, y) in sorted(positions.items()):
+        cx, cy = sx(x), sy(y)
+        evidenziata = slug == highlight
+        cls = "mappa-punto-evidenza" if evidenziata else "mappa-punto"
+        r = 7 if evidenziata else 4
+        label = escape((names or {}).get(slug, slug))
+        parts.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r}" class="{cls}" />')
+        parts.append(
+            f'<text x="{cx + 8:.1f}" y="{cy - 6:.1f}" class="grafo-etichetta-piccola'
+            f'{" mappa-etichetta-evidenza" if evidenziata else ""}">{label}</text>'
+        )
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def coverage_bar_svg(
     by_group: dict[str, int], *, label: str, width: int = 360
 ) -> str:

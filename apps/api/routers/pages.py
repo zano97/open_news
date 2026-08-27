@@ -7,11 +7,14 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.svg import ownership_graph_svg
+from apps.api.signal_views import shape_signals
+from apps.api.svg import cocoverage_scatter_svg, coverage_bar_svg, ownership_graph_svg
 from apps.api.templating import templates
+from core.bias.selection import cocoverage_map
 from core.bias.structure import source_profile
 from core.db import get_session
 from core.models import Article, Source, Story
+from core.nlp.topics import load_topics
 from core.provenance import for_entity
 
 router = APIRouter()
@@ -91,6 +94,28 @@ async def fonte(
         )
     ).scalar_one()
     provenances = await for_entity(session, "source", profile.source.id)
+    topic_labels = {t.id: t.label_it for t in load_topics()}
+    signal_views = shape_signals(profile.signals, topic_labels)
+
+    mappa_svg = None
+    if "cocoverage" in signal_views:
+        mappa = await cocoverage_map(session)
+        if mappa.positions:
+            nomi = {
+                s.slug: s.name
+                for s in (await session.execute(select(Source))).scalars()
+            }
+            mappa_svg = cocoverage_scatter_svg(
+                mappa.positions, highlight=slug, names=nomi
+            )
+
+    tono_svg = None
+    if "tone" in signal_views:
+        tono_svg = coverage_bar_svg(
+            signal_views["tone"].data["distribution"],
+            label=f"Distribuzione del tono dei titoli di {profile.source.name}",
+        )
+
     return templates.TemplateResponse(
         request,
         "fonte.html",
@@ -100,5 +125,28 @@ async def fonte(
             "article_count": article_count,
             "grafo_svg": ownership_graph_svg(profile),
             "provenances": provenances,
+            "signal_views": signal_views,
+            "mappa_svg": mappa_svg,
+            "tono_svg": tono_svg,
+        },
+    )
+
+
+@router.get("/mappa", response_class=HTMLResponse)
+async def mappa(
+    request: Request, session: Annotated[AsyncSession, Depends(get_session)]
+) -> HTMLResponse:
+    result = await cocoverage_map(session)
+    nomi = {
+        s.slug: s.name for s in (await session.execute(select(Source))).scalars()
+    }
+    svg = cocoverage_scatter_svg(result.positions, names=nomi)
+    return templates.TemplateResponse(
+        request,
+        "mappa.html",
+        {
+            **await masthead_context(session),
+            "result": result,
+            "mappa_svg": svg,
         },
     )

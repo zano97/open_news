@@ -114,20 +114,112 @@
   </section>
 
   <section class="scheda-sezione">
-    <h3>Segnali di selezione e framing</h3>
-    {% if profile.signals %}
+    <h3>Che cosa copre (livello 2 — selezione)</h3>
+    {% if signal_views.agenda %}
+    {% set a = signal_views.agenda %}
+    <p class="fonte-meta">Periodo {{ a.signal.period_start }} → {{ a.signal.period_end }}
+      · {{ a.signal.n_articles }} articoli · metodo agenda-deviation-v1 con IC bootstrap 95%
+      · <a href="/metodo#agenda">da dove viene questo dato?</a></p>
+    <div class="agenda-colonne">
+      <div>
+        <h4>Più della media delle fonti</h4>
+        <ul>
+          {% for r in a.data.over %}
+          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> punti
+            <small>(IC {{ r.ci_low_pts }} … {{ r.ci_high_pts }}{{ "; solido" if r.significant else "; entro il rumore" }})</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <h4>Meno della media delle fonti</h4>
+        <ul>
+          {% for r in a.data.under %}
+          <li>{{ r.topic }}: <strong>{{ "%+.1f" | format(r.deviation_pts) }}</strong> punti
+            <small>(IC {{ r.ci_low_pts }} … {{ r.ci_high_pts }}{{ "; solido" if r.significant else "; entro il rumore" }})</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% else %}
+    <p class="dato-mancante">In valutazione: servono almeno 10 articoli con tema
+      nella finestra di 30 giorni ({{ article_count }} articoli raccolti finora).</p>
+    {% endif %}
+
+    {% if signal_views.blindspot %}
+    {% set b = signal_views.blindspot %}
+    <h4>Angoli ciechi</h4>
+    <p>
+      Nella finestra, <strong>{{ b.data.count }}</strong> story coperte da almeno il
+      {{ b.data.threshold_pct }}% delle altre {{ b.data.peers }} fonti attive dello stesso paese
+      non compaiono in questa testata.
+      {% if b.data.story_ids %}Le più recenti:
+        {% for sid in b.data.story_ids %}<a href="/storia/{{ sid }}">n.{{ sid }}</a>{{ ", " if not loop.last }}{% endfor %}.
+      {% endif %}
+    </p>
+    {% endif %}
+
+    {% if mappa_svg %}
+    <h4>Dove si colloca nella mappa di co-copertura</h4>
+    {{ mappa_svg | safe }}
+    <p class="fonte-meta">Assi emergenti, nessuna etichetta assegnata:
+      <a href="/mappa">leggi la mappa completa con le story che separano gli assi</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Come racconta (livello 3 — framing)</h3>
+    {% if signal_views.framing %}
+    {% set f = signal_views.framing %}
+    <p class="fonte-meta">Periodo {{ f.signal.period_start }} → {{ f.signal.period_end }}
+      · {{ f.signal.n_articles }} articoli · lessico pubblico ampliabile via pull request
+      · <a href="/metodo#framing">da dove viene questo dato?</a></p>
+    <h4>Lessico: quali parole sceglie</h4>
     <ul class="elenco-segnali">
-      {% for s in profile.signals[:12] %}
-      <li><code>{{ s.signal_type }}</code>{% if s.axis %} · asse {{ s.axis }}{% endif %}
-        · periodo {{ s.period_start }} → {{ s.period_end }} · n={{ s.n_articles }}
-        · metodo v.{{ s.method_version }}</li>
+      {% for g in f.data.top_groups %}
+      <li><strong>{{ g.id | replace("_", " ") }}</strong>:
+        {% for term, n in g.terms %}{{ term }} ({{ n }}){{ ", " if not loop.last }}{% endfor %}</li>
       {% endfor %}
     </ul>
     {% else %}
-    <p class="dato-mancante">In valutazione: i segnali dei livelli 2 e 3 vengono
-      calcolati dal job settimanale quando ci sono abbastanza articoli
-      ({{ article_count }} raccolti finora).</p>
+    <p class="dato-mancante">Lessico: in valutazione (servono almeno 5 articoli
+      in lingua coperta dal lessico).</p>
     {% endif %}
+
+    {% if signal_views.actors %}
+    {% set act = signal_views.actors %}
+    <h4>Chi lascia parlare</h4>
+    <p>
+      {% for role, n in act.data.roles[:6] %}
+      {{ role }} {{ act.data.roles_percent[role] }}%{{ " · " if not loop.last }}
+      {% endfor %}
+      <small>(euristica dichiarata actors-heuristic-v1, su {{ act.signal.n_articles }} articoli)</small>
+    </p>
+    {% if act.data.top_speakers %}
+    <p class="fonte-meta">Voci più citate:
+      {% for sp in act.data.top_speakers %}{{ sp.name }} ({{ sp.count }}){{ ", " if not loop.last }}{% endfor %}</p>
+    {% endif %}
+    {% endif %}
+
+    {% if signal_views.tone %}
+    <h4>Tono dei titoli (solo distribuzione)</h4>
+    {{ tono_svg | safe }}
+    <p class="fonte-meta">
+      {% for label, pct in signal_views.tone.data.percent.items() %}{{ label }} {{ pct }}%{{ " · " if not loop.last }}{% endfor %}
+      — metodo tone-lexicon-v1: mai un giudizio sul singolo articolo.
+    </p>
+    {% endif %}
+
+    {% if not signal_views.framing and not signal_views.actors and not signal_views.tone %}
+    <p class="dato-mancante">In valutazione: i segnali del livello 3 arrivano con
+      il job settimanale quando ci sono abbastanza articoli.</p>
+    {% endif %}
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Posizionamento (livello 4 — giudizio umano)</h3>
+    <p class="dato-mancante">In valutazione: l'etichetta di posizionamento viene
+      pubblicata solo con ≥50 articoli annotati da ≥3 annotatori con orientamenti
+      dichiarati diversi e accordo α ≥ 0,6 (<a href="/metodo#livello4">protocollo</a>).</p>
   </section>
 
   <footer class="scheda-piede">

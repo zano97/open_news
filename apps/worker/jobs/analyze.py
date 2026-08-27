@@ -1,15 +1,23 @@
-"""Job di analisi: clustering incrementale e mappa di copertura."""
+"""Job di analisi: clustering incrementale, copertura, segnali settimanali."""
 
 import logging
 
 from sqlalchemy import select
 
+from core.bias.aggregate import compute_weekly_signals
 from core.cluster.coverage import compute_coverage
 from core.cluster.incremental import cluster_pending
 from core.db import get_sessionmaker
 from core.models import Story
 
 log = logging.getLogger(__name__)
+
+
+async def signals_job() -> None:
+    maker = get_sessionmaker()
+    async with maker() as session:
+        await compute_weekly_signals(session)
+        await session.commit()
 
 
 async def cluster_job() -> None:

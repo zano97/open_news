@@ -399,6 +399,25 @@ hr.filetto {
 .grafo-etichetta-forte { font-weight: 700; font-family: var(--font-display); }
 .grafo-etichetta-piccola { fill: var(--seppia); font-size: 12px; }
 
+.agenda-colonne {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0 2rem;
+}
+.agenda-colonne h4 { margin-bottom: 0.3rem; }
+.assi-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 0 2.5rem;
+}
+.asse-lista h3 { font-size: 1.05rem; font-variant: small-caps; }
+.asse-lista ol { font-size: 0.95rem; }
+
+.mappa-cocopertura { width: 100%; height: auto; margin: 0.6rem 0; }
+.mappa-punto { fill: var(--seppia); }
+.mappa-punto-evidenza { fill: var(--accento); stroke: var(--inchiostro); stroke-width: 1; }
+.mappa-etichetta-evidenza { fill: var(--accento); font-weight: 700; }
+
 .barra-copertura { width: 100%; max-width: 24rem; height: auto; }
 .cop-a { fill: var(--inchiostro); }
 .cop-b { fill: var(--seppia); }
