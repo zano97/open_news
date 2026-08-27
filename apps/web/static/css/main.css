@@ -279,6 +279,134 @@ hr.filetto {
 }
 .badge-lampo { color: var(--accento); }
 
+/* ---------- Titoli di sezione ed elenchi fonti ---------- */
+.titolo-sezione {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  border-bottom: 2px solid var(--inchiostro);
+  padding-bottom: 0.2rem;
+}
+.occhiello {
+  font-style: italic;
+  color: var(--seppia);
+  max-width: var(--misura);
+}
+.titolo-regione {
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--filetto);
+}
+.elenco-fonti {
+  list-style: none;
+  padding: 0;
+  column-width: 20rem;
+  column-gap: 2.5rem;
+}
+.elenco-fonti li {
+  break-inside: avoid;
+  margin-bottom: 0.6rem;
+}
+.fonte-meta { color: var(--seppia); font-size: 0.85rem; margin-left: 0.4rem; }
+.fonte-motivo { color: var(--seppia); font-size: 0.85rem; margin: 0.1rem 0 0; }
+.fonte-disabilitata > a { color: var(--seppia); }
+
+/* ---------- Scheda anagrafica (pagina fonte) ---------- */
+.scheda-archivio {
+  max-width: 52rem;
+  margin: 0 auto;
+  border: 1px solid var(--filetto);
+  padding: 1.5rem 2rem;
+  background:
+    linear-gradient(transparent 97%, rgba(0, 0, 0, 0.03) 100%);
+}
+.scheda-timbro {
+  font-family: var(--font-macchina);
+  font-size: 0.8rem;
+  color: var(--seppia);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.scheda-nome {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  margin: 0.1rem 0;
+}
+.scheda-sotto { color: var(--seppia); margin-top: 0; }
+.scheda-sezione { border-top: 1px solid var(--filetto); margin-top: 1.2rem; padding-top: 0.6rem; }
+.scheda-sezione h3 {
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  margin: 0.2rem 0 0.6rem;
+}
+.avviso-disabilitata {
+  border: 1px solid var(--accento);
+  color: var(--accento);
+  padding: 0.5rem 0.8rem;
+}
+.linea-dichiarata {
+  font-style: italic;
+  margin: 0.4rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--filetto);
+}
+.linea-dichiarata cite { display: block; font-size: 0.85rem; margin-top: 0.3rem; }
+.dato-mancante { color: var(--seppia); font-style: italic; }
+
+.tabella-archivio {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0.8rem 0;
+}
+.tabella-archivio caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--seppia);
+  padding-bottom: 0.3rem;
+}
+.tabella-archivio th,
+.tabella-archivio td {
+  border-bottom: 1px solid var(--filetto);
+  text-align: left;
+  padding: 0.35rem 0.6rem 0.35rem 0;
+  vertical-align: top;
+}
+.tabella-archivio thead th { border-bottom: 2px solid var(--inchiostro); }
+.riga-nota td { color: var(--seppia); border-bottom: 1px dotted var(--filetto); }
+.elenco-cariche, .elenco-segnali, .elenco-provenienze {
+  font-size: 0.95rem;
+  padding-left: 1.2rem;
+}
+.scheda-piede {
+  border-top: 3px double var(--inchiostro);
+  margin-top: 1.5rem;
+  padding-top: 0.6rem;
+  font-size: 0.9rem;
+}
+.scheda-piede h4 { margin: 0.2rem 0; }
+
+/* ---------- Grafo SVG delle partecipazioni ---------- */
+.grafo-proprieta { width: 100%; height: auto; margin: 0.6rem 0; }
+.grafo-nodo {
+  fill: var(--carta-scura);
+  stroke: var(--inchiostro);
+  stroke-width: 1;
+}
+.grafo-testata { stroke-width: 2; }
+.grafo-arco { stroke: var(--seppia); stroke-width: 1.2; }
+.grafo-etichetta { fill: var(--inchiostro); font-size: 15px; }
+.grafo-etichetta-forte { font-weight: 700; font-family: var(--font-display); }
+.grafo-etichetta-piccola { fill: var(--seppia); font-size: 12px; }
+
+.barra-copertura { width: 100%; max-width: 24rem; height: auto; }
+.cop-a { fill: var(--inchiostro); }
+.cop-b { fill: var(--seppia); }
+.cop-c { fill: var(--accento); }
+.cop-d { fill: var(--filetto); }
+.cop-e { fill: var(--carta-scura); stroke: var(--seppia); stroke-width: 0.5; }
+.cop-f { fill: var(--inchiostro); opacity: 0.55; }
+
 /* ---------- Piè di pagina ---------- */
 .pie {
   max-width: 75rem;

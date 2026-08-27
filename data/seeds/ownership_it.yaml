@@ -147,6 +147,20 @@ ownerships:
     evidence_name: stampa specializzata
     evidence_url: null
     note: "Testata riconducibile alla famiglia Angelucci; anno di acquisizione e quota puntuale da verificare. Antonio Angelucci è deputato in carica: vedi political_offices."
+  - source_slug: libero
+    owner_name: "Antonio Angelucci"
+    share_pct: null
+    from_year: null
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Capofamiglia del gruppo Angelucci, cui la stampa specializzata riconduce il controllo della testata tramite società della famiglia (gruppo Tosinvest); deputato in carica (vedi cariche politiche). Catena societaria puntuale da verificare sul ROC AGCOM."
+  - source_slug: il-giornale
+    owner_name: "Antonio Angelucci"
+    share_pct: null
+    from_year: 2023
+    evidence_name: stampa specializzata
+    evidence_url: null
+    note: "Acquisizione del 2023 riconducibile alla famiglia Angelucci tramite proprie società; deputato in carica (vedi cariche politiche). Catena societaria puntuale da verificare sul ROC AGCOM."
   - source_slug: avvenire
     owner_name: "Conferenza Episcopale Italiana (CEI)"
     share_pct: null

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.source.name }} — scheda anagrafica — {{ app_name }}{% endblock %}
+
+{% block content %}
+<article class="scheda-archivio">
+  <header class="scheda-testata">
+    <p class="scheda-timbro">Archivio delle testate · scheda n. {{ profile.source.id }}</p>
+    <h2 class="scheda-nome">{{ profile.source.name }}</h2>
+    <p class="scheda-sotto">
+      {{ profile.source.domain }} · {{ profile.source.country | upper }} ·
+      lingua {{ profile.source.language }}
+      {% if profile.source.founded %} · fondata nel {{ profile.source.founded }}{% endif %}
+      {% if profile.source.wikidata_qid %}
+      · <a href="https://www.wikidata.org/wiki/{{ profile.source.wikidata_qid }}">
+        {{ profile.source.wikidata_qid }}</a> <small>(secondo Wikidata)</small>
+      {% endif %}
+    </p>
+    {% if not profile.source.enabled %}
+    <p class="avviso-disabilitata"><strong>Fonte disabilitata.</strong>
+      {{ profile.source.disabled_reason or "Motivo non registrato." }}</p>
+    {% endif %}
+  </header>
+
+  {% if profile.source.self_declared_line %}
+  <section class="scheda-sezione">
+    <h3>Linea dichiarata</h3>
+    <blockquote class="linea-dichiarata">
+      «{{ profile.source.self_declared_line.quote }}»
+      <cite><a href="{{ profile.source.self_declared_line.url }}">fonte: la testata stessa</a></cite>
+    </blockquote>
+  </section>
+  {% endif %}
+
+  <section class="scheda-sezione">
+    <h3>Chi la possiede</h3>
+    {{ grafo_svg | safe }}
+    {% if profile.ownerships %}
+    <table class="tabella-archivio">
+      <caption>Partecipazioni registrate, con evidenza e data di rilevamento</caption>
+      <thead>
+        <tr><th scope="col">Proprietario</th><th scope="col">Tipo</th>
+            <th scope="col">Quota</th><th scope="col">Evidenza</th>
+            <th scope="col">Rilevato il</th></tr>
+      </thead>
+      <tbody>
+        {% for entry in profile.ownerships %}
+        <tr>
+          <td>{{ entry.owner.name }}
+            {% if entry.owner.wikidata_qid %}
+            <a href="https://www.wikidata.org/wiki/{{ entry.owner.wikidata_qid }}"><small>[{{ entry.owner.wikidata_qid }}]</small></a>
+            {% endif %}
+          </td>
+          <td>{{ entry.owner.type }}</td>
+          <td>{% if entry.ownership.share_pct is not none %}{{ entry.ownership.share_pct }}%{% else %}dato non disponibile{% endif %}</td>
+          <td>{% if entry.ownership.evidence_url %}<a href="{{ entry.ownership.evidence_url }}">{{ entry.ownership.evidence_name }}</a>{% else %}{{ entry.ownership.evidence_name }}{% endif %}</td>
+          <td>{{ entry.owner.retrieved_at | data_breve }}</td>
+        </tr>
+        {% if entry.ownership.note %}
+        <tr class="riga-nota"><td colspan="5"><small>{{ entry.ownership.note }}</small></td></tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% set con_cariche = profile.ownerships | selectattr("owner.political_offices") | list %}
+    {% if con_cariche %}
+    <h4>Cariche politiche dei proprietari</h4>
+    <ul class="elenco-cariche">
+      {% for entry in con_cariche %}
+        {% for carica in entry.owner.political_offices %}
+        <li>
+          <strong>{{ entry.owner.name }}</strong>: {{ carica.office }}
+          ({{ carica.from_year or "?" }}–{{ carica.to_year or "in corso" }})
+          — {{ carica.holder_note }}
+          {% if carica.evidence_url %}<a href="{{ carica.evidence_url }}">[evidenza]</a>{% endif %}
+        </li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Soldi pubblici</h3>
+    {% if profile.fundings %}
+    <table class="tabella-archivio">
+      <caption>Contributi pubblici registrati per anno</caption>
+      <thead>
+        <tr><th scope="col">Anno</th><th scope="col">Programma</th>
+            <th scope="col">Importo</th><th scope="col">Evidenza</th></tr>
+      </thead>
+      <tbody>
+        {% for f in profile.fundings %}
+        <tr>
+          <td>{{ f.year }}</td>
+          <td>{{ f.program }}</td>
+          <td>{% if f.amount_eur is not none %}{{ "%.0f" | format(f.amount_eur) }} €{% else %}importo non disponibile{% endif %}</td>
+          <td>{% if f.evidence_url %}<a href="{{ f.evidence_url }}">elenchi DIE</a>{% else %}—{% endif %}</td>
+        </tr>
+        {% if f.note %}<tr class="riga-nota"><td colspan="4"><small>{{ f.note }}</small></td></tr>{% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="dato-mancante">Nessun contributo pubblico registrato per questa fonte
+      (o dato non ancora importato).</p>
+    {% endif %}
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Termini d'uso della fonte</h3>
+    <p>{{ profile.source.terms_note or "nessuna restrizione nota" }}</p>
+  </section>
+
+  <section class="scheda-sezione">
+    <h3>Segnali di selezione e framing</h3>
+    {% if profile.signals %}
+    <ul class="elenco-segnali">
+      {% for s in profile.signals[:12] %}
+      <li><code>{{ s.signal_type }}</code>{% if s.axis %} · asse {{ s.axis }}{% endif %}
+        · periodo {{ s.period_start }} → {{ s.period_end }} · n={{ s.n_articles }}
+        · metodo v.{{ s.method_version }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="dato-mancante">In valutazione: i segnali dei livelli 2 e 3 vengono
+      calcolati dal job settimanale quando ci sono abbastanza articoli
+      ({{ article_count }} raccolti finora).</p>
+    {% endif %}
+  </section>
+
+  <footer class="scheda-piede">
+    <h4>Da dove vengono questi dati?</h4>
+    <ul class="elenco-provenienze">
+      {% for p in provenances[:20] %}
+      <li><code>{{ p.field }}</code> — metodo {{ p.method }} v.{{ p.method_version }},
+        calcolato il {{ p.computed_at | data_breve }}
+        {% if p.source_name %} · fonte: {% if p.source_url %}<a href="{{ p.source_url }}">{{ p.source_name }}</a>{% else %}{{ p.source_name }}{% endif %}{% endif %}
+      </li>
+      {% else %}
+      <li>Nessun dato derivato registrato per questa fonte.</li>
+      {% endfor %}
+    </ul>
+    <p><a href="/metodo">Come lo calcoliamo →</a></p>
+  </footer>
+</article>
+{% endblock %}
