@@ -4,16 +4,24 @@ Un solo processo: sito + raccoglitore (scheduler) insieme, database SQLite
 in ~/.opennews/. Pensato per l'uso personale sul proprio computer; per un
 server pubblico resta lo stack Docker (docs/DEPLOY.md).
 
+Il giornale si apre in una FINESTRA APPLICAZIONE dedicata (senza tab né
+barra degli indirizzi) se sul computer c'è un browser della famiglia
+Chromium — Chrome, Chromium, Edge, Brave, Vivaldi —, altrimenti nel
+browser predefinito come pagina normale.
+
 Comandi:
-    opennews                 avvia il giornale e apre il browser
+    opennews                 avvia il giornale e apre la finestra
     opennews seed            scarica le ultime 24 ore di notizie vere
     opennews seed --demo     notizie dimostrative (nessuna rete)
     opennews --port 8100     porta diversa
-    opennews --no-browser    non aprire il browser
+    opennews --tab           apri nel browser normale invece che in finestra
+    opennews --no-browser    non aprire niente
 """
 
 import argparse
 import os
+import shutil
+import subprocess
 import sys
 import threading
 import webbrowser
@@ -57,17 +65,75 @@ def _migrate() -> None:
     command.upgrade(cfg, "head")
 
 
-def _open_browser_later(url: str, delay: float = 1.5) -> None:
+def _app_browser_command() -> list[str] | None:
+    """Comando per una finestra applicazione (browser famiglia Chromium)."""
+    if sys.platform == "darwin":
+        for nome in (
+            "Google Chrome", "Chromium", "Brave Browser", "Microsoft Edge", "Vivaldi"
+        ):
+            if Path(f"/Applications/{nome}.app").exists():
+                return ["open", "-na", nome, "--args"]
+        return None
+    if sys.platform == "win32":
+        program_files = [
+            # Nomi canonici Windows (l'ambiente lì è case-insensitive).
+            os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"),  # noqa: SIM112
+            os.environ.get("ProgramFiles", r"C:\Program Files"),  # noqa: SIM112
+            os.environ.get("LOCALAPPDATA", ""),
+        ]
+        relativi = [
+            r"Microsoft\Edge\Application\msedge.exe",
+            r"Google\Chrome\Application\chrome.exe",
+            r"BraveSoftware\Brave-Browser\Application\brave.exe",
+        ]
+        for base in program_files:
+            for rel in relativi:
+                exe = Path(base) / rel
+                if base and exe.exists():
+                    return [str(exe)]
+        return None
+    for nome in (
+        "chromium", "chromium-browser", "google-chrome", "google-chrome-stable",
+        "brave-browser", "microsoft-edge", "microsoft-edge-stable", "vivaldi",
+    ):
+        exe = shutil.which(nome)
+        if exe:
+            return [exe]
+    return None
+
+
+def open_app_window(url: str) -> bool:
+    """Apre l'URL come finestra applicazione. Falso se non c'è un browser adatto."""
+    cmd = _app_browser_command()
+    if cmd is None:
+        return False
+    argv = [*cmd, f"--app={url}", "--window-size=1280,900"]
+    if sys.platform.startswith("linux"):
+        argv.append("--class=OpenNews")  # icona e raggruppamento corretti nel dock
+    try:
+        subprocess.Popen(
+            argv,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError:
+        return False
+    return True
+
+
+def _open_ui_later(url: str, *, app_window: bool, delay: float = 1.5) -> None:
     def apri() -> None:
         import time
 
         time.sleep(delay)
-        webbrowser.open(url)
+        if not (app_window and open_app_window(url)):
+            webbrowser.open(url)
 
     threading.Thread(target=apri, daemon=True).start()
 
 
-def cmd_run(port: int, open_browser: bool) -> None:
+def cmd_run(port: int, open_browser: bool, app_window: bool = True) -> None:
     import uvicorn
 
     _ensure_env()
@@ -77,7 +143,7 @@ def cmd_run(port: int, open_browser: bool) -> None:
     url = f"http://127.0.0.1:{port}"
     print(f"Open News → {url}   (Ctrl+C per fermare; dati in {home_dir()})")
     if open_browser:
-        _open_browser_later(url)
+        _open_ui_later(url, app_window=app_window)
     uvicorn.run(
         "apps.api.main:app", host="127.0.0.1", port=port, workers=1, log_level="warning"
     )
@@ -101,6 +167,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="opennews", description=__doc__)
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument(
+        "--tab", action="store_true",
+        help="apri nel browser normale invece che in finestra applicazione",
+    )
     sub = parser.add_subparsers(dest="comando")
     seed = sub.add_parser("seed", help="scarica le notizie (o --demo)")
     seed.add_argument("--demo", action="store_true")
@@ -109,7 +179,11 @@ def main() -> None:
     if args.comando == "seed":
         cmd_seed(demo=args.demo)
     else:
-        cmd_run(port=args.port, open_browser=not args.no_browser)
+        cmd_run(
+            port=args.port,
+            open_browser=not args.no_browser,
+            app_window=not args.tab,
+        )
 
 
 if __name__ == "__main__":

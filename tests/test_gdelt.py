@@ -9,7 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core import provenance
-from core.ingest.gdelt import GDELT_DOC_URL, ingest_gdelt_source, parse_artlist
+from core.ingest.gdelt import (
+    GDELT_DOC_URL,
+    fetch_domain_articles,
+    ingest_gdelt_source,
+    parse_artlist,
+)
 from core.ingest.ratelimit import DomainRateLimiter
 from core.models import Article, Source
 
@@ -89,3 +94,85 @@ async def test_ingest_gdelt_con_provenance(session: AsyncSession) -> None:
             session, reuters, client=client, limiter=_limiter()
         )
     assert created2 == 0
+
+
+@respx.mock
+async def test_retry_su_429() -> None:
+    """Un 429 non è un fallimento: si attende e si riprova."""
+    route = respx.get(GDELT_DOC_URL)
+    route.side_effect = [
+        httpx.Response(429, headers={"Retry-After": "7"}),
+        httpx.Response(200, json=FIXTURE),
+    ]
+    attese: list[float] = []
+
+    async def sleep(secondi: float) -> None:
+        attese.append(secondi)
+
+    async with httpx.AsyncClient() as client:
+        articoli = await fetch_domain_articles(
+            client, _limiter(), "reuters.com", sleep=sleep
+        )
+    assert len(articoli) == 2
+    assert len(route.calls) == 2
+    assert attese == [7.0]  # Retry-After rispettato
+
+
+@respx.mock
+async def test_risposta_non_json_e_errore_leggibile(session: AsyncSession) -> None:
+    """GDELT sotto carico risponde 200 con testo semplice: niente crash,
+    zero articoli, errore spiegato nei log."""
+    respx.get(GDELT_DOC_URL).mock(
+        return_value=httpx.Response(200, text="Rate limit exceeded, slow down.")
+    )
+    fonte = Source(
+        slug="reuters2", name="Reuters", domain="reuters.com",
+        country="gb", language="en", region="world",
+        feed_urls=[], gdelt_domain="reuters.com", terms_note="",
+    )
+    session.add(fonte)
+    await session.flush()
+    async with httpx.AsyncClient() as client:
+        creati = await ingest_gdelt_source(
+            session, fonte, client=client, limiter=_limiter()
+        )
+    assert creati == 0
+
+
+def test_match_source_per_dominio() -> None:
+    from core.ingest.gdelt import GdeltArticle, match_source
+
+    fonti = [
+        Source(slug="reuters", name="R", domain="reuters.com", country="gb",
+               language="en", region="world", feed_urls=[],
+               gdelt_domain="reuters.com", terms_note=""),
+        Source(slug="g1", name="g1", domain="g1.globo.com", country="br",
+               language="pt", region="world", feed_urls=[],
+               gdelt_domain="g1.globo.com", terms_note=""),
+    ]
+
+    def art(dominio: str) -> GdeltArticle:
+        return GdeltArticle(
+            url=f"https://{dominio}/x", title="t", language=None,
+            seen_at=None, image_url=None, domain=dominio, source_country=None,
+        )
+
+    assert match_source(art("www.reuters.com"), fonti) is fonti[0]
+    assert match_source(art("reuters.com"), fonti) is fonti[0]
+    assert match_source(art("g1.globo.com"), fonti) is fonti[1]
+    # Nessun match parziale ingannevole: globo.com NON è g1.globo.com.
+    assert match_source(art("globo.com"), fonti) is None
+    assert match_source(art("altro.example"), fonti) is None
+
+
+@respx.mock
+async def test_query_batch_con_or() -> None:
+    from core.ingest.gdelt import fetch_domains_articles
+
+    route = respx.get(GDELT_DOC_URL).mock(return_value=httpx.Response(200, json=FIXTURE))
+    async with httpx.AsyncClient() as client:
+        await fetch_domains_articles(
+            client, _limiter(), ["reuters.com", "apnews.com"]
+        )
+    query = route.calls[0].request.url.params["query"]
+    assert query == "(domain:reuters.com OR domain:apnews.com)"

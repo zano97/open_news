@@ -94,15 +94,19 @@ Type=Application
 Name=Open News
 Comment=Chi paga l'informazione · come la racconta · che cosa ignora
 Exec=$APP/.venv/bin/opennews
+Icon=$APP/apps/web/static/icons/opennews-256.png
 Terminal=false
+StartupWMClass=OpenNews
 Categories=News;Network;
 DESK
     ;;
   Darwin)
     MACAPP="$HOME/Applications/Open News.app/Contents/MacOS"
-    mkdir -p "$MACAPP"
+    mkdir -p "$MACAPP" "$HOME/Applications/Open News.app/Contents/Resources"
     printf '#!/bin/bash\nexec "%s"\n' "$APP/.venv/bin/opennews" > "$MACAPP/OpenNews"
     chmod +x "$MACAPP/OpenNews"
+    cp "$APP/apps/web/static/icons/opennews.icns" \
+       "$HOME/Applications/Open News.app/Contents/Resources/opennews.icns"
     cat > "$HOME/Applications/Open News.app/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -110,6 +114,7 @@ DESK
   <key>CFBundleName</key><string>Open News</string>
   <key>CFBundleExecutable</key><string>OpenNews</string>
   <key>CFBundleIdentifier</key><string>org.opennews.app</string>
+  <key>CFBundleIconFile</key><string>opennews</string>
 </dict></plist>
 PLIST
     ;;
@@ -119,15 +124,18 @@ if [ "${OPENNEWS_DEMO:-0}" = "1" ]; then
   say "Popolo con notizie dimostrative (dichiarate come tali)"
   "$APP/.venv/bin/opennews" seed --demo
 elif [ "${OPENNEWS_NO_SEED:-0}" != "1" ]; then
-  say "Scarico le ultime 24 ore di notizie vere (~10-15 minuti, solo la prima volta)"
+  say "Scarico le ultime 24 ore di notizie vere (pochi minuti, solo la prima volta)"
   "$APP/.venv/bin/opennews" seed
 fi
 
 say "Avvio il giornale"
 nohup "$APP/.venv/bin/opennews" --no-browser > "$OPENNEWS_HOME/log.txt" 2>&1 &
 for _ in $(seq 1 40); do curl -fsS "$URL/healthz" >/dev/null 2>&1 && break; sleep 1; done
-if command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
-elif command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true; fi
+# Finestra applicazione dedicata se c'è un browser Chromium; altrimenti tab.
+if ! "$APP/.venv/bin/python" -c "import sys; from apps.launcher import open_app_window; sys.exit(0 if open_app_window('$URL') else 1)" 2>/dev/null; then
+  if command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 || true
+  elif command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 || true; fi
+fi
 
 say "Fatto. Il giornale è su $URL"
 cat <<EOF

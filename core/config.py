@@ -40,12 +40,22 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen2.5:7b"
 
     # Raccolta: identità e cortesia di rete (vedi docs/LEGAL.md).
+    # Il formato "Mozilla/5.0 (compatible; Nome; +url)" è la convenzione dei
+    # crawler dichiarati (è quello di Googlebot): molti WAF rifiutano a
+    # prescindere gli User-Agent fuori standard. L'identità resta esplicita.
     user_agent: str = (
-        "OpenNewsBot/0.1 (+https://github.com/zano97/open_news; aggregatore open source; "
-        "rispettiamo robots.txt; contatti nel repository)"
+        "Mozilla/5.0 (compatible; OpenNewsBot/0.1; +https://github.com/zano97/open_news)"
     )
+    # Token con cui i siti possono indirizzarci in robots.txt
+    # ("User-agent: OpenNewsBot"): è questo che usiamo per le regole.
+    robots_user_agent: str = "OpenNewsBot"
     rate_limit_seconds: float = 2.0
     http_timeout_seconds: float = 20.0
+    # Un feed che fallisce ripetutamente viene riprovato con calma, non a
+    # ogni ciclo: dopo `feed_backoff_failures` errori consecutivi si attende
+    # `feed_backoff_hours` prima del tentativo successivo.
+    feed_backoff_failures: int = 3
+    feed_backoff_hours: int = 6
 
     # Clustering. La soglia è calibrata sul backend attivo con
     # scripts/calibrate_threshold.py (set: data/seeds/calibration_pairs.yaml).

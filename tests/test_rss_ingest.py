@@ -152,3 +152,112 @@ async def test_errore_http_registrato(session: AsyncSession) -> None:
     ).scalar_one()
     assert stato.last_status == 500
     assert stato.error == "HTTP 500"
+
+
+HOMEPAGE = """<!doctype html><html><head>
+<link rel="alternate" type="application/rss+xml" title="Feed" href="/nuovo.xml">
+</head><body>giornale</body></html>"""
+
+
+@respx.mock
+async def test_autodiscovery_su_404(session: AsyncSession) -> None:
+    """URL del catalogo morto: il feed vero viene trovato dalla homepage
+    e ricordato in FeedState.resolved_url."""
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    respx.get(FEED_URL).mock(return_value=httpx.Response(404))
+    respx.get("https://esempio.test/").mock(
+        return_value=httpx.Response(200, text=HOMEPAGE)
+    )
+    nuovo = respx.get("https://esempio.test/nuovo.xml").mock(
+        return_value=httpx.Response(200, content=FIXTURE)
+    )
+
+    async with httpx.AsyncClient() as client:
+        robots = RobotsCache(client)
+        stats = await ingest_feed(
+            session, fonte, FEED_URL, client=client, limiter=_limiter(), robots=robots
+        )
+        assert stats.error is None
+        assert stats.created == 2
+
+        stato = (
+            await session.execute(select(FeedState).where(FeedState.feed_url == FEED_URL))
+        ).scalar_one()
+        assert stato.resolved_url == "https://esempio.test/nuovo.xml"
+        assert stato.consecutive_failures == 0
+
+        # Dal secondo giro si interroga direttamente l'URL risolto.
+        prima = len(nuovo.calls)
+        await ingest_feed(
+            session, fonte, FEED_URL, client=client, limiter=_limiter(), robots=robots
+        )
+        assert len(nuovo.calls) == prima + 1
+
+
+@respx.mock
+async def test_autodiscovery_su_pagina_html(session: AsyncSession) -> None:
+    """URL che risponde 200 ma con una pagina HTML (es. indice dei feed):
+    si passa al feed dichiarato nella pagina."""
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    respx.get(FEED_URL).mock(
+        return_value=httpx.Response(
+            200, text=HOMEPAGE, headers={"content-type": "text/html"}
+        )
+    )
+    respx.get("https://esempio.test/").mock(
+        return_value=httpx.Response(200, text=HOMEPAGE)
+    )
+    respx.get("https://esempio.test/nuovo.xml").mock(
+        return_value=httpx.Response(200, content=FIXTURE)
+    )
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.created == 2
+
+
+@respx.mock
+async def test_backoff_dopo_errori_ripetuti(session: AsyncSession) -> None:
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    route = respx.get(FEED_URL).mock(return_value=httpx.Response(500))
+
+    async with httpx.AsyncClient() as client:
+        robots = RobotsCache(client)
+        for _ in range(3):
+            stats = await ingest_feed(
+                session, fonte, FEED_URL,
+                client=client, limiter=_limiter(), robots=robots,
+            )
+            assert stats.error == "HTTP 500"
+        chiamate = len(route.calls)
+
+        # Senza retry_failed il feed è in pausa: nessuna richiesta HTTP.
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=robots, retry_failed=False,
+        )
+        assert stats.backoff
+        assert len(route.calls) == chiamate
+
+        # Il seed (retry_failed=True) invece riprova sempre.
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=robots,
+        )
+        assert not stats.backoff
+        assert len(route.calls) == chiamate + 1

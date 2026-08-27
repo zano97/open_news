@@ -1,3 +1,5 @@
+<img src="apps/web/static/icons/opennews.svg" alt="" width="84" align="right">
+
 # Open News
 
 **Who pays for the news · how they tell it · what they ignore.**
@@ -41,9 +43,9 @@ French, German, Spanish — switchable from the masthead):
 
 ## How it works
 
-The collector reads the **RSS feeds of 47 outlets from 19 countries**
-(92 feeds: front pages plus the world/politics/business sections of the
-major outlets) and complements them with **GDELT** (free) for articles the
+The collector reads the **RSS feeds of 90+ outlets from 43 countries**
+(132 feeds: front pages plus the world/politics/business sections of the
+major ones) and complements them with **GDELT** (free) for articles the
 feeds miss — including Reuters and AP, which have no public feeds. Articles
 about the same event are grouped into "stories", so you see **how different
 outlets headline the same fact**. On top of the data run the four levels of
@@ -84,14 +86,16 @@ it downloads the app into `~/.opennews`, fetches its own Python 3.12 (via
 [uv](https://github.com/astral-sh/uv)), creates the **"Open News" icon**
 (applications menu on Linux, `~/Applications` on macOS, Start menu on
 Windows) and the `opennews` command, downloads the last 24 hours of real
-news (~10–15 minutes, first time only) and opens the newspaper in your
+news (a few minutes: collection runs in parallel) and opens the newspaper in your
 browser.
 
-From then on:
+The newspaper opens in a **dedicated app window** — no tabs, no address
+bar — when Chrome, Chromium, Edge, Brave or Vivaldi is installed;
+otherwise in your default browser. From then on:
 
 - **start** it by clicking the icon, or with `opennews` in a terminal
-  (`opennews --port 8100` for another port, `--no-browser` to skip the
-  browser);
+  (`opennews --port 8100` for another port, `--tab` to open in a normal
+  browser tab, `--no-browser` to open nothing);
 - **stop** it with Ctrl+C (or by closing the window): next time it picks
   up where it left off;
 - your **data** (news, settings, annotations) lives in `~/.opennews` and

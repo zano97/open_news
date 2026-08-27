@@ -770,6 +770,7 @@ html:has(body.pagina-lampo) {
 .impostazione input[type="text"] { width: 100%; }
 .impostazione-aiuto { display: block; color: var(--seppia); font-weight: 400; }
 .impostazione-errore { color: var(--accento); font-weight: 700; margin: 0.2rem 0 0; }
+.riassunto-errore { color: var(--accento); font-style: italic; }
 .avviso-salvato {
   border: 1px solid var(--accento);
   color: var(--accento);

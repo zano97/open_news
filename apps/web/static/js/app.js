@@ -62,7 +62,16 @@
       testo.textContent = "";
       fetch(btn.getAttribute("data-url"), { method: "POST" })
         .then(function (resp) {
-          if (!resp.ok || !resp.body) throw new Error("HTTP " + resp.status);
+          if (!resp.ok) {
+            // Il server spiega il motivo (Ollama spento, modello mancante…):
+            // mostriamolo al lettore invece di fallire in silenzio.
+            return resp.text().then(function (corpo) {
+              var msg = "";
+              try { msg = JSON.parse(corpo).detail || ""; } catch (e) { /* testo */ }
+              throw new Error(msg || corpo || "HTTP " + resp.status);
+            });
+          }
+          if (!resp.body) throw new Error("HTTP " + resp.status);
           var reader = resp.body.getReader();
           var decoder = new TextDecoder();
           function leggi() {
@@ -75,13 +84,18 @@
           return leggi();
         })
         .then(function () {
-          if (testo.textContent.trim().length < 40) throw new Error("vuoto");
+          if (testo.textContent.trim().length < 40) throw new Error("");
           btn.remove();
           if (nota) nota.hidden = false;
         })
-        .catch(function () {
+        .catch(function (err) {
           btn.disabled = false;
           btn.textContent = btn.getAttribute("data-errore") || etichetta;
+          if (err && err.message) {
+            testo.hidden = false;
+            testo.textContent = err.message;
+            testo.classList.add("riassunto-errore");
+          }
         });
     });
   }

@@ -1,3 +1,5 @@
+<img src="apps/web/static/icons/opennews.svg" alt="" width="84" align="right">
+
 # Open News
 
 **Chi paga l'informazione · come la racconta · che cosa ignora.**
@@ -41,8 +43,8 @@ spagnolo — si cambia dalla testata):
 
 ## Come funziona
 
-Il raccoglitore legge i **feed RSS di 47 testate di 19 paesi** (92 feed:
-prime pagine più le sezioni esteri/politica/economia delle testate maggiori)
+Il raccoglitore legge i **feed RSS di oltre 90 testate di 43 paesi** (132
+feed: prime pagine più le sezioni esteri/politica/economia delle maggiori)
 e integra con **GDELT** (gratuito) gli articoli che nei feed non compaiono —
 comprese Reuters e AP, che feed pubblici non ne hanno. Gli articoli sullo
 stesso evento vengono raggruppati in «story», così vedi **come testate
@@ -83,14 +85,16 @@ Lo script fa tutto da solo, **senza Docker e senza prerequisiti**: scarica
 l'app in `~/.opennews`, si procura Python 3.12 per conto suo (tramite
 [uv](https://github.com/astral-sh/uv)), crea **l'icona «Open News»** (menu
 applicazioni su Linux, `~/Applications` su macOS, menu Start su Windows) e
-il comando `opennews`, scarica le ultime 24 ore di notizie vere (~10-15
-minuti, solo la prima volta) e apre il giornale nel browser.
+il comando `opennews`, scarica le ultime 24 ore di notizie vere (pochi
+minuti: la raccolta è parallela) e apre il giornale nel browser.
 
-Da lì in poi:
+Il giornale si apre in una **finestra applicazione dedicata** — senza tab
+né barra degli indirizzi — se sul computer c'è Chrome, Chromium, Edge,
+Brave o Vivaldi; altrimenti nel browser predefinito. Da lì in poi:
 
 - **avvii** con un clic sull'icona, oppure con `opennews` nel terminale
-  (`opennews --port 8100` per un'altra porta, `--no-browser` per non aprire
-  il browser);
+  (`opennews --port 8100` per un'altra porta, `--tab` per aprire nel
+  browser normale, `--no-browser` per non aprire niente);
 - **fermi** con Ctrl+C nel terminale (o chiudendo la finestra): alla
   prossima apertura riparte da dov'era;
 - i **dati** (notizie, impostazioni, annotazioni) vivono in `~/.opennews`

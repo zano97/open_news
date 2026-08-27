@@ -2,9 +2,10 @@
 
 Modalità:
 - predefinita (rete necessaria): verifica lo schema, sincronizza il catalogo,
-  importa gli assetti proprietari, scarica i feed RSS (max 4 per fonte) e la
-  copertura GDELT come complemento per tutte le fonti, poi esegue clustering, coperture, entità,
-  temi e segnali. Pensata per stare sotto i 15 minuti su una macchina modesta.
+  importa gli assetti proprietari, scarica i feed RSS (max 4 per fonte, in
+  parallelo) e la copertura GDELT (a batch di domini, in parallelo all'RSS),
+  poi esegue clustering, coperture, entità, temi e segnali. Pensata per
+  stare in pochi minuti su una macchina modesta.
 - `--offline-demo` (nessuna rete): crea 8 testate dimostrative dichiarate
   come tali e un giorno di notizie plausibili MA INVENTATE, poi esegue la
   stessa pipeline. Serve per provare l'interfaccia; nessun titolo inventato
@@ -24,10 +25,10 @@ from core.cluster.coverage import compute_coverage
 from core.cluster.incremental import cluster_pending
 from core.db import get_engine, get_sessionmaker
 from core.ingest.catalog import sync_catalog
-from core.ingest.gdelt import ingest_gdelt_source
+from core.ingest.pipeline import ingest_all_feeds, ingest_gdelt_all
 from core.ingest.ratelimit import DomainRateLimiter
 from core.ingest.robots import RobotsCache
-from core.ingest.rss import ingest_feed
+from core.ingest.rss import IngestStats
 from core.models import Article, Base, Source, Story
 from core.net import build_client
 from core.nlp.entities import assign_story_entities
@@ -175,32 +176,40 @@ async def seed_online() -> None:
         await session.commit()
         print(f"catalogo: {cat} · assetti: {own}")
 
+    def stampa_feed(slug: str, feed_url: str, stats: IngestStats) -> None:
+        esito = stats.error or f"+{stats.created} articoli"
+        print(f"  {slug}: {esito}")
+
+    def stampa_gdelt(slug: str, created: int) -> None:
+        if created:
+            print(f"  {slug}: +{created} articoli (GDELT)")
+
     async with build_client() as client:
         limiter = DomainRateLimiter()
         robots = RobotsCache(client)
-        async with maker() as session:
-            sources = list(
-                (
-                    await session.execute(select(Source).where(Source.enabled))
-                ).scalars()
-            )
-        for source in sources:
-            async with maker() as session:
-                merged = await session.merge(source, load=False)
-                for feed_url in merged.feed_urls[:MAX_FEEDS_PER_SOURCE]:
-                    stats = await ingest_feed(
-                        session, merged, feed_url,
-                        client=client, limiter=limiter, robots=robots,
-                    )
-                    esito = stats.error or f"+{stats.created} articoli"
-                    print(f"  {merged.slug}: {esito}")
-                if merged.gdelt_domain:
-                    created = await ingest_gdelt_source(
-                        session, merged, client=client, limiter=limiter
-                    )
-                    if created or not merged.feed_urls:
-                        print(f"  {merged.slug}: +{created} articoli (GDELT)")
-                await session.commit()
+        # Rete in parallelo (i rate limit per host restano rispettati),
+        # database in sequenza tramite un lock condiviso; RSS e GDELT
+        # girano insieme perché parlano con host diversi.
+        db_lock = asyncio.Lock()
+        await asyncio.gather(
+            ingest_all_feeds(
+                maker,
+                client=client,
+                limiter=limiter,
+                robots=robots,
+                max_feeds_per_source=MAX_FEEDS_PER_SOURCE,
+                retry_failed=True,
+                db_lock=db_lock,
+                progress=stampa_feed,
+            ),
+            ingest_gdelt_all(
+                maker,
+                client=client,
+                limiter=limiter,
+                db_lock=db_lock,
+                progress=stampa_gdelt,
+            ),
+        )
 
     await run_pipeline()
 

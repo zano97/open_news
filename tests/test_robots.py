@@ -52,3 +52,17 @@ async def test_errore_di_rete_consente_ma_non_esplode() -> None:
     async with build_client() as client:
         robots = RobotsCache(client)
         assert await robots.can_fetch("https://fonte.test/articolo")
+
+
+@respx.mock
+async def test_token_bot_rispettato_anche_con_ua_compatibile() -> None:
+    """L'header HTTP è "Mozilla/5.0 (compatible; OpenNewsBot...)" ma le regole
+    robots che nominano OpenNewsBot devono valere comunque."""
+    respx.get("https://fonte.test/robots.txt").mock(
+        return_value=httpx.Response(
+            200, text="User-agent: OpenNewsBot\nDisallow: /\n"
+        )
+    )
+    async with build_client() as client:
+        robots = RobotsCache(client)
+        assert not await robots.can_fetch("https://fonte.test/feed.xml")

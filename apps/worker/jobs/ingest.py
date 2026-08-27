@@ -7,16 +7,13 @@ per-fonte, così un errore su una testata non blocca le altre.
 
 import logging
 
-from sqlalchemy import select
-
 from core.db import get_sessionmaker
 from core.extract.fulltext import articles_missing_fulltext, fetch_fulltext
 from core.ingest.catalog import sync_catalog
-from core.ingest.gdelt import ingest_gdelt_source
+from core.ingest.pipeline import ingest_all_feeds, ingest_gdelt_all
 from core.ingest.ratelimit import DomainRateLimiter
 from core.ingest.robots import RobotsCache
-from core.ingest.rss import ingest_feed
-from core.models import Source
+from core.ingest.rss import IngestStats
 from core.net import build_client
 
 log = logging.getLogger(__name__)
@@ -30,61 +27,40 @@ async def sync_catalog_job() -> None:
     log.info("catalogo sincronizzato: %s", stats)
 
 
+def _log_feed(slug: str, feed_url: str, stats: IngestStats) -> None:
+    if stats.error:
+        log.warning("%s %s: %s", slug, feed_url, stats.error)
+    elif stats.created:
+        log.info("%s: +%d articoli da %s", slug, stats.created, feed_url)
+
+
 async def ingest_feeds_job() -> None:
     maker = get_sessionmaker()
     async with build_client() as client:
-        limiter = DomainRateLimiter()
-        robots = RobotsCache(client)
-        async with maker() as session:
-            sources = list(
-                (
-                    await session.execute(
-                        select(Source).where(Source.enabled, Source.feed_urls != [])
-                    )
-                ).scalars()
-            )
-        for source in sources:
-            if not source.feed_urls:
-                continue
-            async with maker() as session:
-                merged = await session.merge(source, load=False)
-                for feed_url in merged.feed_urls:
-                    stats = await ingest_feed(
-                        session, merged, feed_url,
-                        client=client, limiter=limiter, robots=robots,
-                    )
-                    if stats.error:
-                        log.warning("%s %s: %s", merged.slug, feed_url, stats.error)
-                    elif stats.created:
-                        log.info("%s: +%d articoli da %s", merged.slug, stats.created, feed_url)
-                await session.commit()
+        # I feed in errore ripetuto restano in backoff (li ritenta il seed
+        # o il giro successivo dopo la pausa): niente martellate inutili.
+        await ingest_all_feeds(
+            maker,
+            client=client,
+            limiter=DomainRateLimiter(),
+            robots=RobotsCache(client),
+            retry_failed=False,
+            progress=_log_feed,
+        )
 
 
 async def ingest_gdelt_job() -> None:
+    # Complemento di copertura per TUTTE le fonti: GDELT vede anche articoli
+    # assenti dai feed RSS (il dedup per URL evita i doppi). Le richieste
+    # viaggiano a batch di domini: una decina in tutto, non una per fonte.
     maker = get_sessionmaker()
     async with build_client() as client:
-        limiter = DomainRateLimiter()
-        async with maker() as session:
-            # Complemento di copertura per TUTTE le fonti: GDELT vede anche
-            # articoli assenti dai feed RSS (il dedup per URL evita i doppi).
-            sources = list(
-                (
-                    await session.execute(
-                        select(Source).where(
-                            Source.enabled, Source.gdelt_domain.is_not(None)
-                        )
-                    )
-                ).scalars()
-            )
-        for source in sources:
-            async with maker() as session:
-                merged = await session.merge(source, load=False)
-                created = await ingest_gdelt_source(
-                    session, merged, client=client, limiter=limiter
-                )
-                await session.commit()
-                if created:
-                    log.info("%s: +%d articoli via GDELT", merged.slug, created)
+        created = await ingest_gdelt_all(
+            maker, client=client, limiter=DomainRateLimiter()
+        )
+        for slug, n in created.items():
+            if n:
+                log.info("%s: +%d articoli via GDELT", slug, n)
 
 
 async def fetch_fulltext_job(limit: int = 25) -> None:

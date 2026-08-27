@@ -98,7 +98,15 @@ def build_client(
     """
     settings = get_settings()
     return httpx.AsyncClient(
-        headers={"User-Agent": settings.user_agent},
+        headers={
+            "User-Agent": settings.user_agent,
+            # Alcuni server rifiutano richieste senza Accept; la preferenza
+            # XML aiuta i feed, */* copre JSON (GDELT, Wikidata) e HTML.
+            "Accept": (
+                "application/rss+xml, application/atom+xml, "
+                "application/xml;q=0.9, text/xml;q=0.8, */*;q=0.5"
+            ),
+        },
         timeout=timeout if timeout is not None else settings.http_timeout_seconds,
         follow_redirects=follow_redirects,
         event_hooks={"request": [_guard_request]},

@@ -38,7 +38,9 @@ def test_argomenti_instradati(monkeypatch: pytest.MonkeyPatch) -> None:
     chiamate: list[tuple[object, ...]] = []
     monkeypatch.setattr(
         launcher, "cmd_run",
-        lambda port, open_browser: chiamate.append(("run", port, open_browser)),
+        lambda port, open_browser, app_window=True: chiamate.append(
+            ("run", port, open_browser, app_window)
+        ),
     )
     monkeypatch.setattr(
         launcher, "cmd_seed", lambda demo: chiamate.append(("seed", demo))
@@ -46,7 +48,40 @@ def test_argomenti_instradati(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("sys.argv", ["opennews", "--port", "8100", "--no-browser"])
     launcher.main()
+    monkeypatch.setattr("sys.argv", ["opennews", "--tab"])
+    launcher.main()
     monkeypatch.setattr("sys.argv", ["opennews", "seed", "--demo"])
     launcher.main()
 
-    assert chiamate == [("run", 8100, False), ("seed", True)]
+    assert chiamate == [
+        ("run", 8100, False, True),
+        ("run", 8000, True, False),
+        ("seed", True),
+    ]
+
+
+def test_finestra_app_usa_il_browser_chromium(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    lanci: list[list[str]] = []
+    monkeypatch.setattr(launcher.sys, "platform", "linux")
+    monkeypatch.setattr(
+        launcher.shutil, "which",
+        lambda nome: "/usr/bin/chromium" if nome == "chromium" else None,
+    )
+    monkeypatch.setattr(
+        launcher.subprocess, "Popen",
+        lambda argv, **kw: lanci.append(argv),
+    )
+    assert launcher.open_app_window("http://127.0.0.1:8000")
+    assert lanci[0][0] == "/usr/bin/chromium"
+    assert "--app=http://127.0.0.1:8000" in lanci[0]
+    assert "--class=OpenNews" in lanci[0]
+
+
+def test_senza_chromium_si_ripiega_sul_browser(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(launcher.sys, "platform", "linux")
+    monkeypatch.setattr(launcher.shutil, "which", lambda nome: None)
+    assert not launcher.open_app_window("http://127.0.0.1:8000")

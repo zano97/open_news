@@ -282,6 +282,9 @@ imp.llm_nessuna_story: "Aucune story en attente : il faut des stories récentes 
 storia.riassunto_genera: "Générer « L’essentiel en bref »"
 storia.riassunto_attendi: "Génération en cours…"
 storia.riassunto_errore: "Échec de la génération : réessayez (ou vérifiez l’état dans /impostazioni)"
+storia.riassunto_spento: "Le générateur est désactivé : un administrateur peut l'activer dans les Réglages."
+storia.riassunto_in_corso: "Un résumé est déjà en cours de génération pour cet article : patientez quelques secondes puis réessayez."
+storia.riassunto_fallito: "Échec de la génération — {errore}. Vérifiez l'« État du générateur » dans les Réglages."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Qui est le propriétaire (selon Wikidata)"

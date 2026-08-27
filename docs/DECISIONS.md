@@ -176,3 +176,41 @@ un servizio esterno, contro la nostra politica self-host/allowlist.
 come candidato per un'estensione futura coerente con la missione: catturare
 le PRIME PAGINE delle testate come immagini per studiare risalto e
 gerarchia visiva delle notizie (un segnale di agenda che l'HTML non rende).
+
+## ADR-0018 — Raccolta robusta e parallela (identità HTTP, autodiscovery, GDELT a batch)
+
+**Contesto.** Il primo seed reale ha mostrato quattro classi di fallimento:
+WAF che rifiutano l'User-Agent fuori standard (403 su ilpost, fanpage,
+publico, haaretz); URL di feed spostati (404 su ilgiornale, ilfoglio) o
+diventati pagine HTML (avvenire, adnkronos); GDELT in 429 dopo ~50
+richieste sequenziali; e un seed sequenziale da ~10-15 minuti.
+
+**Decisione.**
+1. L'header User-Agent diventa `Mozilla/5.0 (compatible; OpenNewsBot/0.1;
+   +repo)` — il formato convenzionale dei crawler dichiarati (lo stesso
+   schema di Googlebot): identità esplicita, ma non "fuori standard" per i
+   WAF. Le regole robots.txt vengono verificate col TOKEN `OpenNewsBot`,
+   così un sito che ci vieta per nome resta rispettato (testato).
+2. Un feed che risponde 404/410 o HTML fa scattare l'autodiscovery
+   (`<link rel="alternate">` dalla homepage, stesso dominio, robots e rate
+   limit rispettati); l'URL trovato è ricordato in `FeedState.resolved_url`.
+   Un feed che fallisce 3 volte di fila entra in backoff (6 ore) nei giri
+   periodici; il seed riprova sempre tutto.
+3. GDELT: domini interrogati A BATCH (`(domain:a OR domain:b ...)`, 6 per
+   richiesta, 250 risultati) con attribuzione per dominio; le fonti senza
+   feed (Reuters, AP) mantengono la richiesta dedicata. Retry con attesa
+   crescente su 429/5xx/timeout, rispettando Retry-After; le risposte non
+   JSON diventano errori leggibili, mai crash.
+4. `core/ingest/pipeline.py`: fetch dei feed in parallelo (semaforo, rate
+   limit per host invariato) e scritture DB in sequenza dietro un lock
+   (SQLite ha un solo scrittore); nel seed RSS e GDELT girano insieme.
+
+**Conseguenze.** Primo seed da ~10-15 minuti a pochi minuti; -80% richieste
+GDELT; feed che "si riparano da soli" quando una testata sposta l'URL. Il
+costo è un modulo di orchestrazione in più e uno stato per-feed più ricco
+(migrazione 0005).
+
+**Alternative scartate.** Mantenere l'UA "onesto ma inconsueto" (puniva il
+progetto senza informare nessuno: l'identità resta dichiarata nel nuovo
+formato); imitare un browser vero (disonesto); un fetch multi-processo
+(inutile: il collo è l'attesa di rete, non la CPU).

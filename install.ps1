@@ -60,13 +60,14 @@ $Lnk = $Shell.CreateShortcut((Join-Path $StartMenu "Open News.lnk"))
 $Lnk.TargetPath = $Exe
 $Lnk.WorkingDirectory = $App
 $Lnk.Description = "Chi paga l'informazione · come la racconta · che cosa ignora"
+$Lnk.IconLocation = (Join-Path $App "apps\web\static\icons\favicon.ico")
 $Lnk.Save()
 
 if ($env:OPENNEWS_DEMO -eq "1") {
   Say "Popolo con notizie dimostrative (dichiarate come tali)"
   & $Exe seed --demo
 } elseif ($env:OPENNEWS_NO_SEED -ne "1") {
-  Say "Scarico le ultime 24 ore di notizie vere (~10-15 minuti, solo la prima volta)"
+  Say "Scarico le ultime 24 ore di notizie vere (pochi minuti, solo la prima volta)"
   & $Exe seed
 }
 

@@ -22,14 +22,20 @@ class RobotsCache:
         self._client = client
         self._ttl = ttl_seconds
         self._cache: dict[str, tuple[float, RobotFileParser | None]] = {}
-        self._user_agent = get_settings().user_agent
+        # Per le regole robots conta il token del bot ("OpenNewsBot"), non
+        # l'header HTTP completo: un sito che ci vieta per nome va rispettato
+        # anche se l'header inizia con "Mozilla/5.0 (compatible; ...)".
+        self._user_agent = get_settings().robots_user_agent
 
     async def _load(self, scheme: str, host: str) -> RobotFileParser | None:
         url = f"{scheme}://{host}/robots.txt"
         try:
             resp = await self._client.get(url)
         except httpx.HTTPError as exc:
-            log.warning("robots.txt non raggiungibile per %s (%s): consento", host, exc)
+            log.warning(
+                "robots.txt non raggiungibile per %s (%s: %s): consento",
+                host, exc.__class__.__name__, exc,
+            )
             return None
         if resp.status_code >= 500:
             log.warning("robots.txt %s ha risposto %s: consento", host, resp.status_code)

@@ -1,6 +1,7 @@
 """Pagine HTML (Jinja2 + HTMX)."""
 
 import json
+import logging
 import math
 from collections.abc import AsyncIterator
 from datetime import timedelta
@@ -45,6 +46,8 @@ from core.models import (
 )
 from core.nlp.topics import load_topics
 from core.provenance import for_entity
+
+log = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -393,8 +396,22 @@ async def storia(
 _riassunti_in_corso: set[int] = set()
 
 
+def _errore_ollama(exc_or_body: object) -> str:
+    """Messaggio leggibile da un'eccezione httpx o dal corpo d'errore di Ollama."""
+    if isinstance(exc_or_body, Exception):
+        text = str(exc_or_body).strip()
+        name = exc_or_body.__class__.__name__
+        return f"{name}: {text}" if text else name
+    try:
+        detail = json.loads(str(exc_or_body)).get("error", "")
+    except ValueError:
+        detail = ""
+    return str(detail or exc_or_body)[:200]
+
+
 @router.post("/storia/{story_id}/riassunto", response_model=None)
 async def genera_riassunto(
+    request: Request,
     story_id: int,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> PlainTextResponse | StreamingResponse:
@@ -402,12 +419,16 @@ async def genera_riassunto(
 
     Generato in locale (Ollama) dai soli titoli ed estratti; al termine viene
     salvato, marcato come automatico, con provenance. Se esiste già, si
-    restituisce quello salvato senza rigenerare.
+    restituisce quello salvato senza rigenerare. Un fallimento non è MAI
+    silenzioso: prima del flusso diventa un errore HTTP con la causa; a
+    flusso avviato diventa una riga di avviso nel testo, e finisce nei log.
     """
     from core.config import get_settings
+    from core.net import build_client
     from core.nlp.summarize import METHOD_NAME, build_prompt
     from core.provenance import record as record_provenance
 
+    t = make_translator(request_locale(request))
     await refresh_runtime_settings(session)
     settings = get_settings()
     story = (
@@ -418,45 +439,70 @@ async def genera_riassunto(
     if story.summary_neutral:
         return PlainTextResponse(story.summary_neutral)
     if not settings.enable_llm:
-        raise HTTPException(status_code=503, detail="generatore disattivato")
+        raise HTTPException(status_code=503, detail=t("storia.riassunto_spento"))
     if not story.articles:
         raise HTTPException(status_code=409, detail="story senza articoli")
     if story_id in _riassunti_in_corso:
-        raise HTTPException(status_code=409, detail="generazione già in corso")
+        raise HTTPException(
+            status_code=409, detail=t("storia.riassunto_in_corso")
+        )
 
     prompt = build_prompt(story)
     n_articles = len(story.articles)
 
+    # Pre-flight: la connessione a Ollama viene aperta PRIMA di rispondere,
+    # così "non raggiungibile", "modello mancante" (404) o un errore del
+    # server diventano un vero errore HTTP col motivo, non un flusso vuoto.
+    _riassunti_in_corso.add(story_id)
+    client = build_client(timeout=300)
+    stream_cm = client.stream(
+        "POST",
+        f"{settings.ollama_url.rstrip('/')}/api/generate",
+        json={
+            "model": settings.ollama_model,
+            "prompt": prompt,
+            "stream": True,
+            "options": {"temperature": 0.2, "num_predict": 260},
+        },
+    )
+    try:
+        resp = await stream_cm.__aenter__()
+        if resp.status_code != 200:
+            body = (await resp.aread()).decode("utf-8", "replace")
+            await stream_cm.__aexit__(None, None, None)
+            raise HTTPException(
+                status_code=502,
+                detail=t("storia.riassunto_fallito", errore=_errore_ollama(body)),
+            )
+    except httpx.HTTPError as exc:
+        _riassunti_in_corso.discard(story_id)
+        await client.aclose()
+        log.warning("riassunto story %d: Ollama non risponde (%s)", story_id, _errore_ollama(exc))
+        raise HTTPException(
+            status_code=502,
+            detail=t("storia.riassunto_fallito", errore=_errore_ollama(exc)),
+        ) from exc
+    except BaseException:
+        _riassunti_in_corso.discard(story_id)
+        await client.aclose()
+        raise
+
     async def stream() -> AsyncIterator[str]:
-        _riassunti_in_corso.add(story_id)
         parts: list[str] = []
         try:
-            from core.net import build_client
-
-            async with build_client(timeout=300) as client, client.stream(
-                "POST",
-                f"{settings.ollama_url.rstrip('/')}/api/generate",
-                json={
-                    "model": settings.ollama_model,
-                    "prompt": prompt,
-                    "stream": True,
-                    "options": {"temperature": 0.2, "num_predict": 260},
-                },
-            ) as resp:
-                resp.raise_for_status()
-                async for line in resp.aiter_lines():
-                    if not line.strip():
-                        continue
-                    try:
-                        payload = json.loads(line)
-                    except ValueError:
-                        continue
-                    token = str(payload.get("response", ""))
-                    if token:
-                        parts.append(token)
-                        yield token
-                    if payload.get("done"):
-                        break
+            async for line in resp.aiter_lines():
+                if not line.strip():
+                    continue
+                try:
+                    payload = json.loads(line)
+                except ValueError:
+                    continue
+                token = str(payload.get("response", ""))
+                if token:
+                    parts.append(token)
+                    yield token
+                if payload.get("done"):
+                    break
             testo = "".join(parts).strip()
             if len(testo) >= 40:
                 story.summary_neutral = testo
@@ -475,10 +521,17 @@ async def genera_riassunto(
                     },
                 )
                 await session.commit()
-        except httpx.HTTPError:
-            yield "\n"  # il client rileva l'interruzione dal flusso troncato
+        except httpx.HTTPError as exc:
+            log.warning(
+                "riassunto story %d interrotto: %s", story_id, _errore_ollama(exc)
+            )
+            yield "\n⚠ " + t(
+                "storia.riassunto_fallito", errore=_errore_ollama(exc)
+            )
         finally:
             _riassunti_in_corso.discard(story_id)
+            await stream_cm.__aexit__(None, None, None)
+            await client.aclose()
 
     return StreamingResponse(
         stream(),

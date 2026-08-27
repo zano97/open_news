@@ -12,7 +12,6 @@ Create Date: 2026-08-27
 from collections.abc import Sequence
 
 from alembic import op
-
 from core.models import Base
 
 revision: str = "0001"

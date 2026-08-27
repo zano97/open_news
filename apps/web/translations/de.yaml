@@ -282,6 +282,9 @@ imp.llm_nessuna_story: "Keine wartenden Storys: nötig sind aktuelle Storys mit 
 storia.riassunto_genera: "„Das Wichtigste in Kürze“ erzeugen"
 storia.riassunto_attendi: "Wird erzeugt…"
 storia.riassunto_errore: "Erzeugung fehlgeschlagen: erneut versuchen (oder Status in /impostazioni prüfen)"
+storia.riassunto_spento: "Der Generator ist ausgeschaltet: Eine Administratorin oder ein Administrator kann ihn in den Einstellungen aktivieren."
+storia.riassunto_in_corso: "Für diese Meldung läuft bereits eine Generierung: einen Moment warten und erneut versuchen."
+storia.riassunto_fallito: "Generierung fehlgeschlagen — {errore}. Prüfen Sie den „Status des Generators“ in den Einstellungen."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Wer der Eigentümer ist (laut Wikidata)"

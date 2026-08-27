@@ -283,6 +283,9 @@ imp.llm_nessuna_story: "Nessuna story in attesa: servono story recenti coperte d
 storia.riassunto_genera: "Genera «Il fatto in breve»"
 storia.riassunto_attendi: "Generazione in corso…"
 storia.riassunto_errore: "Generazione non riuscita: riprova (o controlla lo stato in /impostazioni)"
+storia.riassunto_spento: "Il generatore è disattivato: un amministratore può attivarlo in Impostazioni."
+storia.riassunto_in_corso: "Una generazione è già in corso per questa notizia: attendi qualche secondo e riprova."
+storia.riassunto_fallito: "Generazione non riuscita — {errore}. Controlla lo «Stato del generatore» in Impostazioni."
 
 # Proprietario secondo Wikidata
 fonte.owner_wikidata: "Chi è il proprietario (secondo Wikidata)"

@@ -74,6 +74,8 @@ sources:
     Nessuna restrizione nota per titolo+snippet+link. Molti articoli sono
     dietro paywall: il link porta comunque alla fonte.
 
+# Nota: robots.txt di ilfattoquotidiano.it vieta /feed/ ai bot non elencati;
+# la regola viene rispettata e la copertura arriva da GDELT.
 - slug: fatto-quotidiano
   name: il Fatto Quotidiano
   domain: ilfattoquotidiano.it
@@ -103,6 +105,7 @@ sources:
   language: it
   region: italy
   feed_urls:
+  - https://www.ilgiornale.it/feed.xml
   - https://www.ilgiornale.it/rss.xml
   gdelt_domain: ilgiornale.it
   wikidata_qid: Q580060
@@ -259,6 +262,8 @@ sources:
   enabled: true
   terms_note: Nessuna restrizione nota per titolo+snippet+link.
 
+# Nota: il CDN di lastampa.it chiude il TLS ai client non-browser
+# (handshake rifiutato): quando accade, la copertura arriva da GDELT.
 - slug: la-stampa
   name: La Stampa
   domain: lastampa.it
@@ -779,6 +784,7 @@ sources:
   region: world
   feed_urls:
   - https://kyivindependent.com/rss/
+  - https://kyivindependent.com/feed
   gdelt_domain: kyivindependent.com
   wikidata_qid:
   founded: 2021
@@ -834,3 +840,686 @@ sources:
     AP non offre feed RSS pubblici: la copertura è rilevata solo via GDELT
     DOC 2.0 (titolo+link; con citazione del GDELT Project). Nessun
     contenuto AP viene ripubblicato.
+
+  # ---------------- EUROPA — AMPLIAMENTO 2026-08 ----------------
+  # Feed scelti tra quelli storicamente stabili; dove un feed pubblico
+  # affidabile non è noto, la fonte è "solo GDELT" (feed_urls: []).
+  # `make verify-feeds` controlla tutto via HTTP reale e aggiorna lo stato;
+  # a runtime l'autodiscovery ripara gli URL spostati.
+
+- slug: spiegel
+  name: Der Spiegel
+  domain: spiegel.de
+  country: de
+  language: de
+  region: europe
+  feed_urls:
+  - https://www.spiegel.de/schlagzeilen/index.rss
+  gdelt_domain: spiegel.de
+  wikidata_qid:
+  founded: 1947
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: zeit
+  name: Die Zeit
+  domain: zeit.de
+  country: de
+  language: de
+  region: europe
+  feed_urls:
+  - https://newsfeed.zeit.de/index
+  gdelt_domain: zeit.de
+  wikidata_qid:
+  founded: 1946
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: taz
+  name: taz — die tageszeitung
+  domain: taz.de
+  country: de
+  language: de
+  region: europe
+  feed_urls:
+  - https://taz.de/!p4608;rss/
+  gdelt_domain: taz.de
+  wikidata_qid:
+  founded: 1978
+  enabled: true
+  terms_note: >-
+    Cooperativa di lettori (assetto registrato al livello 1 quando
+    documentato). Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: orf
+  name: ORF News
+  domain: orf.at
+  country: at
+  language: de
+  region: europe
+  feed_urls:
+  - https://rss.orf.at/news.xml
+  gdelt_domain: orf.at
+  wikidata_qid:
+  founded: 1955
+  enabled: true
+  terms_note: Emittente pubblica austriaca (canone; fatto di livello 1).
+
+- slug: derstandard
+  name: Der Standard
+  domain: derstandard.at
+  country: at
+  language: de
+  region: europe
+  feed_urls:
+  - https://www.derstandard.at/rss
+  gdelt_domain: derstandard.at
+  wikidata_qid:
+  founded: 1988
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: nzz
+  name: Neue Zürcher Zeitung
+  domain: nzz.ch
+  country: ch
+  language: de
+  region: europe
+  feed_urls:
+  - https://www.nzz.ch/recent.rss
+  gdelt_domain: nzz.ch
+  wikidata_qid:
+  founded: 1780
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: mediapart
+  name: Mediapart
+  domain: mediapart.fr
+  country: fr
+  language: fr
+  region: europe
+  feed_urls:
+  - https://www.mediapart.fr/articles/feed
+  gdelt_domain: mediapart.fr
+  wikidata_qid:
+  founded: 2008
+  enabled: true
+  terms_note: >-
+    Testata finanziata dai soli abbonati (dichiarato dalla testata; fatto
+    di livello 1 quando documentato). Contenuti in gran parte a pagamento.
+
+- slug: nos
+  name: NOS Nieuws
+  domain: nos.nl
+  country: nl
+  language: nl
+  region: europe
+  feed_urls:
+  - https://feeds.nos.nl/nosnieuwsalgemeen
+  gdelt_domain: nos.nl
+  wikidata_qid:
+  founded: 1969
+  enabled: true
+  terms_note: Emittente pubblica olandese (fatto di livello 1).
+
+- slug: vrt-nws
+  name: VRT NWS
+  domain: vrt.be
+  country: be
+  language: nl
+  region: europe
+  feed_urls: []
+  gdelt_domain: vrt.be
+  wikidata_qid:
+  founded: 1930
+  enabled: true
+  terms_note: >-
+    Emittente pubblica fiamminga. Nessun feed pubblico stabile noto:
+    copertura via GDELT (titolo+link, con citazione del GDELT Project).
+
+- slug: politico-europe
+  name: POLITICO Europe
+  domain: politico.eu
+  country: be
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.politico.eu/feed/
+  gdelt_domain: politico.eu
+  wikidata_qid:
+  founded: 2015
+  enabled: true
+  terms_note: >-
+    Proprietà Axel Springer (fatto di livello 1 quando documentato).
+    Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: observador
+  name: Observador
+  domain: observador.pt
+  country: pt
+  language: pt
+  region: europe
+  feed_urls:
+  - https://observador.pt/feed/
+  gdelt_domain: observador.pt
+  wikidata_qid:
+  founded: 2014
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: eldiario
+  name: elDiario.es
+  domain: eldiario.es
+  country: es
+  language: es
+  region: europe
+  feed_urls:
+  - https://www.eldiario.es/rss/
+  gdelt_domain: eldiario.es
+  wikidata_qid:
+  founded: 2012
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: svt
+  name: SVT Nyheter
+  domain: svt.se
+  country: se
+  language: sv
+  region: europe
+  feed_urls:
+  - https://www.svt.se/nyheter/rss.xml
+  gdelt_domain: svt.se
+  wikidata_qid:
+  founded: 1956
+  enabled: true
+  terms_note: Emittente pubblica svedese (fatto di livello 1).
+
+- slug: nrk
+  name: NRK Nyheter
+  domain: nrk.no
+  country: 'no'
+  language: 'no'
+  region: europe
+  feed_urls:
+  - https://www.nrk.no/nyheter/siste.rss
+  gdelt_domain: nrk.no
+  wikidata_qid:
+  founded: 1933
+  enabled: true
+  terms_note: Emittente pubblica norvegese (fatto di livello 1).
+
+- slug: dr
+  name: DR Nyheder
+  domain: dr.dk
+  country: dk
+  language: da
+  region: europe
+  feed_urls:
+  - https://www.dr.dk/nyheder/service/feeds/allenyheder
+  gdelt_domain: dr.dk
+  wikidata_qid:
+  founded: 1925
+  enabled: true
+  terms_note: Emittente pubblica danese (fatto di livello 1).
+
+- slug: yle
+  name: Yle Uutiset
+  domain: yle.fi
+  country: fi
+  language: fi
+  region: europe
+  feed_urls:
+  - https://feeds.yle.fi/uutiset/v1/majorHeadlines/YLE_UUTISET.rss
+  gdelt_domain: yle.fi
+  wikidata_qid:
+  founded: 1926
+  enabled: true
+  terms_note: Emittente pubblica finlandese (fatto di livello 1).
+
+- slug: rte
+  name: "RTÉ News"
+  domain: rte.ie
+  country: ie
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.rte.ie/news/rss/news-headlines.xml
+  gdelt_domain: rte.ie
+  wikidata_qid:
+  founded: 1926
+  enabled: true
+  terms_note: Emittente pubblica irlandese (fatto di livello 1).
+
+- slug: notes-from-poland
+  name: Notes from Poland
+  domain: notesfrompoland.com
+  country: pl
+  language: en
+  region: europe
+  feed_urls:
+  - https://notesfrompoland.com/feed/
+  gdelt_domain: notesfrompoland.com
+  wikidata_qid:
+  founded: 2019
+  enabled: true
+  terms_note: >-
+    Testata non profit in inglese sulla Polonia (finanziata da lettori e
+    grant, dichiarato dalla testata). Nessuna restrizione nota.
+
+- slug: irozhlas
+  name: "iROZHLAS (Český rozhlas)"
+  domain: irozhlas.cz
+  country: cz
+  language: cs
+  region: europe
+  feed_urls:
+  - https://www.irozhlas.cz/rss/irozhlas
+  gdelt_domain: irozhlas.cz
+  wikidata_qid:
+  founded: 2017
+  enabled: true
+  terms_note: Sito d'informazione della radio pubblica ceca (livello 1).
+
+- slug: g4media
+  name: G4Media
+  domain: g4media.ro
+  country: ro
+  language: ro
+  region: europe
+  feed_urls:
+  - https://www.g4media.ro/feed
+  gdelt_domain: g4media.ro
+  wikidata_qid:
+  founded: 2018
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: ekathimerini
+  name: Kathimerini (English)
+  domain: ekathimerini.com
+  country: gr
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.ekathimerini.com/feed/
+  gdelt_domain: ekathimerini.com
+  wikidata_qid:
+  founded: 1919
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: meduza
+  name: Meduza (English)
+  domain: meduza.io
+  country: ru
+  language: en
+  region: europe
+  feed_urls:
+  - https://meduza.io/rss/en
+  gdelt_domain: meduza.io
+  wikidata_qid:
+  founded: 2014
+  enabled: true
+  terms_note: >-
+    Testata in esilio (sede a Riga), dichiarata "indesiderata" dalle
+    autorità russe: fatti registrati al livello 1.
+
+- slug: sky-news
+  name: Sky News
+  domain: news.sky.com
+  country: gb
+  language: en
+  region: europe
+  feed_urls:
+  - https://feeds.skynews.com/feeds/rss/home.xml
+  gdelt_domain: news.sky.com
+  wikidata_qid:
+  founded: 1989
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: independent
+  name: The Independent
+  domain: independent.co.uk
+  country: gb
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.independent.co.uk/rss
+  gdelt_domain: independent.co.uk
+  wikidata_qid:
+  founded: 1986
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: telegraph
+  name: The Telegraph
+  domain: telegraph.co.uk
+  country: gb
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.telegraph.co.uk/rss.xml
+  gdelt_domain: telegraph.co.uk
+  wikidata_qid:
+  founded: 1855
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: financial-times
+  name: Financial Times
+  domain: ft.com
+  country: gb
+  language: en
+  region: europe
+  feed_urls: []
+  gdelt_domain: ft.com
+  wikidata_qid:
+  founded: 1888
+  enabled: true
+  terms_note: >-
+    Feed pubblici non disponibili senza licenza: copertura via GDELT
+    (titolo+link, con citazione del GDELT Project). Contenuti a pagamento.
+
+- slug: economist
+  name: The Economist
+  domain: economist.com
+  country: gb
+  language: en
+  region: europe
+  feed_urls: []
+  gdelt_domain: economist.com
+  wikidata_qid:
+  founded: 1843
+  enabled: true
+  terms_note: >-
+    Feed pubblici limitati: copertura via GDELT (titolo+link, con
+    citazione del GDELT Project). Contenuti a pagamento.
+
+  # ------------- MEDIO ORIENTE E AFRICA — AMPLIAMENTO -------------
+
+- slug: hurriyet-daily-news
+  name: Hürriyet Daily News
+  domain: hurriyetdailynews.com
+  country: tr
+  language: en
+  region: world
+  feed_urls:
+  - https://www.hurriyetdailynews.com/rss
+  gdelt_domain: hurriyetdailynews.com
+  wikidata_qid:
+  founded: 1961
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: times-of-israel
+  name: The Times of Israel
+  domain: timesofisrael.com
+  country: il
+  language: en
+  region: world
+  feed_urls:
+  - https://www.timesofisrael.com/feed/
+  gdelt_domain: timesofisrael.com
+  wikidata_qid:
+  founded: 2012
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: arab-news
+  name: Arab News
+  domain: arabnews.com
+  country: sa
+  language: en
+  region: world
+  feed_urls:
+  - https://www.arabnews.com/rss.xml
+  gdelt_domain: arabnews.com
+  wikidata_qid:
+  founded: 1975
+  enabled: true
+  terms_note: >-
+    Editore Saudi Research and Media Group (fatto di livello 1 quando
+    documentato). Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: premium-times
+  name: Premium Times
+  domain: premiumtimesng.com
+  country: ng
+  language: en
+  region: world
+  feed_urls:
+  - https://www.premiumtimesng.com/feed
+  gdelt_domain: premiumtimesng.com
+  wikidata_qid:
+  founded: 2011
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: mail-guardian
+  name: Mail & Guardian
+  domain: mg.co.za
+  country: za
+  language: en
+  region: world
+  feed_urls:
+  - https://mg.co.za/feed/
+  gdelt_domain: mg.co.za
+  wikidata_qid:
+  founded: 1985
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: mada-masr
+  name: Mada Masr
+  domain: madamasr.com
+  country: eg
+  language: en
+  region: world
+  feed_urls:
+  - https://www.madamasr.com/feed/
+  gdelt_domain: madamasr.com
+  wikidata_qid:
+  founded: 2013
+  enabled: true
+  terms_note: >-
+    Testata indipendente egiziana (il sito ha subito blocchi in Egitto:
+    fatto registrato al livello 1 quando documentato).
+
+  # ----------------- AMERICHE — AMPLIAMENTO -----------------
+
+- slug: wsj
+  name: The Wall Street Journal
+  domain: wsj.com
+  country: us
+  language: en
+  region: world
+  feed_urls:
+  - https://feeds.a.dj.com/rss/RSSWorldNews.xml
+  gdelt_domain: wsj.com
+  wikidata_qid:
+  founded: 1889
+  enabled: true
+  terms_note: >-
+    Proprietà News Corp (fatto di livello 1 quando documentato). Feed
+    pubblico dei titoli; contenuti a pagamento.
+
+- slug: bloomberg
+  name: Bloomberg
+  domain: bloomberg.com
+  country: us
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: bloomberg.com
+  wikidata_qid:
+  founded: 1981
+  enabled: true
+  terms_note: >-
+    Feed pubblici non stabili: copertura via GDELT (titolo+link, con
+    citazione del GDELT Project). Contenuti a pagamento.
+
+- slug: global-news
+  name: Global News
+  domain: globalnews.ca
+  country: ca
+  language: en
+  region: world
+  feed_urls:
+  - https://globalnews.ca/feed/
+  gdelt_domain: globalnews.ca
+  wikidata_qid:
+  founded: 1974
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: g1
+  name: g1 (Globo)
+  domain: g1.globo.com
+  country: br
+  language: pt
+  region: world
+  feed_urls:
+  - https://g1.globo.com/rss/g1/
+  gdelt_domain: g1.globo.com
+  wikidata_qid:
+  founded: 2006
+  enabled: true
+  terms_note: >-
+    Proprietà Grupo Globo (fatto di livello 1 quando documentato).
+    Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: el-universal-mx
+  name: El Universal (México)
+  domain: eluniversal.com.mx
+  country: mx
+  language: es
+  region: world
+  feed_urls:
+  - https://www.eluniversal.com.mx/rss.xml
+  gdelt_domain: eluniversal.com.mx
+  wikidata_qid:
+  founded: 1916
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: infobae
+  name: Infobae
+  domain: infobae.com
+  country: ar
+  language: es
+  region: world
+  feed_urls:
+  - https://www.infobae.com/feeds/rss/
+  gdelt_domain: infobae.com
+  wikidata_qid:
+  founded: 2002
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  # ----------------- ASIA E PACIFICO — AMPLIAMENTO -----------------
+
+- slug: japan-times
+  name: The Japan Times
+  domain: japantimes.co.jp
+  country: jp
+  language: en
+  region: world
+  feed_urls:
+  - https://www.japantimes.co.jp/feed/
+  gdelt_domain: japantimes.co.jp
+  wikidata_qid:
+  founded: 1897
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: korea-herald
+  name: The Korea Herald
+  domain: koreaherald.com
+  country: kr
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: koreaherald.com
+  wikidata_qid:
+  founded: 1953
+  enabled: true
+  terms_note: >-
+    Nessun feed pubblico stabile noto: copertura via GDELT (titolo+link,
+    con citazione del GDELT Project).
+
+- slug: channel-news-asia
+  name: CNA — Channel NewsAsia
+  domain: channelnewsasia.com
+  country: sg
+  language: en
+  region: world
+  feed_urls:
+  - https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml
+  gdelt_domain: channelnewsasia.com
+  wikidata_qid:
+  founded: 1999
+  enabled: true
+  terms_note: >-
+    Emittente del gruppo Mediacorp (partecipata statale: fatto di
+    livello 1 quando documentato).
+
+- slug: dawn
+  name: Dawn
+  domain: dawn.com
+  country: pk
+  language: en
+  region: world
+  feed_urls:
+  - https://www.dawn.com/feeds/home
+  gdelt_domain: dawn.com
+  wikidata_qid:
+  founded: 1941
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: daily-star-bd
+  name: The Daily Star (Bangladesh)
+  domain: thedailystar.net
+  country: bd
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: thedailystar.net
+  wikidata_qid:
+  founded: 1991
+  enabled: true
+  terms_note: >-
+    Nessun feed pubblico stabile noto: copertura via GDELT (titolo+link,
+    con citazione del GDELT Project).
+
+- slug: tempo-english
+  name: Tempo (English)
+  domain: en.tempo.co
+  country: id
+  language: en
+  region: world
+  feed_urls:
+  - https://en.tempo.co/rss
+  gdelt_domain: tempo.co
+  wikidata_qid:
+  founded: 1971
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+- slug: focus-taiwan
+  name: Focus Taiwan (CNA)
+  domain: focustaiwan.tw
+  country: tw
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: focustaiwan.tw
+  wikidata_qid:
+  founded: 2010
+  enabled: true
+  terms_note: >-
+    Servizio in inglese dell'agenzia CNA (finanziamento pubblico: fatto di
+    livello 1 quando documentato). Copertura via GDELT.

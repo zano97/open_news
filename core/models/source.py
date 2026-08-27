@@ -54,6 +54,13 @@ class FeedState(Base):
     last_status: Mapped[int | None] = mapped_column(Integer)
     last_fetched_at: Mapped[datetime | None] = mapped_column(TZDateTime())
     error: Mapped[str | None] = mapped_column(Text)
+    # Se l'URL del catalogo è morto ma il sito espone un feed alternativo
+    # (autodiscovery da <link rel="alternate">), qui resta l'URL trovato.
+    resolved_url: Mapped[str | None] = mapped_column(Text)
+    # Errori consecutivi: oltre la soglia il feed viene riprovato con calma.
+    consecutive_failures: Mapped[int] = mapped_column(
+        Integer, default=0, server_default="0"
+    )
 
 
 class Owner(Base):
