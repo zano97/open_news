@@ -215,3 +215,7 @@ demo.banner: "Esta instancia muestra <strong>noticias de demostración, inventad
 filtro.tutto_mondo: "Todo el mundo"
 filtro.aria: "Filtrar la portada por país de los periódicos"
 filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico de: {paese}. La portada sin filtro sigue siendo mundial."
+
+# Riassunto neutro (LLM locale, marcato)
+storia.riassunto_titolo: "La historia en breve"
+storia.riassunto_nota: "Resumen generado automáticamente por un modelo abierto ejecutado en local, solo a partir de los titulares y extractos de los periódicos (nunca del texto íntegro). Está marcado como automático y puede contener imprecisiones: los artículos originales enlazados abajo son los que hacen fe."

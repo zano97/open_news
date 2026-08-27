@@ -568,6 +568,14 @@ hr.filetto {
 .versione-immagine { max-width: 100%; height: auto; filter: sepia(0.25); }
 .versione-meta { font-size: 0.8rem; color: var(--seppia); margin: 0.3rem 0 0; }
 
+/* "Il fatto in breve": riassunto neutro generato in locale, sempre marcato. */
+.riassunto-neutro {
+  border: 1px solid var(--filetto);
+  background: var(--carta-scura);
+  padding: 0.8rem 1.2rem;
+}
+.riassunto-testo { font-size: 1.1rem; margin: 0.3rem 0; }
+
 .storia-timeline { list-style: none; padding: 0; }
 .storia-timeline li {
   padding: 0.2rem 0;

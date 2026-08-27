@@ -201,3 +201,7 @@ demo.banner: "This instance shows <strong>invented demo news</strong>, attribute
 filtro.tutto_mondo: "Whole world"
 filtro.aria: "Filter the front page by outlet country"
 filtro.nota: "You are seeing stories covered by at least one outlet from: {paese}. The unfiltered front page stays worldwide."
+
+# Riassunto neutro (LLM locale, marcato)
+storia.riassunto_titolo: "The story in brief"
+storia.riassunto_nota: "Summary generated automatically by an open model running locally, from the outlets’ headlines and excerpts only (never from full text). It is marked as automatic and may contain inaccuracies: the original articles linked below are authoritative."

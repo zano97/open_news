@@ -1,0 +1,142 @@
+"""Riassunto neutro con LLM locale: marcato, con provenance, mai obbligatorio."""
+
+import httpx
+import pytest
+import respx
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core import provenance
+from core.config import get_settings
+from core.models import Article, Source, Story, utcnow
+from core.nlp.summarize import build_prompt, summarize_story
+
+RIASSUNTO = (
+    "Il consiglio dei ministri ha approvato la riforma delle pensioni dopo "
+    "mesi di trattative con i sindacati. La misura entrerà in vigore da "
+    "gennaio e riguarda i lavoratori del settore privato."
+)
+
+
+@pytest.fixture
+def llm_attivo() -> None:
+    settings = get_settings()
+    originale = settings.enable_llm
+    settings.enable_llm = True
+    yield
+    settings.enable_llm = originale
+
+
+async def _story_multi_fonte(session: AsyncSession) -> Story:
+    story = Story(
+        title_neutral="Pensioni, il governo approva la riforma",
+        first_seen=utcnow(), last_seen=utcnow(),
+        article_count=2, source_count=2,
+    )
+    session.add(story)
+    await session.flush()
+    for i in range(2):
+        fonte = Source(
+            slug=f"sum-{i}", name=f"Fonte {i}", domain=f"sum{i}.test",
+            country="it", language="it", region="italy", feed_urls=[], terms_note="",
+        )
+        session.add(fonte)
+        await session.flush()
+        session.add(
+            Article(
+                source_id=fonte.id,
+                url=f"https://sum{i}.test/pensioni",
+                title=f"Pensioni, via libera alla riforma (versione {i})",
+                snippet="Accordo trovato dopo mesi di trattative.",
+                language="it",
+                story_id=story.id,
+            )
+        )
+    await session.flush()
+    await session.refresh(story)
+    return story
+
+
+def test_prompt_usa_solo_materiale_pubblico() -> None:
+    """Il prompt contiene titoli ed estratti, mai il testo integrale."""
+    # build_prompt legge story.articles: basta un oggetto compatibile.
+    class FonteFinta:
+        name = "Testata X"
+
+    class ArticoloFinto:
+        source = FonteFinta()
+        title = "Titolo pubblico"
+        snippet = "Estratto pubblico."
+        language = "it"
+        full_text = "TESTO INTEGRALE RISERVATO CHE NON DEVE FINIRE NEL PROMPT"
+
+    class StoryFinta:
+        def __init__(self) -> None:
+            self.articles = [ArticoloFinto()]
+
+    prompt = build_prompt(StoryFinta())  # type: ignore[arg-type]
+    assert "Titolo pubblico" in prompt
+    assert "Estratto pubblico." in prompt
+    assert "RISERVATO" not in prompt
+    assert "riassunto" in prompt.lower()
+
+
+@respx.mock
+async def test_riassunto_generato_e_marcato(
+    session: AsyncSession, llm_attivo: None
+) -> None:
+    story = await _story_multi_fonte(session)
+    route = respx.post("http://localhost:11434/api/generate").mock(
+        return_value=httpx.Response(200, json={"response": RIASSUNTO})
+    )
+    async with httpx.AsyncClient() as client:
+        ok = await summarize_story(session, story, client=client)
+    assert ok
+    assert route.called
+    assert story.summary_neutral == RIASSUNTO
+    assert story.summary_method == "llm"  # sempre marcato
+
+    prova = await provenance.for_entity(session, "story", story.id)
+    riga = next(p for p in prova if p.field == "summary")
+    assert riga.method == "ollama-summary-v1"
+    assert "mai testo integrale" in str(riga.inputs)
+
+
+async def test_flag_spento_non_fa_nulla(session: AsyncSession) -> None:
+    story = await _story_multi_fonte(session)
+    async with httpx.AsyncClient() as client:
+        ok = await summarize_story(session, story, client=client)
+    assert not ok
+    assert story.summary_neutral is None
+
+
+@respx.mock
+async def test_errore_ollama_gestito(
+    session: AsyncSession, llm_attivo: None
+) -> None:
+    story = await _story_multi_fonte(session)
+    respx.post("http://localhost:11434/api/generate").mock(
+        side_effect=httpx.ConnectError("ollama non attivo")
+    )
+    async with httpx.AsyncClient() as client:
+        ok = await summarize_story(session, story, client=client)
+    assert not ok
+    assert story.summary_neutral is None
+
+
+async def test_pagina_storia_mostra_riassunto_marcato(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    story = await _story_multi_fonte(session)
+    story.summary_neutral = RIASSUNTO
+    story.summary_method = "llm"
+    await session.commit()
+
+    resp = await client.get(f"/storia/{story.id}")
+    assert resp.status_code == 200
+    testo = resp.text
+    assert "Il fatto in breve" in testo
+    assert "riforma delle pensioni" in testo
+    # La marcatura "automatico" è sempre accanto al riassunto.
+    assert "automaticamente" in testo
+    assert "fanno fede gli articoli originali" in testo

@@ -215,3 +215,7 @@ demo.banner: "Diese Instanz zeigt <strong>erfundene Demo-Nachrichten</strong>, d
 filtro.tutto_mondo: "Ganze Welt"
 filtro.aria: "Titelseite nach Land der Zeitungen filtern"
 filtro.nota: "Sie sehen Storys, die von mindestens einer Zeitung aus {paese} abgedeckt wurden. Die ungefilterte Titelseite bleibt weltweit."
+
+# Riassunto neutro (LLM locale, marcato)
+storia.riassunto_titolo: "Das Wichtigste in Kürze"
+storia.riassunto_nota: "Zusammenfassung, automatisch erzeugt von einem offenen, lokal laufenden Modell — nur aus den Schlagzeilen und Auszügen der Zeitungen (nie aus dem Volltext). Sie ist als automatisch gekennzeichnet und kann Ungenauigkeiten enthalten: Maßgeblich sind die unten verlinkten Originalartikel."

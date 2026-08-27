@@ -11,6 +11,7 @@ from core.db import get_sessionmaker
 from core.models import Story
 from core.net import build_client
 from core.nlp.entities import assign_story_entities, link_entities_wikidata
+from core.nlp.summarize import summarize_story
 
 log = logging.getLogger(__name__)
 
@@ -48,3 +49,40 @@ async def link_entities_job() -> None:
         await session.commit()
     if linked:
         log.info("entità collegate a Wikidata: %d", linked)
+
+
+async def summarize_job() -> None:
+    """Riassunti neutri per le story recenti multi-fonte (solo con ENABLE_LLM)."""
+    from datetime import timedelta
+
+    from core.config import get_settings
+    from core.models import utcnow
+
+    if not get_settings().enable_llm:
+        return
+    maker = get_sessionmaker()
+    since = utcnow() - timedelta(hours=48)
+    async with build_client(timeout=150) as client, maker() as session:
+        stories = (
+            (
+                await session.execute(
+                    select(Story)
+                    .where(
+                        Story.summary_neutral.is_(None),
+                        Story.source_count >= 2,
+                        Story.last_seen >= since,
+                    )
+                    .order_by(Story.source_count.desc())
+                    .limit(10)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        done = 0
+        for story in stories:
+            if await summarize_story(session, story, client=client):
+                done += 1
+        await session.commit()
+    if done:
+        log.info("riassunti neutri generati: %d", done)

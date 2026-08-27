@@ -215,3 +215,7 @@ demo.banner: "Cette instance affiche des <strong>actualités de démonstration, 
 filtro.tutto_mondo: "Monde entier"
 filtro.aria: "Filtrer la une par pays des journaux"
 filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {paese}. La une sans filtre reste mondiale."
+
+# Riassunto neutro (LLM locale, marcato)
+storia.riassunto_titolo: "L’essentiel en bref"
+storia.riassunto_nota: "Résumé généré automatiquement par un modèle ouvert exécuté en local, à partir des seuls titres et extraits des journaux (jamais du texte intégral). Il est marqué comme automatique et peut contenir des imprécisions : les articles originaux liés ci-dessous font foi."

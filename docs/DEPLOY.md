@@ -48,6 +48,23 @@ macchine minime, ma è debole tra lingue diverse. Su macchine con ≥8 GB:
 docker compose exec api python -m scripts.calibrate_threshold
 ```
 
+### Riassunti neutri "il fatto in breve" (opzionale, LLM locale)
+
+Nella pagina di ogni story può comparire un riassunto neutro generato in
+locale (mai un servizio a pagamento, nessun dato lascia la macchina):
+
+```bash
+docker compose --profile llm up -d          # avvia Ollama
+docker compose exec ollama ollama pull qwen2.5:7b
+# in .env: ENABLE_LLM=true, poi:
+docker compose up -d api worker
+```
+
+Il worker riassume le story multi-fonte ogni 15 minuti; il riassunto è
+sempre marcato "automatico" e usa solo titoli ed estratti (mai il testo
+integrale). Su macchine con 8 GB scegli un modello quantizzato piccolo
+(es. `qwen2.5:3b`) impostando `OLLAMA_MODEL` nell'ambiente dell'api/worker.
+
 ## Oracle Cloud Always Free (ARM)
 
 Il tier Always Free di Oracle offre fino a 4 OCPU ARM Ampere e 24 GB di RAM

@@ -53,8 +53,7 @@ the *centre* of the group **and** at least one real article inside it (the
 centre alone "drifts" as the group grows and would end up attracting
 everything). Otherwise it opens a new story. The story's "neutral" headline
 is not generated: it is the **real headline closest to the centre of the
-group** (if we ever enable local-LLM summaries, they will always be marked
-as such).
+group**.
 
 The threshold is not arbitrary: we **calibrated it on 100 hand-annotated
 headline pairs** (50 same-event pairs, 50 different-event pairs, 25 of them
@@ -75,6 +74,14 @@ threshold must be recalibrated with `make calibrate`
 
 A story is a "**flash**" if at least **5 outlets** cover it within **2
 hours** of its first appearance.
+
+**The story in brief.** The articles' full text belongs to the outlets and
+is never shown (see the legal notes). If the instance enables the optional
+local model (Ollama, `ENABLE_LLM=true`), the story page shows a **neutral
+summary** generated locally from the public headlines and excerpts only,
+always **marked as automatic**, with the model used recorded in the
+provenance. The summary describes the event and never judges the outlets;
+the original articles, linked next to it, are authoritative.
 
 ### <a id="agenda"></a>The agenda profile
 

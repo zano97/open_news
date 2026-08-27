@@ -23,6 +23,14 @@
     {% endif %}
   </header>
 
+  {% if story.summary_neutral %}
+  <section class="riassunto-neutro scheda-sezione">
+    <h3>{{ t('storia.riassunto_titolo') }}</h3>
+    <p class="riassunto-testo">{{ story.summary_neutral }}</p>
+    <p class="fonte-meta">{{ t('storia.riassunto_nota') }}</p>
+  </section>
+  {% endif %}
+
   <section class="scheda-sezione">
     <h3>{{ t('storia.come_raccontano') }}</h3>
     <div class="versioni-griglia">

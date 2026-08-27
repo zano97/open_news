@@ -216,3 +216,7 @@ demo.banner: "Questa istanza mostra <strong>notizie dimostrative, inventate</str
 filtro.tutto_mondo: "Tutto il mondo"
 filtro.aria: "Filtra la prima pagina per paese delle testate"
 filtro.nota: "Stai vedendo le story coperte da almeno una testata di: {paese}. La prima pagina senza filtro resta mondiale."
+
+# Riassunto neutro (LLM locale, marcato)
+storia.riassunto_titolo: "Il fatto in breve"
+storia.riassunto_nota: "Riassunto generato automaticamente da un modello aperto eseguito in locale, a partire dai soli titoli ed estratti delle testate (mai dal testo integrale). È marcato come automatico e può contenere imprecisioni: fanno fede gli articoli originali, linkati qui sotto."

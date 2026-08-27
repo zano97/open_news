@@ -52,8 +52,7 @@ somigliare al *centro* del gruppo **e** ad almeno un articolo reale che ne
 fa parte (il centro, da solo, "deriva" man mano che il gruppo cresce e
 finirebbe per attirare tutto). Altrimenti apre una story nuova. Il titolo
 "neutro" della story non è generato: è il **titolo reale più vicino al
-centro del gruppo** (se un giorno attiveremo il riassunto con LLM locale,
-sarà sempre marcato come tale).
+centro del gruppo**.
 
 La soglia non è arbitraria: l'abbiamo **calibrata su 100 coppie di titoli
 annotate a mano** (50 coppie sullo stesso evento, 50 su eventi diversi, di
@@ -73,6 +72,14 @@ ricalibrata con `make calibrate` (`scripts/calibrate_threshold.py`).
 
 Una story è "**lampo**" se almeno **5 testate** la coprono entro **2 ore**
 dalla prima apparizione.
+
+**Il fatto in breve.** Il testo integrale degli articoli appartiene alle
+testate e non viene mai mostrato (vedi le note legali). Se l'istanza attiva
+il modello locale opzionale (Ollama, `ENABLE_LLM=true`), la pagina della
+story mostra un **riassunto neutro** generato in locale dai soli titoli ed
+estratti pubblici, sempre **marcato come automatico**, con il modello usato
+registrato nella provenienza. Il riassunto descrive l'evento e non giudica
+mai le testate; a fare fede sono gli articoli originali, linkati accanto.
 
 ### <a id="agenda"></a>Il profilo di agenda
 

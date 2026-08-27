@@ -17,6 +17,11 @@ un'istanza pubblica di Open News è responsabile della propria conformità.
   esposto dalle API, mai ridistribuito**. La colonna che lo contiene è
   interna e nessun endpoint la serializza.
 - Non aggiriamo paywall; non ripubblichiamo lanci di agenzia.
+- Il **riassunto neutro** ("il fatto in breve") mostrato nella pagina di una
+  story non è testo delle testate: è generato in locale da un modello aperto
+  a partire dai soli titoli ed estratti già pubblici nei feed, è sempre
+  marcato come automatico e rimanda agli articoli originali, che restano
+  l'unica versione che fa fede.
 
 ## Come raccogliamo
 
