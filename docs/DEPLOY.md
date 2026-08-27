@@ -56,14 +56,28 @@ locale (mai un servizio a pagamento, nessun dato lascia la macchina):
 ```bash
 docker compose --profile llm up -d          # avvia Ollama
 docker compose exec ollama ollama pull qwen2.5:7b
-# in .env: ENABLE_LLM=true, poi:
-docker compose up -d api worker
 ```
+
+Poi attiva i riassunti dal **pannello /impostazioni** (accedi col primo
+profilo registrato, che è amministratore): lì scegli anche il modello e
+l'URL di Ollama. In alternativa: `ENABLE_LLM=true` in `.env` e
+`docker compose up -d api worker`.
 
 Il worker riassume le story multi-fonte ogni 15 minuti; il riassunto è
 sempre marcato "automatico" e usa solo titoli ed estratti (mai il testo
 integrale). Su macchine con 8 GB scegli un modello quantizzato piccolo
-(es. `qwen2.5:3b`) impostando `OLLAMA_MODEL` nell'ambiente dell'api/worker.
+(es. `qwen2.5:3b`) dal pannello /impostazioni.
+
+### Pannello /impostazioni
+
+Il **primo profilo registrato** su /annota è l'amministratore dell'istanza
+e vede il pannello `/impostazioni`: modello e URL di Ollama, motore di
+embedding, soglia e finestra del clustering, soglia «lampo», intervallo di
+cortesia della raccolta (mai sotto 2 s), finestre dei segnali. Le modifiche
+sono salvate nel database, prevalgono su `.env`, si applicano subito
+all'API e al worker entro 5 minuti. I parametri della **metodologia**
+(soglie del livello 4, tassonomia, lessico) restano fuori dal pannello di
+proposito: si cambiano nel repository, con la versione del metodo.
 
 ## Oracle Cloud Always Free (ARM)
 

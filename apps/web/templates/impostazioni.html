@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('imp.titolo') }} — {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="modulo">
+  <h2 class="titolo-sezione">{{ t('imp.titolo') }}</h2>
+  <p class="occhiello">{{ t('imp.occhiello') }}</p>
+
+  {% if saved %}<p class="avviso-salvato" role="status">{{ t('imp.salvate') }}</p>{% endif %}
+
+  <form method="post" action="/impostazioni" class="modulo-campi">
+    {% for gruppo in ["llm", "clustering", "raccolta", "segnali"] %}
+    <fieldset>
+      <legend>{{ t('imp.gruppo_' + gruppo) }}</legend>
+      {% for spec in specs if spec.group == gruppo %}
+      <div class="impostazione">
+        <label for="imp-{{ spec.key }}">{{ t('imp.' + spec.key) }}</label>
+        {% if spec.input_type == "bool" %}
+        <input type="checkbox" id="imp-{{ spec.key }}" name="{{ spec.key }}"
+               value="true" {{ "checked" if values[spec.key] }}>
+        {% elif spec.input_type == "choice" %}
+        <select id="imp-{{ spec.key }}" name="{{ spec.key }}">
+          {% for scelta in spec.choices %}
+          <option value="{{ scelta }}" {{ "selected" if values[spec.key] == scelta }}>{{ scelta }}</option>
+          {% endfor %}
+        </select>
+        {% elif spec.input_type == "number" %}
+        <input type="number" id="imp-{{ spec.key }}" name="{{ spec.key }}"
+               value="{{ values[spec.key] }}" step="{{ spec.step }}">
+        {% else %}
+        <input type="text" id="imp-{{ spec.key }}" name="{{ spec.key }}"
+               value="{{ values[spec.key] }}">
+        {% endif %}
+        <small class="impostazione-aiuto">{{ t('imp.' + spec.key + '_help') }}</small>
+        {% if errors.get(spec.key) %}
+        <p class="impostazione-errore" role="alert">{{ errors[spec.key] }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </fieldset>
+    {% endfor %}
+
+    <button type="submit" class="bottone">{{ t('imp.salva') }}</button>
+  </form>
+
+  <p class="fonte-meta">{{ t('imp.nota_env') }}</p>
+  <p class="fonte-meta">{{ t('imp.nota_metodologia') | safe }}</p>
+  {% if ultima %}
+  <p class="fonte-meta">{{ t('imp.aggiornata', quando=ultima.updated_at | data_breve, chi=ultima.updated_by) }}</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,6 +1,7 @@
 """Modelli SQLAlchemy di Open News."""
 
 from core.models.annotation import Annotation, AnnotatorProfile
+from core.models.appsetting import AppSetting
 from core.models.article import SNIPPET_MAX_CHARS, Article
 from core.models.base import Base, utcnow
 from core.models.provenance import Provenance
@@ -12,6 +13,7 @@ __all__ = [
     "SNIPPET_MAX_CHARS",
     "Annotation",
     "AnnotatorProfile",
+    "AppSetting",
     "Article",
     "Base",
     "BiasSignal",

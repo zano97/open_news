@@ -94,6 +94,7 @@ restano nella lingua in cui ogni testata li ha scritti. Le pagine:
 | **/mappa** | La mappa di co-copertura: testate vicine = coprono le stesse story. Gli assi **emergono dai dati** e vanno letti con le story elencate sotto la mappa. |
 | **/metodo** | La metodologia completa, in italiano semplice (e in inglese): come si calcola ogni cosa, con i numeri di calibrazione e i limiti noti. |
 | **/dati** | Gli export aperti (CSV, CC BY-SA 4.0): story, coperture, segnali, annotazioni anonime. API JSON documentata su **/docs**. |
+| **/impostazioni** | Pannello admin (il primo profilo registrato è l'amministratore): modello e URL di Ollama, motore di embedding, soglie del clustering, intervallo di cortesia della raccolta. Le modifiche vivono nel database, prevalgono su `.env` e si applicano a caldo. I parametri della metodologia sono esclusi di proposito. |
 | **/annota** | Diventa annotatore: valuti titoli **senza sapere da che testata vengono** (annotazione cieca) su due assi. Le etichette di posizionamento si pubblicano solo con ≥50 articoli, ≥3 annotatori con orientamenti dichiarati diversi e accordo α ≥ 0,6. |
 
 In alto a destra trovi l'**edizione notturna** (tema scuro); tutto il sito è

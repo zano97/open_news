@@ -9,6 +9,9 @@
     <form method="post" action="/annota/esci" class="esci-inline">
       <button type="submit" class="tema-toggle">{{ t('annota.esci', nome=annotator.display_name) }}</button>
     </form>
+    {% if annotator.is_admin %}
+    <a class="tema-toggle" href="/impostazioni">{{ t('imp.titolo') }}</a>
+    {% endif %}
   </p>
 
   {% if article %}

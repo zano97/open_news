@@ -86,3 +86,15 @@ async def summarize_job() -> None:
         await session.commit()
     if done:
         log.info("riassunti neutri generati: %d", done)
+
+
+async def refresh_settings_job() -> None:
+    """Ricarica gli override del pannello admin (prevalgono sull'ambiente)."""
+    from core.runtime_settings import load_overrides
+
+    maker = get_sessionmaker()
+    try:
+        async with maker() as session:
+            await load_overrides(session)
+    except Exception:  # DB non pronto: si riprova al prossimo giro
+        log.info("override impostazioni non caricati (DB non pronto)")

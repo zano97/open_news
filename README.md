@@ -96,6 +96,7 @@ content stays in the language each outlet wrote it in. The pages:
 | **/mappa** | The co-coverage map: outlets sit close together when they cover the same stories. The axes **emerge from the data** and must be read through the stories listed under the map. |
 | **/metodo** | The full methodology in plain language: how everything is computed, with the calibration figures and the known limits. |
 | **/dati** | The open exports (CSV, CC BY-SA 4.0): stories, coverage, signals, anonymous annotations. JSON API documented at **/docs**. |
+| **/impostazioni** | Admin panel (the first registered profile is the administrator): Ollama model and URL, embedding engine, clustering thresholds, collection courtesy interval. Changes are stored in the database, override `.env` and apply live. Methodology parameters are deliberately excluded. |
 | **/annota** | Become an annotator: you judge headlines **without knowing which outlet they come from** (blind annotation) on two axes. Positioning labels are published only with ≥50 articles, ≥3 annotators with different declared orientations and agreement α ≥ 0.6. |
 
 Top right you find the **night edition** (dark theme); the whole site is

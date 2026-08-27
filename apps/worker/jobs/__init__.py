@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apps.worker.jobs.analyze import (
     cluster_job,
     link_entities_job,
+    refresh_settings_job,
     signals_job,
     summarize_job,
 )
@@ -26,6 +27,11 @@ async def heartbeat() -> None:
 
 def register_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(heartbeat, "interval", minutes=15, id="heartbeat")
+    # Gli override del pannello admin: subito all'avvio e poi ogni 5 minuti.
+    scheduler.add_job(refresh_settings_job, id="refresh_settings")
+    scheduler.add_job(
+        refresh_settings_job, "interval", minutes=5, id="refresh_settings_periodic"
+    )
     # Il catalogo si sincronizza subito all'avvio e poi ogni 6 ore.
     scheduler.add_job(sync_catalog_job, id="sync_catalog")
     scheduler.add_job(sync_catalog_job, "interval", hours=6, id="sync_catalog_periodic")

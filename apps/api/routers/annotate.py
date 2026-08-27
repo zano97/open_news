@@ -82,12 +82,17 @@ async def registrati(
     ).scalar_one_or_none()
     if existing is not None:
         raise HTTPException(status_code=409, detail="nome utente già in uso")
+    # Il primo profilo registrato amministra l'istanza (pannello /impostazioni).
+    primi = (
+        await session.execute(select(func.count()).select_from(AnnotatorProfile))
+    ).scalar_one()
     annotator = AnnotatorProfile(
         username=username,
         password_hash=hash_password(password),
         display_name=display_name or username,
         self_axis_economic=self_axis_economic,
         self_axis_cultural=self_axis_cultural,
+        is_admin=primi == 0,
     )
     session.add(annotator)
     await session.commit()
