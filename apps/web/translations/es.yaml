@@ -217,6 +217,7 @@ demo.banner: "Esta instancia muestra <strong>noticias de demostración, inventad
 
 # Filtro per paese
 filtro.tutto_mondo: "Todo el mundo"
+filtro.altri: "{n} países más ▾"
 filtro.aria: "Filtrar la portada por país de los periódicos"
 filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico de: {paese}. La portada sin filtro sigue siendo mundial."
 

@@ -218,6 +218,7 @@ demo.banner: "Questa istanza mostra <strong>notizie dimostrative, inventate</str
 
 # Filtro per paese
 filtro.tutto_mondo: "Tutto il mondo"
+filtro.altri: "Altri {n} paesi ▾"
 filtro.aria: "Filtra la prima pagina per paese delle testate"
 filtro.nota: "Stai vedendo le story coperte da almeno una testata di: {paese}. La prima pagina senza filtro resta mondiale."
 

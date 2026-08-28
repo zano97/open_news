@@ -100,6 +100,11 @@ def build_templates() -> Jinja2Templates:
     templates.env.globals["app_name"] = get_settings().app_name
     templates.env.globals["method_version"] = METHOD_VERSION
     templates.env.globals["asset_v"] = ASSET_VERSION
+    # Codice paese ISO -> bandiera emoji (nessun asset, funziona ovunque).
+    templates.env.filters["bandiera"] = lambda codice: (
+        "".join(chr(0x1F1E6 + ord(c) - ord("a")) for c in str(codice).lower())
+        if len(str(codice)) == 2 and str(codice).isalpha() else ""
+    )
     templates.env.globals["now"] = lambda: datetime.now(UTC)
 
     # Titolo della story nella lingua dell'interfaccia (traduzione marcata).

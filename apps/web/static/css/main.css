@@ -947,16 +947,26 @@ a, button, input, select, summary {
 .lingue a:hover { background: var(--carta-scura); }
 .lingue .lingua-attiva { border-bottom-width: 0; background: var(--carta-scura); }
 
-/* Filtro paesi: chip, con lo stato attivo pieno. */
-.filtro-paesi a {
+/* Filtro paesi: chip con bandiera e conteggio, stato attivo pieno,
+   paesi meno coperti raccolti in una tendina discreta. */
+.chip-paese {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--seppia);
+  text-decoration: none;
   border: 1px solid var(--filetto);
   border-radius: 999px;
-  padding: 0.18rem 0.7rem;
+  padding: 0.22rem 0.75rem;
+  background: var(--carta);
+  box-shadow: var(--ombra);
+  cursor: pointer;
 }
-.filtro-paesi a:hover {
+.chip-paese:hover {
+  color: var(--accento);
   border-color: var(--accento);
-  background: var(--carta-scura);
   transform: translateY(-1px);
+  box-shadow: var(--ombra-alta);
 }
 .filtro-paesi .paese-attivo {
   background: var(--accento);
@@ -964,6 +974,36 @@ a, button, input, select, summary {
   color: var(--carta);
 }
 .filtro-paesi .paese-attivo:hover { color: var(--carta); }
+.filtro-paesi .paese-attivo .chip-n { background: color-mix(in srgb, var(--carta) 25%, transparent); }
+.chip-bandiera { font-size: 1.05em; line-height: 1; }
+.chip-n {
+  font-size: 0.72em;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentcolor 12%, transparent);
+}
+.filtro-altri { display: contents; }
+.filtro-altri summary { list-style: none; }
+.filtro-altri summary::-webkit-details-marker { display: none; }
+.filtro-altri[open] summary {
+  border-color: var(--accento);
+  color: var(--accento);
+}
+.filtro-altri-pannello {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.5rem;
+  margin-top: 0.4rem;
+  padding: 0.7rem;
+  background: var(--carta-scura);
+  border: 1px solid var(--filetto);
+  border-radius: var(--raggio);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .filtro-altri[open] .filtro-altri-pannello { animation: comparsa 220ms ease both; }
+}
 
 /* Card: contenimento morbido e sollevamento al passaggio. */
 .versione-card,
@@ -1041,3 +1081,58 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   border: 3px solid var(--carta);
 }
 *::-webkit-scrollbar-track { background: transparent; }
+
+
+/* Tab di sezione: un segmented control che sa dove sei, appiccicoso in
+   cima con effetto carta smerigliata. La vecchia riga tra due filetti
+   duri è sostituita. */
+.masthead { border-bottom: none; padding-bottom: 0.3rem; }
+.barra-tab {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: color-mix(in srgb, var(--carta) 80%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--filetto);
+}
+.barra-tab-interna {
+  display: inline-flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: var(--carta-scura);
+  border: 1px solid var(--filetto);
+  border-radius: 999px;
+  padding: 0.25rem;
+  box-shadow: var(--ombra);
+}
+.barra-tab-interna a {
+  color: var(--seppia);
+  text-decoration: none;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  font-size: 1.02rem;
+  padding: 0.28rem 0.95rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.barra-tab-interna a:hover {
+  color: var(--accento);
+  background: color-mix(in srgb, var(--carta) 65%, transparent);
+}
+.barra-tab-interna a.tab-attiva {
+  background: var(--carta);
+  color: var(--accento-vivo);
+  font-weight: 700;
+  box-shadow: var(--ombra);
+}
+@media (max-width: 44rem) {
+  .barra-tab { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .barra-tab::-webkit-scrollbar { display: none; }
+  .barra-tab-interna { flex-wrap: nowrap; }
+}
+.sotto-testata { text-align: center; }

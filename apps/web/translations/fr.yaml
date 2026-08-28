@@ -217,6 +217,7 @@ demo.banner: "Cette instance affiche des <strong>actualités de démonstration, 
 
 # Filtro per paese
 filtro.tutto_mondo: "Monde entier"
+filtro.altri: "{n} autres pays ▾"
 filtro.aria: "Filtrer la une par pays des journaux"
 filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {paese}. La une sans filtre reste mondiale."
 

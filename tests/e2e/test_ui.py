@@ -9,7 +9,7 @@ pytestmark = pytest.mark.e2e
 def test_prima_pagina_desktop(page: Page, base_url: str) -> None:
     page.goto(base_url + "/")
     expect(page.locator(".masthead-titolo")).to_contain_text("OPEN NEWS")
-    expect(page.locator(".masthead-nav a", has_text="Edizione lampo")).to_be_visible()
+    expect(page.locator(".barra-tab a", has_text="Edizione lampo")).to_be_visible()
     expect(page.locator(".masthead-edizione")).to_contain_text("Edizione n.")
     # La story di apertura mostra le versioni delle testate.
     expect(page.locator(".story-apertura .story-versioni li").first).to_be_visible()

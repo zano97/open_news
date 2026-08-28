@@ -44,12 +44,30 @@
 
 {% block content %}
 {% if countries and countries | length > 1 %}
+{% set in_vista = countries[:9] %}
+{% set altri = countries[9:] %}
+{# Il paese filtrato resta sempre in vista, anche se non è tra i primi. #}
+{% if paese and paese not in (in_vista | map(attribute=0) | list) %}
+  {% set in_vista = in_vista + (countries | selectattr(0, "equalto", paese) | list) %}
+  {% set altri = countries[9:] | rejectattr(0, "equalto", paese) | list %}
+{% endif %}
 <nav class="filtro-paesi" aria-label="{{ t('filtro.aria') }}">
-  <a href="/" class="{{ 'paese-attivo' if not paese }}">{{ t('filtro.tutto_mondo') }}</a>
-  {% for c, n in countries %}
-  <a href="/?paese={{ c }}" class="{{ 'paese-attivo' if paese == c }}"
-     hreflang="{{ c }}">{{ c | upper }}&nbsp;<span class="filtro-conteggio">{{ n }}</span></a>
+  <a href="/" class="chip-paese {{ 'paese-attivo' if not paese }}">🌍 {{ t('filtro.tutto_mondo') }}</a>
+  {% for c, n in in_vista %}
+  <a href="/?paese={{ c }}" class="chip-paese {{ 'paese-attivo' if paese == c }}"
+     hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> {{ c | upper }}<span class="chip-n">{{ n }}</span></a>
   {% endfor %}
+  {% if altri %}
+  <details class="filtro-altri">
+    <summary class="chip-paese">{{ t('filtro.altri', n=altri | length) }}</summary>
+    <div class="filtro-altri-pannello">
+      {% for c, n in altri %}
+      <a href="/?paese={{ c }}" class="chip-paese {{ 'paese-attivo' if paese == c }}"
+         hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> {{ c | upper }}<span class="chip-n">{{ n }}</span></a>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
 </nav>
 {% endif %}
 {% if paese %}

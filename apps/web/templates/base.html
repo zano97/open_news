@@ -47,14 +47,19 @@
   </div>
   <h1 class="masthead-titolo"><a href="/">{{ app_name | upper }}</a></h1>
   <p class="masthead-motto">{{ t('masthead.motto') }}</p>
-  <nav class="masthead-nav" aria-label="Sezioni">
-    <a href="/">{{ t('nav.prima_pagina') }}</a>
-    <a href="/lampo">{{ t('nav.lampo') }}</a>
-    <a href="/fonti">{{ t('nav.testate') }}</a>
-    <a href="/metodo">{{ t('nav.metodo') }}</a>
-    <a href="/dati">{{ t('nav.dati') }}</a>
-    {% if not personal_mode %}<a href="/annota">{{ t('nav.annota') }}</a>{% endif %}
-  </nav>
+</header>
+{% set percorso = current_path | default('/') %}
+<nav class="barra-tab" aria-label="Sezioni">
+  <div class="barra-tab-interna">
+    <a href="/" {% if percorso == '/' or percorso.startswith('/storia') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.prima_pagina') }}</a>
+    <a href="/lampo" {% if percorso.startswith('/lampo') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.lampo') }}</a>
+    <a href="/fonti" {% if percorso.startswith('/font') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.testate') }}</a>
+    <a href="/metodo" {% if percorso.startswith('/metodo') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.metodo') }}</a>
+    <a href="/dati" {% if percorso.startswith('/dati') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.dati') }}</a>
+    {% if not personal_mode %}<a href="/annota" {% if percorso.startswith('/annota') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.annota') }}</a>{% endif %}
+  </div>
+</nav>
+<div class="sotto-testata">
   <div class="masthead-stato">
     {{ t('masthead.fonti_attive') }}: {{ source_count | default("—") }}
     · {{ t('masthead.ultimo_aggiornamento') }}: {{ last_update | ora_breve if last_update is defined else "—" }}
@@ -69,7 +74,7 @@
       </form>
     {% endif %}
   </div>
-</header>
+</div>
 
 {% if demo_mode %}
 <p class="banner-demo" role="status">{{ t('demo.banner') | safe }}</p>

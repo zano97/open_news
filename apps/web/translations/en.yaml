@@ -203,6 +203,7 @@ demo.banner: "This instance shows <strong>invented demo news</strong>, attribute
 
 # Filtro per paese
 filtro.tutto_mondo: "Whole world"
+filtro.altri: "{n} more countries ▾"
 filtro.aria: "Filter the front page by outlet country"
 filtro.nota: "You are seeing stories covered by at least one outlet from: {paese}. The unfiltered front page stays worldwide."
 

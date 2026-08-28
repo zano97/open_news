@@ -355,7 +355,10 @@ async def index(
             .order_by(Source.country)
         )
     ).all()
-    countries = [(c, int(n)) for c, n in country_rows if n]
+    countries = sorted(
+        ((c, int(n)) for c, n in country_rows if n),
+        key=lambda cn: (-cn[1], cn[0]),
+    )
     valid = {c for c, _ in countries}
     paese = paese.lower() if paese and paese.lower() in valid else None
 
