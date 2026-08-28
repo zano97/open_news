@@ -149,10 +149,40 @@ async def ensure_schema() -> None:
 
 
 async def run_pipeline() -> None:
+    """Clustering, coperture, entità e segnali — con avanzamento VISIBILE
+    e un tetto di tempo: il primo avvio non deve mai sembrare bloccato.
+    Quello che non entra nel budget lo completano i cicli automatici."""
+    budget = get_settings().seed_budget_seconds
+    scadenza = time.monotonic() + budget
     maker = get_sessionmaker()
     async with maker() as session:
-        stats = await cluster_pending(session, batch=5000)
-        for story_id in stats.touched_story_ids:
+        in_coda = (
+            await session.execute(
+                select(Article.id).where(Article.story_id.is_(None)).limit(5000)
+            )
+        ).scalars()
+        totale = len(list(in_coda))
+        if totale:
+            print(f"analisi: raggruppo {totale} articoli in notizie…", flush=True)
+
+        def avanzamento(fatti: int, tot: int) -> None:
+            if fatti % 200 == 0 or fatti == tot:
+                print(f"  raggruppati {fatti}/{tot}", flush=True)
+
+        stats = await cluster_pending(
+            session, batch=5000, progress=avanzamento, deadline=scadenza
+        )
+        if stats.processed + stats.skipped < totale:
+            print(
+                "  tempo massimo raggiunto: il resto lo raggruppano i cicli "
+                "automatici nei prossimi minuti", flush=True,
+            )
+        for indice, story_id in enumerate(stats.touched_story_ids, start=1):
+            if indice % 100 == 0:
+                print(
+                    f"  coperture {indice}/{len(stats.touched_story_ids)}",
+                    flush=True,
+                )
             story = (
                 await session.execute(select(Story).where(Story.id == story_id))
             ).scalar_one()

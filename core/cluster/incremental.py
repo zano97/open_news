@@ -16,6 +16,8 @@ Metodo (documentato in docs/METHODOLOGY.md §2):
 
 import logging
 import math
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -27,7 +29,7 @@ from core.models import Article, Story, utcnow
 from core.nlp.embed import Embedder, cosine, get_embedder
 from core.provenance import record
 
-from .knn import nearest_stories
+from .knn import StoryIndex, nearest_stories
 
 log = logging.getLogger(__name__)
 
@@ -132,10 +134,21 @@ def _maybe_flash(story: Story, attach_time: datetime) -> bool:
 
 
 async def assign_story(
-    session: AsyncSession, article: Article, embedder: Embedder | None = None
+    session: AsyncSession,
+    article: Article,
+    embedder: Embedder | None = None,
+    *,
+    index: StoryIndex | None = None,
+    refresh_title: bool = True,
 ) -> tuple[Story, bool]:
     """Aggancia l'articolo a una story esistente o ne crea una nuova.
 
+    Con `index` (clustering a lotti) i candidati e gli embedding dei membri
+    vengono dall'indice in memoria invece che da una scansione del DB per
+    ogni articolo. Con `refresh_title=False` il titolo neutro NON viene
+    ricalcolato qui: nel clustering a lotti si ricalcola UNA volta a fine
+    giro per ogni story toccata — farlo a ogni aggancio ricaricava tutti
+    gli articoli della story ed era quadratico sulle story grandi.
     Ritorna (story, created).
     """
     settings = get_settings()
@@ -144,32 +157,46 @@ async def assign_story(
     when = _article_time(article)
     since = when - timedelta(hours=settings.cluster_window_hours)
 
-    matches = await nearest_stories(session, embedding, since=since, limit=5)
+    if index is not None:
+        matches = index.nearest(embedding, since=since, limit=5)
+    else:
+        matches = await nearest_stories(session, embedding, since=since, limit=5)
     best = matches[0] if matches else None
 
     # Doppio criterio anti-concatenazione: oltre alla similarità col centroide
     # (che deriva man mano che il cluster cresce), l'articolo deve somigliare
     # ad ALMENO UN membro reale della story. Vedi docs/METHODOLOGY.md §2.
     if best is not None and best.similarity >= settings.cluster_similarity_threshold:
-        member_embeddings = (
-            await session.execute(
-                select(Article.embedding).where(
-                    Article.story_id == best.story_id,
-                    Article.embedding.is_not(None),
+        if index is not None:
+            import numpy as np
+
+            membri = await index.members(session, best.story_id)
+            vettore = np.asarray(embedding, dtype=np.float64)
+            # Vettori normalizzati: il prodotto scalare È il coseno.
+            best_member = max((float(m @ vettore) for m in membri), default=0.0)
+        else:
+            member_embeddings = (
+                await session.execute(
+                    select(Article.embedding).where(
+                        Article.story_id == best.story_id,
+                        Article.embedding.is_not(None),
+                    )
                 )
+            ).scalars()
+            best_member = max(
+                (cosine(embedding, m) for m in member_embeddings if m is not None),
+                default=0.0,
             )
-        ).scalars()
-        best_member = max(
-            (cosine(embedding, m) for m in member_embeddings if m is not None),
-            default=0.0,
-        )
         if best_member < settings.cluster_similarity_threshold:
             best = None
 
     if best is not None and best.similarity >= settings.cluster_similarity_threshold:
-        story = (
-            await session.execute(select(Story).where(Story.id == best.story_id))
-        ).scalar_one()
+        if index is not None and best.story_id in index.stories:
+            story = index.stories[best.story_id]
+        else:
+            story = (
+                await session.execute(select(Story).where(Story.id == best.story_id))
+            ).scalar_one()
         article.story_id = story.id
         if story.centroid is not None:
             story.centroid = _merge_centroid(
@@ -181,7 +208,8 @@ async def assign_story(
         story.first_seen = min(story.first_seen, when)
         await session.flush()
         await _refresh_counts(session, story)
-        await refresh_title_neutral(session, story)
+        if refresh_title:
+            await refresh_title_neutral(session, story)
         _maybe_flash(story, when)
         created = False
     else:
@@ -198,6 +226,9 @@ async def assign_story(
         await session.flush()
         article.story_id = story.id
         created = True
+    if index is not None:
+        index.register(story)
+        index.note_member(story.id, embedding)
 
     await record(
         session,
@@ -221,8 +252,18 @@ async def cluster_pending(
     *,
     embedder: Embedder | None = None,
     batch: int = 500,
+    progress: Callable[[int, int], None] | None = None,
+    deadline: float | None = None,
 ) -> ClusterStats:
-    """Processa gli articoli senza story, in ordine temporale. Idempotente."""
+    """Processa gli articoli senza story, in ordine temporale. Idempotente.
+
+    I candidati vengono da un indice in memoria costruito UNA volta
+    (StoryIndex): con migliaia di articoli in coda, la scansione dei
+    centroidi per ogni articolo rendeva il primo seed un finto blocco.
+    `deadline` (time.monotonic) ferma il giro con garbo: gli articoli
+    rimasti restano in coda per il giro successivo. `progress(fatti,
+    totale)` permette a chi chiama di mostrare l'avanzamento.
+    """
     embedder = embedder or get_embedder()
     stats = ClusterStats()
     articles = (
@@ -237,12 +278,30 @@ async def cluster_pending(
         .scalars()
         .all()
     )
-    for article in articles:
+    if not articles:
+        return stats
+    settings = get_settings()
+    piu_vecchio = min(_article_time(a) for a in articles)
+    finestra = piu_vecchio - timedelta(hours=settings.cluster_window_hours)
+    index = StoryIndex(settings.embedding_dim)
+    for story in (
+        await session.execute(
+            select(Story).where(
+                Story.centroid.is_not(None), Story.last_seen >= finestra
+            )
+        )
+    ).scalars():
+        index.register(story)
+    for indice, article in enumerate(articles, start=1):
+        if deadline is not None and time.monotonic() > deadline:
+            break
         if not article.title.strip():
             stats.skipped += 1
             continue
         try:
-            story, created = await assign_story(session, article, embedder)
+            story, created = await assign_story(
+                session, article, embedder, index=index, refresh_title=False
+            )
         except Exception as exc:
             # Un articolo indigesto NON deve congelare il raggruppamento: la
             # coda è ordinata per data, un errore in testa bloccherebbe tutto
@@ -260,4 +319,15 @@ async def cluster_pending(
             stats.touched_story_ids.append(story.id)
         if story.is_flash and story.id not in stats.new_flash:
             stats.new_flash.append(story.id)
+        if progress is not None:
+            progress(indice, len(articles))
+    # Titolo neutro UNA volta per story toccata, a fine giro (vedi
+    # assign_story: farlo a ogni aggancio era quadratico).
+    for story_id in stats.touched_story_ids:
+        toccata = index.stories.get(story_id)
+        if toccata is None:
+            toccata = (
+                await session.execute(select(Story).where(Story.id == story_id))
+            ).scalar_one()
+        await refresh_title_neutral(session, toccata)
     return stats

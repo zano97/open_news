@@ -1415,7 +1415,6 @@ sources:
   region: world
   feed_urls:
   - https://www.eluniversal.com.mx/arc/outboundfeeds/rss/
-  - https://www.eluniversal.com.mx/rss.xml
   gdelt_domain: eluniversal.com.mx
   wikidata_qid:
   founded: 1916
@@ -2129,8 +2128,7 @@ sources:
   country: kw
   language: en
   region: world
-  feed_urls:
-  - https://www.kuwaittimes.com/feed/
+  feed_urls: []
   gdelt_domain: kuwaittimes.com
   wikidata_qid:
   enabled: true

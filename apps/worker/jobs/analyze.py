@@ -24,6 +24,8 @@ async def signals_job() -> None:
 
 
 async def cluster_job() -> None:
+    import time
+
     from core.bias.selection import compute_blindspots
     from core.refresh_state import tracking
 
@@ -31,7 +33,11 @@ async def cluster_job() -> None:
     async with tracking("clustering"), maker() as session:
         from core import refresh_state
 
-        stats = await cluster_pending(session)
+        # Deadline sotto l'intervallo del job (10 min): un arretrato enorme
+        # si smaltisce in più giri invece di accavallarli.
+        stats = await cluster_pending(
+            session, deadline=time.monotonic() + 480
+        )
         refresh_state.set_progress("clustering", 0, len(stats.touched_story_ids) or 1)
         for indice, story_id in enumerate(stats.touched_story_ids, start=1):
             refresh_state.set_progress(

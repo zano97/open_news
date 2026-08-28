@@ -423,3 +423,33 @@ feed → feed_urls vuoti, copre GDELT senza rumore a ogni giro.
 **Conseguenze.** docs/LEGAL.md aggiornato («robots.txt rispettato per il
 crawling»); più feed vivi al primo avvio; i 403 da fingerprinting TLS
 (La Stampa) restano non risolvibili onestamente e coperti da GDELT.
+
+## ADR-0026 — Clustering a lotti con indice in memoria: il seed non sembra mai bloccato
+
+**Contesto.** Col catalogo rimpolpato e i feed sbloccati, il primo seed
+reale ha portato ~1400 articoli in un colpo. La fase di analisi dopo la
+raccolta girava senza tetto di tempo e senza output, e su SQLite il KNN
+rileggeva e decodificava TUTTI i centroidi dal database per OGNI
+articolo; in più il titolo neutro veniva ricalcolato a ogni aggancio
+ricaricando tutti gli articoli della story (quadratico sulle story
+grandi). Risultato: installazione che «si blocca» dopo la raccolta.
+
+**Decisione.** (1) ``StoryIndex``: i centroidi si caricano UNA volta in
+una matrice numpy (numpy è già dipendenza core) e ogni ricerca è un
+prodotto matrice-vettore; gli embedding dei membri per il doppio
+criterio si caricano una volta per story e si aggiornano in memoria.
+(2) Nel clustering a lotti il titolo neutro si ricalcola UNA volta per
+story toccata, a fine giro. (3) ``cluster_pending`` accetta un
+``deadline`` (si ferma con garbo, il resto resta in coda) e un callback
+di avanzamento. (4) Il seed stampa l'avanzamento («raggruppati X/Y») e
+applica il budget di tempo anche all'analisi; il cluster_job del worker
+ha una deadline di 8 minuti, sotto il proprio intervallo. Benchmark sul
+caso peggiore (1400 articoli tutti nella stessa story, SQLite):
+da 211 a 10 secondi; il metodo non cambia (un test impone che l'indice
+dia gli stessi vicini della ricerca su DB).
+
+**Conseguenze.** Il primo avvio resta nei minuti promessi anche con
+migliaia di articoli; un arretrato enorme si smaltisce in più giri da
+10 minuti invece di accavallare i job; su PostgreSQL l'indice sostituisce
+pgvector solo dentro il giro a lotti (finestra temporale, centinaia di
+story: il matvec è comunque immediato).

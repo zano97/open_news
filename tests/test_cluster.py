@@ -233,3 +233,51 @@ async def test_articolo_indigesto_non_blocca_la_coda(
     assert stats.processed == 1  # la notizia buona è passata comunque
     story = (await session.execute(select(Story))).scalar_one()
     assert story.title_neutral == TERREMOTO[0]
+
+async def test_indice_in_memoria_equivale_alla_ricerca_su_db(
+    session: AsyncSession,
+) -> None:
+    """StoryIndex (numpy, una lettura) e nearest_stories (scansione DB)
+    devono dare gli stessi vicini: l'indice è un'ottimizzazione, mai un
+    cambio di metodo."""
+    from datetime import timedelta as td
+
+    from core.cluster.knn import StoryIndex, nearest_stories
+    from core.nlp.embed import HashingEmbedder
+
+    for i, titolo in enumerate([*TERREMOTO[:3], ALTRO_EVENTO]):
+        fonte = await _fonte(session, f"eq{i}")
+        await _articolo(session, fonte, titolo)
+    await cluster_pending(session)
+
+    emb = HashingEmbedder(dim=768)
+    vettore = emb.embed(TERREMOTO[4])
+    since = ORA - td(hours=72)
+
+    dal_db = await nearest_stories(session, vettore, since=since, limit=5)
+    indice = StoryIndex(768)
+    for story in (await session.execute(select(Story))).scalars():
+        indice.register(story)
+    dall_indice = indice.nearest(vettore, since=since, limit=5)
+
+    assert [m.story_id for m in dall_indice] == [m.story_id for m in dal_db]
+    for a, b in zip(dall_indice, dal_db, strict=True):
+        assert abs(a.similarity - b.similarity) < 1e-9
+
+
+async def test_deadline_ferma_il_giro_con_garbo(session: AsyncSession) -> None:
+    """Con la deadline già scaduta il giro non processa nulla e gli
+    articoli restano in coda per il giro successivo."""
+    import time as _time
+
+    fonte = await _fonte(session, "dl-src")
+    await _articolo(session, fonte, TERREMOTO[0])
+    stats = await cluster_pending(session, deadline=_time.monotonic() - 1)
+    assert stats.processed == 0
+
+    avanzamenti: list[tuple[int, int]] = []
+    stats = await cluster_pending(
+        session, progress=lambda i, n: avanzamenti.append((i, n))
+    )
+    assert stats.processed == 1
+    assert avanzamenti == [(1, 1)]
