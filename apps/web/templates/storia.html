@@ -15,6 +15,7 @@
     <p class="story-meta">
       {{ t('storia.titolo_centroide') if story.title_method == "centroide" else t('storia.titolo_llm') }}
       · {{ t('storia.apparsa', data=story.first_seen | data_breve, ora=story.first_seen | ora_breve) }}
+      · {{ t('storia.aggiornata', data=story.last_seen | data_breve, ora=story.last_seen | ora_breve) }}
       · {{ t('storia.conteggi', testate=story.source_count, articoli=story.article_count) }}
       {% if story.is_flash %}<span class="badge badge-lampo">{{ t('badge.lampo') }}</span>{% endif %}
     </p>

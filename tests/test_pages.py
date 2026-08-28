@@ -229,3 +229,75 @@ async def test_mappa_dei_paesi(client: AsyncClient, session: AsyncSession) -> No
     assert "dati-mappa" in testo  # i conteggi per il JS
     assert 'href="/?paese=it"' in testo  # e il chip di riserva senza JS
     assert "chip-nome" in testo
+
+
+async def test_prima_pagina_privilegia_l_attualita(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """La prima pagina è il giornale di OGGI: una story enorme ma ferma da
+    ieri decade sotto una story fresca; una fuori finestra sparisce."""
+    adesso = datetime.now(UTC)
+    fonte = Source(
+        slug="attualita-src", name="Fonte Attualità", domain="att.test",
+        country="it", language="it", region="italy", feed_urls=[], terms_note="",
+    )
+    session.add(fonte)
+    await session.flush()
+    vecchia_grossa = Story(
+        title_neutral="Vecchia storia enorme ferma da un giorno e mezzo",
+        first_seen=adesso - timedelta(hours=40),
+        last_seen=adesso - timedelta(hours=36),
+        article_count=60, source_count=30,
+    )
+    fresca = Story(
+        title_neutral="Notizia fresca di stamattina con poche testate",
+        first_seen=adesso - timedelta(days=10),  # nata giorni fa, viva oggi
+        last_seen=adesso - timedelta(hours=1),
+        article_count=8, source_count=5,
+    )
+    fuori_finestra = Story(
+        title_neutral="Storia gigantesca ma di quattro giorni fa",
+        first_seen=adesso - timedelta(hours=90),
+        last_seen=adesso - timedelta(hours=80),
+        article_count=99, source_count=40,
+    )
+    session.add_all([vecchia_grossa, fresca, fuori_finestra])
+    await session.commit()
+
+    resp = await client.get("/")
+    testo = resp.text
+    assert "Notizia fresca di stamattina" in testo
+    assert "Vecchia storia enorme" in testo
+    assert "Storia gigantesca" not in testo  # fuori dalla finestra di 48h
+    # La fresca sta SOPRA la grossa ferma: copertura scontata del tempo.
+    assert testo.index("Notizia fresca di stamattina") < testo.index(
+        "Vecchia storia enorme"
+    )
+
+    # La data della scheda è l'ULTIMO aggiornamento, non la prima apparizione.
+    from apps.api.templating import _MESI
+
+    locale_oggi = (adesso - timedelta(hours=1)).astimezone()
+    attesa = f"{locale_oggi.day} {_MESI['it'][locale_oggi.month - 1]} {locale_oggi.year}"
+    nascita = (adesso - timedelta(days=10)).astimezone()
+    vietata = f"{nascita.day} {_MESI['it'][nascita.month - 1]} {nascita.year}"
+    assert attesa in testo
+    assert vietata not in testo
+
+
+async def test_prima_pagina_mai_vuota(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Archivio fermo (solo story vecchie): meglio le più recenti che una
+    pagina bianca."""
+    adesso = datetime.now(UTC)
+    story = Story(
+        title_neutral="Unica storia rimasta, vecchia di una settimana",
+        first_seen=adesso - timedelta(days=7),
+        last_seen=adesso - timedelta(days=7),
+        article_count=3, source_count=2,
+    )
+    session.add(story)
+    await session.commit()
+    resp = await client.get("/")
+    assert "Unica storia rimasta" in resp.text

@@ -5,7 +5,7 @@ import logging
 import math
 import os
 from collections.abc import AsyncIterator
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Annotated, Any
 
 import httpx
@@ -212,13 +212,36 @@ async def cambia_lingua(code: str, next: str = "/") -> RedirectResponse:
     return response
 
 
+def _finestra_attualita() -> datetime:
+    """Inizio della finestra di attualità della prima pagina (last_seen)."""
+    from core.config import get_settings
+
+    return utcnow() - timedelta(hours=get_settings().front_page_window_hours)
+
+
+# La copertura si sconta del tempo trascorso dall'ultimo aggiornamento:
+# dimezza ogni PESO_DIMEZZAMENTO_ORE. Così una story enorme di ieri non
+# copre per sempre una story nata oggi, ma una ancora viva resta in alto.
+PESO_DIMEZZAMENTO_ORE = 12.0
+
+
+def _peso_attualita(copertura: int, last_seen: datetime) -> float:
+    ore = max((utcnow() - last_seen).total_seconds() / 3600.0, 0.0)
+    return max(int(copertura), 1) * math.pow(0.5, ore / PESO_DIMEZZAMENTO_ORE)
+
+
 async def _conteggi_per_paese(session: AsyncSession) -> list[tuple[str, int]]:
-    """(paese, story coperte) per il filtro e la mappa, per copertura."""
+    """(paese, story coperte) per il filtro e la mappa, per copertura.
+
+    Conta sulla stessa finestra di attualità della prima pagina: i numeri
+    dei chip e della mappa descrivono il giornale di OGGI, non l'archivio.
+    """
     rows = (
         await session.execute(
             select(Source.country, func.count(func.distinct(Article.story_id)))
             .join(Article, Article.source_id == Source.id)
-            .where(Article.story_id.is_not(None))
+            .join(Story, Story.id == Article.story_id)
+            .where(Story.last_seen >= _finestra_attualita())
             .group_by(Source.country)
         )
     ).all()
@@ -391,27 +414,20 @@ async def index(
     session: Annotated[AsyncSession, Depends(get_session)],
     paese: str | None = None,
 ) -> HTMLResponse:
-    # Filtro per paese: solo paesi con almeno una story, col conteggio accanto
-    # (così l'effetto del filtro è verificabile a colpo d'occhio).
-    country_rows = (
-        await session.execute(
-            select(Source.country, func.count(func.distinct(Article.story_id)))
-            .join(Article, Article.source_id == Source.id)
-            .where(Article.story_id.is_not(None))
-            .group_by(Source.country)
-            .order_by(Source.country)
-        )
-    ).all()
-    countries = sorted(
-        ((c, int(n)) for c, n in country_rows if n),
-        key=lambda cn: (-cn[1], cn[0]),
-    )
+    # Filtro per paese: solo paesi con almeno una story ATTUALE, col conteggio
+    # accanto (così l'effetto del filtro è verificabile a colpo d'occhio).
+    countries = await _conteggi_per_paese(session)
     valid = {c for c, _ in countries}
     paese = paese.lower() if paese and paese.lower() in valid else None
 
     locale = request_locale(request)
+    # La prima pagina è il giornale di OGGI: candidate = story viste nella
+    # finestra di attualità, ordinate per copertura scontata del tempo
+    # (_peso_attualita). Senza finestra, le story più grandi dell'archivio
+    # restavano in cima per sempre e le notizie del giorno non entravano mai.
+    since = _finestra_attualita()
     if paese:
-        # Solo story coperte da almeno una testata del paese, ordinate per
+        # Solo story coperte da almeno una testata del paese; il peso usa
         # quanto QUEL paese le ha coperte.
         from_country = (
             select(Article.story_id, func.count(Article.id).label("n"))
@@ -422,27 +438,51 @@ async def index(
         )
         rows = (
             await session.execute(
-                select(Story)
+                select(Story, from_country.c.n)
                 .join(from_country, Story.id == from_country.c.story_id)
-                .order_by(
-                    from_country.c.n.desc(),
-                    Story.source_count.desc(),
-                    Story.last_seen.desc(),
-                )
-                .limit(36)
+                .where(Story.last_seen >= since)
+                .order_by(Story.last_seen.desc())
+                .limit(200)
             )
-        ).scalars()
-        stories = list(rows)
+        ).all()
+        if not rows:
+            # Archivio fermo (o dati dimostrativi datati): meglio le più
+            # recenti di quel paese che una pagina vuota.
+            rows = (
+                await session.execute(
+                    select(Story, from_country.c.n)
+                    .join(from_country, Story.id == from_country.c.story_id)
+                    .order_by(Story.last_seen.desc())
+                    .limit(36)
+                )
+            ).all()
+        ordinate = sorted(
+            rows, key=lambda r: -_peso_attualita(int(r[1]), r[0].last_seen)
+        )
+        stories = [story for story, _ in ordinate][:36]
     else:
-        stories = list(
+        candidate = list(
             (
                 await session.execute(
                     select(Story)
-                    .order_by(Story.source_count.desc(), Story.last_seen.desc())
-                    .limit(36)
+                    .where(Story.last_seen >= since)
+                    .order_by(Story.last_seen.desc())
+                    .limit(200)
                 )
             ).scalars()
         )
+        if not candidate:
+            candidate = list(
+                (
+                    await session.execute(
+                        select(Story).order_by(Story.last_seen.desc()).limit(36)
+                    )
+                ).scalars()
+            )
+        stories = sorted(
+            candidate,
+            key=lambda s: -_peso_attualita(s.source_count, s.last_seen),
+        )[:36]
     coverages = await _coverages_for(session, [s.id for s in stories])
     versions_map = {
         s.id: order_versions(s.articles, paese, locale) for s in stories

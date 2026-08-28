@@ -208,3 +208,28 @@ async def test_titolo_neutro_preferisce_articoli_dal_feed(
     # Senza titoli editoriali il più vicino al centroide resta la scelta.
     await refresh_title_neutral(session, story)
     assert story.title_neutral == TERREMOTO[3]  # stabile anche al refresh
+
+async def test_articolo_indigesto_non_blocca_la_coda(
+    session: AsyncSession,
+) -> None:
+    """La coda è ordinata per data: un articolo che solleva un'eccezione in
+    testa NON deve congelare per sempre l'arrivo delle notizie nuove."""
+    class EmbedderVelenoso(HashingEmbedder):
+        def embed(self, text: str) -> list[float]:
+            if "veleno" in text:
+                raise RuntimeError("boom")
+            return super().embed(text)
+
+    fonte = await _fonte(session, "veleno-src")
+    await _articolo(
+        session, fonte, "Un articolo veleno che rompe l'embedding",
+        quando=ORA - timedelta(hours=1),
+    )
+    buona = await _fonte(session, "buona-src")
+    await _articolo(session, buona, TERREMOTO[0], quando=ORA)
+
+    stats = await cluster_pending(session, embedder=EmbedderVelenoso(dim=768))
+    assert stats.skipped == 1
+    assert stats.processed == 1  # la notizia buona è passata comunque
+    story = (await session.execute(select(Story))).scalar_one()
+    assert story.title_neutral == TERREMOTO[0]

@@ -63,6 +63,7 @@ index.vuoto_testo: "Il sistema non ha ancora raccolto notizie. Avvia il worker o
 storia.titolo_centroide: "Titolo neutro: il più vicino al centroide del gruppo"
 storia.titolo_llm: "Titolo neutro: riassunto automatico (LLM locale), marcato"
 storia.apparsa: "prima apparizione {data} alle {ora}"
+storia.aggiornata: "ultimo aggiornamento {data} alle {ora}"
 storia.conteggi: "{testate} testate in {articoli} articoli"
 storia.angolo_avviso: "<strong>Angolo cieco:</strong> nessuna testata attiva di {gruppi} ha coperto questa story, mentre la coprono {testate} testate di {paesi} paesi. La probabilità che l'assenza sia un caso è sotto il 5% (metodo su /metodo)."
 storia.come_raccontano: "Come la raccontano le testate"

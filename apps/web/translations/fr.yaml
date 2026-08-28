@@ -62,6 +62,7 @@ index.vuoto_testo: "Le système n'a pas encore collecté de nouvelles. Lancez le
 storia.titolo_centroide: "Titre neutre : le plus proche du centroïde du groupe"
 storia.titolo_llm: "Titre neutre : résumé automatique (LLM local), signalé comme tel"
 storia.apparsa: "première apparition le {data} à {ora}"
+storia.aggiornata: "dernière mise à jour le {data} à {ora}"
 storia.conteggi: "{testate} médias dans {articoli} articles"
 storia.angolo_avviso: "<strong>Angle mort :</strong> aucun média actif de {gruppi} n'a couvert cet événement, couvert par {testate} médias de {paesi} pays. La probabilité que cette absence soit un hasard est inférieure à 5 % (méthode sur /metodo)."
 storia.come_raccontano: "Comment les médias la racontent"

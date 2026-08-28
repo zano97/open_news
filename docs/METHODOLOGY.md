@@ -230,6 +230,14 @@ giudice del bias: impara dal protocollo umano e ne eredita i limiti.
 
 ## Le regole di presentazione
 
+- La prima pagina è **attualità**: mostra solo story viste nelle ultime
+  **48 ore**, ordinate per copertura **scontata del tempo trascorso**
+  dall'ultimo aggiornamento (la copertura dimezza ogni 12 ore). Una story
+  enorme di ieri non copre per sempre una story nata oggi; una ancora
+  viva resta in alto. La data sulla scheda è quella dell'**ultimo
+  articolo**, non della prima apparizione. Se la finestra è vuota (nessun
+  aggiornamento recente), si mostrano comunque le story più recenti.
+  I conteggi dei filtri per paese e della mappa usano la stessa finestra.
 - Nessun colore rosso/blu che suggerisca un giudizio morale: la palette è
   quella della carta e dell'inchiostro.
 - Ogni numero ha un record di **provenienza**: metodo, versione, input,

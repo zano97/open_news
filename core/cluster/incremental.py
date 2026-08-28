@@ -241,7 +241,16 @@ async def cluster_pending(
         if not article.title.strip():
             stats.skipped += 1
             continue
-        story, created = await assign_story(session, article, embedder)
+        try:
+            story, created = await assign_story(session, article, embedder)
+        except Exception as exc:
+            # Un articolo indigesto NON deve congelare il raggruppamento: la
+            # coda è ordinata per data, un errore in testa bloccherebbe tutto
+            # l'arrivo di notizie nuove per sempre. Si salta e si riprova al
+            # giro dopo (l'errore resta nel registro).
+            stats.skipped += 1
+            log.warning("articolo %s non raggruppabile ora: %s", article.id, exc)
+            continue
         stats.processed += 1
         if created:
             stats.created += 1

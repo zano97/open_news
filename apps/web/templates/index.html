@@ -21,7 +21,9 @@
   <p class="story-meta">
     {{ story.source_count }} {{ t('comune.testata') if story.source_count == 1 else t('comune.testate') }}
     · {{ story.article_count }} {{ t('comune.articoli') }}
-    · {{ story.first_seen | data_breve }}
+    {# La data della scheda è l'ULTIMO aggiornamento: una story viva di
+       oggi deve leggersi di oggi, anche se è nata giorni fa. #}
+    · {{ story.last_seen | data_breve }}
     {% if story.is_flash %}<span class="badge badge-lampo">{{ t('badge.lampo') }}</span>{% endif %}
     {{ badge_cieco(coverage) }}
   </p>

@@ -62,6 +62,7 @@ index.vuoto_testo: "Das System hat noch keine Nachrichten gesammelt. Starten Sie
 storia.titolo_centroide: "Neutrale Schlagzeile: die dem Zentroid der Gruppe am nächsten liegende"
 storia.titolo_llm: "Neutrale Schlagzeile: automatische Zusammenfassung (lokales LLM), als solche gekennzeichnet"
 storia.apparsa: "zuerst erschienen am {data} um {ora}"
+storia.aggiornata: "zuletzt aktualisiert am {data} um {ora}"
 storia.conteggi: "{testate} Medien in {articoli} Artikeln"
 storia.angolo_avviso: "<strong>Blinder Fleck:</strong> kein aktives Medium aus {gruppi} hat diese Meldung aufgegriffen, während {testate} Medien aus {paesi} Ländern berichteten. Die Wahrscheinlichkeit, dass dieses Fehlen Zufall ist, liegt unter 5 % (Methode auf /metodo)."
 storia.come_raccontano: "Wie die Medien darüber berichten"

@@ -359,3 +359,32 @@ social è tracciata (`bluesky-public-api` / `mastodon-public-api`, col
 link al post). Il limite è dichiarato: niente X/Instagram significa
 nessuna pretesa di misurare «l'attenzione social» — misuriamo sempre e
 solo che cosa pubblicano le testate.
+
+## ADR-0024 — La prima pagina è attualità: finestra di 48 ore e copertura scontata del tempo
+
+**Contesto.** La prima pagina ordinava le story per numero di testate su
+TUTTO l'archivio, senza finestra temporale, e la scheda stampava la data
+di prima apparizione. Dopo pochi giorni di raccolta l'effetto era «vedo
+sempre le stesse notizie, ferme a ieri»: le story più grandi restavano in
+cima per sempre e quelle nate oggi (poche testate nelle prime ore) non
+entravano mai nelle 36 mostrate — pur con la raccolta perfettamente
+funzionante.
+
+**Decisione.** La prima pagina mostra solo story con `last_seen` nelle
+ultime 48 ore (`front_page_window_hours`, configurabile), ordinate per
+**copertura scontata del tempo**: peso = copertura × 0.5^(ore
+dall'ultimo aggiornamento / 12). Regola semplice, spiegabile e
+deterministica: una story enorme ma ferma decade, una ancora viva resta
+su. Con filtro paese il peso usa la copertura di QUEL paese. Finestra
+vuota (archivio fermo, demo datata) → si mostrano comunque le più
+recenti, mai una pagina bianca. La data della scheda è `last_seen`
+(l'ultimo articolo); la pagina story dichiara sia la prima apparizione
+sia l'ultimo aggiornamento. I conteggi dei chip e della mappa /paesi
+usano la stessa finestra, così i numeri descrivono il giornale di oggi.
+In più il raggruppamento salta gli articoli che sollevano un'eccezione
+invece di fermarsi: la coda è ordinata per data e un errore in testa
+avrebbe bloccato per sempre l'arrivo di notizie nuove.
+
+**Conseguenze.** /lampo aveva già la sua finestra (12 ore) e non cambia;
+l'archivio resta tutto raggiungibile (pagina story, export /dati); la
+metodologia («Le regole di presentazione») documenta finestra e sconto.

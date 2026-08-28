@@ -56,6 +56,7 @@ index.vuoto_testo: "The system has not collected any news yet. Start the worker 
 storia.titolo_centroide: "Neutral headline: the one closest to the cluster centroid"
 storia.titolo_llm: "Neutral headline: automatic summary (local LLM), marked as such"
 storia.apparsa: "first seen {data} at {ora}"
+storia.aggiornata: "last updated {data} at {ora}"
 storia.conteggi: "{testate} outlets across {articoli} articles"
 storia.angolo_avviso: "<strong>Blind spot:</strong> no active outlet from {gruppi} covered this story, while {testate} outlets from {paesi} countries did. The probability that this absence is chance is below 5% (method at /metodo)."
 storia.come_raccontano: "How the outlets tell it"

@@ -62,6 +62,7 @@ index.vuoto_testo: "El sistema aún no ha recogido noticias. Arranca el worker o
 storia.titolo_centroide: "Titular neutro: el más cercano al centroide del grupo"
 storia.titolo_llm: "Titular neutro: resumen automático (LLM local), marcado como tal"
 storia.apparsa: "primera aparición el {data} a las {ora}"
+storia.aggiornata: "última actualización el {data} a las {ora}"
 storia.conteggi: "{testate} cabeceras en {articoli} artículos"
 storia.angolo_avviso: "<strong>Ángulo ciego:</strong> ningún medio activo de {gruppi} cubrió esta noticia, cubierta por {testate} medios de {paesi} países. La probabilidad de que esa ausencia sea casual es inferior al 5 % (método en /metodo)."
 storia.come_raccontano: "Cómo la cuentan las cabeceras"

@@ -231,6 +231,14 @@ human protocol and inherits its limits.
 
 ## Presentation rules
 
+- The front page is **current affairs**: it only shows stories seen in
+  the last **48 hours**, ranked by coverage **discounted by the time
+  elapsed** since their last update (coverage halves every 12 hours). A
+  huge story from yesterday does not bury a story born today forever; one
+  still alive stays on top. The date on a card is that of the **latest
+  article**, not the first appearance. If the window is empty (no recent
+  updates), the most recent stories are shown anyway. Country-filter and
+  map counts use the same window.
 - No red/blue colours suggesting a moral judgement: the palette is paper
   and ink.
 - Every number has a **provenance** record: method, version, inputs, date

@@ -77,6 +77,9 @@ class Settings(BaseSettings):
     cluster_similarity_threshold: float = 0.18
     flash_min_sources: int = 5
     flash_window_hours: int = 2
+    # La prima pagina è ATTUALITÀ: solo story viste (last_seen) entro questa
+    # finestra; le più vecchie restano raggiungibili da filtri e archivio.
+    front_page_window_hours: int = 48
 
     # Bias / segnali
     signal_window_days: int = 30
