@@ -126,14 +126,22 @@ async def test_ui_mostra_traduzione_marcata(
 def test_sottotitolo_nella_lingua_del_lettore() -> None:
     from datetime import UTC, datetime
 
-    from core.models import Article, Story
+    from core.models import Article, Source, Story
     from core.nlp.translate import headline_subtitle
 
-    def articolo(titolo: str, lingua: str, ora: int) -> Article:
-        return Article(
+    def fonte(lingua: str) -> Source:
+        return Source(
+            slug=f"f-{lingua}", name="F", domain=f"{lingua}.test", country=lingua,
+            language=lingua, region="world", feed_urls=[], terms_note="",
+        )
+
+    def articolo(titolo: str, lingua: str, ora: int, fonte_lingua: str | None = None) -> Article:
+        a = Article(
             title=titolo, language=lingua, url=f"https://x.test/{lingua}/{ora}",
             published_at=datetime(2026, 8, 27, ora, tzinfo=UTC),
         )
+        a.source = fonte(fonte_lingua or lingua)
+        return a
 
     story = Story(title_neutral="Governo approva la riforma", title_translations={})
     story.articles = [
@@ -151,3 +159,32 @@ def test_sottotitolo_nella_lingua_del_lettore() -> None:
     assert headline_subtitle(story, "en") == ("Government approves the reform", True)
     # Lingua senza versioni né traduzione: niente riga.
     assert headline_subtitle(story, "de") is None
+
+
+def test_sottotitolo_non_si_fida_della_sola_lingua_rilevata() -> None:
+    """Un titolo norvegese classificato per errore "it" NON deve diventare
+    il sottotitolo italiano: serve la conferma della lingua della testata."""
+    from datetime import UTC, datetime
+
+    from core.models import Article, Source, Story
+    from core.nlp.translate import headline_subtitle
+
+    story = Story(title_neutral="Nepal flash floods", title_translations={})
+    nrk = Article(
+        title="Dødstallene stiger i Nepal", language="it",  # rilevazione SBAGLIATA
+        url="https://nrk.test/x", published_at=datetime(2026, 8, 27, 8, tzinfo=UTC),
+    )
+    nrk.source = Source(
+        slug="nrk", name="NRK", domain="nrk.test", country="no",
+        language="no", region="europe", feed_urls=[], terms_note="",
+    )
+    inglese = Article(
+        title="Nepal flash floods", language="en",
+        url="https://bbc.test/x", published_at=datetime(2026, 8, 27, 9, tzinfo=UTC),
+    )
+    inglese.source = Source(
+        slug="bbc", name="BBC", domain="bbc.test", country="gb",
+        language="en", region="europe", feed_urls=[], terms_note="",
+    )
+    story.articles = [inglese, nrk]
+    assert headline_subtitle(story, "it") is None  # meglio niente che sbagliato

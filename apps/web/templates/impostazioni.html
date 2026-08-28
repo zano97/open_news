@@ -89,6 +89,11 @@
     {% else %}
     <p class="fonte-meta">{{ t('imp.diag_nota_docker') }}</p>
     {% endif %}
+    {% if cicli %}
+    <p class="fonte-meta">{{ t('imp.diag_cicli') }}
+      {% for nome, info in cicli.items() %}{{ nome }}: {{ info.quando }} ({{ info.esito }}, {{ info.durata }}){{ " · " if not loop.last }}{% endfor %}
+    </p>
+    {% endif %}
     {% if log_records %}
     <pre class="diagnostica-log">{% for r in log_records %}{{ r.when.strftime('%H:%M:%S') }} {{ r.level }} {{ r.logger }} — {{ r.message }}
 {% endfor %}</pre>

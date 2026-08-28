@@ -156,3 +156,56 @@ async def test_spegni_richiede_il_token(
     monkeypatch.delenv("OPENNEWS_EMBEDDED_WORKER")
     servito = await client.post("/spegni", headers={"X-Opennews-Spegni": "token-di-prova"})
     assert servito.status_code == 404
+
+
+async def test_aggiorna_ora_in_sottofondo(
+    client: AsyncClient, monkeypatch,
+) -> None:
+    """Il pulsante avvia i cicli in un task: risposta immediata, stato
+    visibile via /api/aggiornamento, mai due giri sovrapposti."""
+    import asyncio
+
+    from apps.api.routers import pages
+
+    monkeypatch.setenv("OPENNEWS_EMBEDDED_WORKER", "1")
+    girati: list[str] = []
+
+    async def finto_giro() -> None:
+        girati.append("via")
+        await asyncio.sleep(0.15)
+        pages._aggiornamento["in_corso"] = False
+
+    monkeypatch.setattr(pages, "_giro_di_aggiornamento", finto_giro)
+
+    resp = await client.post("/aggiorna", follow_redirects=False)
+    assert resp.status_code == 303
+    stato = await client.get("/api/aggiornamento")
+    assert stato.json() == {"in_corso": True}
+    # Un secondo clic durante il giro non ne avvia un altro.
+    await client.post("/aggiorna", follow_redirects=False)
+    await asyncio.sleep(0.3)
+    assert girati == ["via"]
+    stato = await client.get("/api/aggiornamento")
+    assert stato.json() == {"in_corso": False}
+
+
+async def test_aggiorna_negato_senza_permessi(client: AsyncClient, monkeypatch) -> None:
+    monkeypatch.delenv("OPENNEWS_EMBEDDED_WORKER", raising=False)
+    resp = await client.post("/aggiorna", follow_redirects=False)
+    assert resp.status_code == 403
+
+
+def test_tracking_dei_cicli() -> None:
+    """La barra si accende quando un ciclo lavora e l'esito resta in
+    diagnostica."""
+    import asyncio
+
+    from core import refresh_state
+
+    async def giro() -> None:
+        async with refresh_state.tracking("prova"):
+            assert refresh_state.is_running()
+
+    asyncio.run(giro())
+    assert not refresh_state.is_running()
+    assert refresh_state.LAST_RUNS["prova"]["esito"] == "ok"

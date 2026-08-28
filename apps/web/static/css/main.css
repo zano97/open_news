@@ -854,3 +854,29 @@ html:has(body.pagina-lampo) {
 }
 
 .badge-trad { color: var(--seppia); }
+
+/* Barra di aggiornamento: visibile ogni volta che un ciclo lavora. */
+.barra-aggiornamento {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 50;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accento) 0 18%, var(--carta-scura) 18% 36%
+  );
+  background-size: 200% 100%;
+  animation: barra-scorre 1.2s linear infinite;
+}
+@keyframes barra-scorre { to { background-position: -200% 0; } }
+.aggiorna-form { display: inline; }
+.aggiorna-bottone {
+  background: transparent;
+  border: none;
+  color: var(--accento);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+.aggiorna-bottone:disabled { text-decoration: none; cursor: wait; opacity: 0.8; }

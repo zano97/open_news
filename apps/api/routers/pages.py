@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.signal_views import shape_signals
 from apps.api.svg import cocoverage_scatter_svg, coverage_bar_svg, ownership_graph_svg
 from apps.api.templating import templates
+from core import refresh_state
 from core.auth import SESSION_COOKIE, read_session_token
 from core.bias.selection import cocoverage_map
 from core.bias.structure import source_profile
@@ -116,7 +117,64 @@ async def page_context(
         # Istanza personale (un solo utente, legata a 127.0.0.1): niente
         # account obbligatorio per le impostazioni, livello 4 ridimensionato.
         "personal_mode": os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1",
+        "aggiornamento_in_corso": (
+            bool(_aggiornamento["in_corso"]) or refresh_state.is_running()
+        ),
     }
+
+
+# Aggiornamento su richiesta: UN task in sottofondo alla volta. L'app
+# continua a servire ogni pagina (server asincrono); a fine giro il
+# client ricarica e mostra le notizie nuove.
+_aggiornamento: dict[str, Any] = {"in_corso": False, "task": None}
+
+
+def _puo_aggiornare(personal_mode: bool, user: AnnotatorProfile | None) -> bool:
+    return personal_mode or (user is not None and user.is_admin)
+
+
+async def _giro_di_aggiornamento() -> None:
+    from apps.worker.jobs.analyze import cluster_job
+    from apps.worker.jobs.ingest import ingest_feeds_job, ingest_gdelt_job
+
+    try:
+        await ingest_feeds_job()
+        await ingest_gdelt_job()
+        await cluster_job()
+        log.info("aggiornamento su richiesta completato")
+    except Exception:
+        log.exception("aggiornamento su richiesta fallito")
+    finally:
+        _aggiornamento["in_corso"] = False
+        _aggiornamento["task"] = None
+
+
+@router.post("/aggiorna")
+async def aggiorna_ora(
+    request: Request,
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> RedirectResponse:
+    """Avvia subito feed + GDELT + clustering, in sottofondo."""
+    import asyncio
+
+    personal = os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1"
+    user = await _session_user(request, session)
+    if not _puo_aggiornare(personal, user):
+        raise HTTPException(status_code=403, detail="solo admin")
+    if not _aggiornamento["in_corso"]:
+        _aggiornamento["in_corso"] = True
+        _aggiornamento["task"] = asyncio.create_task(_giro_di_aggiornamento())
+    ritorno = request.headers.get("referer") or "/"
+    if not ritorno.startswith(("http://" + request.url.netloc,
+                               "https://" + request.url.netloc, "/")):
+        ritorno = "/"
+    return RedirectResponse(ritorno, status_code=303)
+
+
+@router.get("/api/aggiornamento")
+async def stato_aggiornamento() -> dict[str, bool]:
+    """Per il client: la barra compare quando QUALSIASI ciclo lavora."""
+    return {"in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running()}
 
 
 @router.get("/lingua/{code}")
@@ -500,6 +558,37 @@ async def genera_riassunto(
         raise HTTPException(
             status_code=409, detail=t("storia.riassunto_in_corso")
         )
+
+    # L'agente va sui siti ADESSO: scarica il testo integrale mancante degli
+    # articoli scelti (robots e cortesia rispettati, tempo massimo 45 s),
+    # così il riassunto legge gli articoli veri, non solo gli estratti.
+    from core.extract.fulltext import fetch_fulltext
+    from core.ingest.ratelimit import DomainRateLimiter
+    from core.ingest.robots import RobotsCache
+    from core.nlp.summarize import select_input_articles
+
+    mancanti = [a for a in select_input_articles(story) if not a.full_text][:6]
+    if mancanti:
+        import asyncio as _asyncio
+
+        async def _scarica() -> None:
+            async with build_client() as cf:
+                limiter = DomainRateLimiter()
+                robots = RobotsCache(cf)
+                for articolo in mancanti:
+                    try:
+                        await fetch_fulltext(
+                            session, articolo,
+                            client=cf, limiter=limiter, robots=robots,
+                        )
+                    except Exception:  # un sito ostile non blocca il riassunto
+                        log.info("testo non scaricabile ora: %s", articolo.url)
+
+        try:
+            await _asyncio.wait_for(_scarica(), timeout=45)
+        except TimeoutError:
+            log.info("recupero testi oltre i 45 s: proseguo con quel che c'è")
+        await session.commit()
 
     prompt = build_prompt(story, locale)
     n_articles, _n_testate, n_full = input_stats(story)

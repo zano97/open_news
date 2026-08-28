@@ -13,6 +13,7 @@ catalogo di ~100 testate costa una decina di richieste, non cento; su 429 e
 
 import asyncio
 import logging
+import re
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -74,11 +75,25 @@ def _parse_seendate(value: str | None) -> datetime | None:
         return None
 
 
+_SPAZI_PUNTEGGIATURA = re.compile(r"\s+([,.;:!?%)\]])")
+_PUNTEGGIATURA_APERTA = re.compile(r"([(\[])\s+")
+_BARRA = re.compile(r"(?<=\w)\s+/\s+(?=\w)")
+
+
+def tidy_title(title: str) -> str:
+    """GDELT tokenizza i titoli ("9 / 11", "morta , addio"): si ricompone
+    la punteggiatura. Gli apostrofi persi alla fonte non sono recuperabili."""
+    title = _BARRA.sub("/", title)
+    title = _SPAZI_PUNTEGGIATURA.sub(r"\1", title)
+    title = _PUNTEGGIATURA_APERTA.sub(r"\1", title)
+    return re.sub(r"\s{2,}", " ", title).strip()
+
+
 def parse_artlist(payload: dict[str, Any]) -> list[GdeltArticle]:
     articles: list[GdeltArticle] = []
     for item in payload.get("articles", []) or []:
         url = item.get("url")
-        title = (item.get("title") or "").strip()
+        title = tidy_title(item.get("title") or "")
         if not url or not title:
             continue
         articles.append(

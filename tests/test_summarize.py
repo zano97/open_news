@@ -171,6 +171,8 @@ class TestRiassuntoSuRichiesta:
             respx.post("http://localhost:11434/api/generate").mock(
                 return_value=httpx.Response(200, text=flusso)
             )
+            # Il fetch on-demand dei testi trova siti "spenti": non blocca.
+            respx.route(method="GET").mock(return_value=httpx.Response(404))
             resp = await client.post(f"/storia/{story.id}/riassunto")
         assert resp.status_code == 200
         assert "accordo raggiunto" in resp.text

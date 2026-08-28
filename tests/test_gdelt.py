@@ -176,3 +176,14 @@ async def test_query_batch_con_or() -> None:
         )
     query = route.calls[0].request.url.params["query"]
     assert query == "(domain:reuters.com OR domain:apnews.com)"
+
+
+def test_tidy_title_ricompone_la_punteggiatura() -> None:
+    from core.ingest.gdelt import tidy_title
+
+    assert tidy_title("Trial date set for alleged 9 / 11 mastermind") == \
+        "Trial date set for alleged 9/11 mastermind"
+    assert tidy_title("Yayoi Kusama è morta , addio alla regina") == \
+        "Yayoi Kusama è morta, addio alla regina"
+    assert tidy_title("Meteo : allerta ( rossa ) in tre regioni !") == \
+        "Meteo: allerta (rossa) in tre regioni!"

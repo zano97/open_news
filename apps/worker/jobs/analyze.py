@@ -24,8 +24,10 @@ async def signals_job() -> None:
 
 
 async def cluster_job() -> None:
+    from core.refresh_state import tracking
+
     maker = get_sessionmaker()
-    async with maker() as session:
+    async with tracking("clustering"), maker() as session:
         stats = await cluster_pending(session)
         for story_id in stats.touched_story_ids:
             story = (
@@ -93,13 +95,14 @@ async def translate_titles_job() -> None:
     from core.config import get_settings
     from core.models import utcnow
     from core.nlp.translate import get_translator, translate_story_title
+    from core.refresh_state import tracking
 
     llm_fallback = get_settings().enable_llm
     if get_translator() is None and not llm_fallback:
         return
     maker = get_sessionmaker()
     since = utcnow() - timedelta(hours=72)
-    async with maker() as session:
+    async with tracking("traduzioni"), maker() as session:
         stories = (
             (
                 await session.execute(

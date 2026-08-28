@@ -104,6 +104,36 @@
     });
   }
 
+  // Barra di aggiornamento: compare quando un ciclo lavora (automatico o
+  // manuale). Se l'aggiornamento l'ha chiesto il lettore, a fine giro la
+  // pagina si ricarica da sola: "quando ha finito, le mostra".
+  var barra = document.querySelector("[data-aggiorna-barra]");
+  if (barra && window.fetch) {
+    var FLAG = "opennews-aggiorna-richiesto";
+    var form = document.querySelector("[data-aggiorna-form]");
+    if (form) {
+      form.addEventListener("submit", function () {
+        try { sessionStorage.setItem(FLAG, "1"); } catch (e) { /* pazienza */ }
+      });
+    }
+    var eraInCorso = !barra.hidden;
+    setInterval(function () {
+      if (document.hidden) return;
+      fetch("/api/aggiornamento").then(function (r) { return r.json(); })
+        .then(function (stato) {
+          barra.hidden = !stato.in_corso;
+          var richiesto = false;
+          try { richiesto = sessionStorage.getItem(FLAG) === "1"; } catch (e) { /* niente */ }
+          if (eraInCorso && !stato.in_corso && richiesto) {
+            try { sessionStorage.removeItem(FLAG); } catch (e) { /* niente */ }
+            location.reload();
+          }
+          eraInCorso = stato.in_corso;
+        })
+        .catch(function () { /* server in riavvio: si riprova al giro dopo */ });
+    }, 5000);
+  }
+
   // I link alle testate escono dall'app: si aprono nel browser (nuova
   // scheda/finestra), mai DENTRO la finestra del giornale, che non ha
   // una barra degli indirizzi per tornare indietro.

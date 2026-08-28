@@ -35,8 +35,10 @@ def _log_feed(slug: str, feed_url: str, stats: IngestStats) -> None:
 
 
 async def ingest_feeds_job() -> None:
+    from core.refresh_state import tracking
+
     maker = get_sessionmaker()
-    async with build_client() as client:
+    async with tracking("feed"), build_client() as client:
         # I feed in errore ripetuto restano in backoff (li ritenta il seed
         # o il giro successivo dopo la pausa): niente martellate inutili.
         await ingest_all_feeds(
@@ -53,8 +55,10 @@ async def ingest_gdelt_job() -> None:
     # Complemento di copertura per TUTTE le fonti: GDELT vede anche articoli
     # assenti dai feed RSS (il dedup per URL evita i doppi). Le richieste
     # viaggiano a batch di domini: una decina in tutto, non una per fonte.
+    from core.refresh_state import tracking
+
     maker = get_sessionmaker()
-    async with build_client() as client:
+    async with tracking("GDELT"), build_client() as client:
         created = await ingest_gdelt_all(
             maker, client=client, limiter=DomainRateLimiter()
         )
@@ -64,8 +68,10 @@ async def ingest_gdelt_job() -> None:
 
 
 async def fetch_fulltext_job(limit: int = 60) -> None:
+    from core.refresh_state import tracking
+
     maker = get_sessionmaker()
-    async with build_client() as client:
+    async with tracking("testi"), build_client() as client:
         limiter = DomainRateLimiter()
         robots = RobotsCache(client)
         async with maker() as session:

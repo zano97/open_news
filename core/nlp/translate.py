@@ -247,16 +247,24 @@ def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
     articles = list(story.articles or [])
     neutral_language = next(
         (a.language for a in articles if a.title == story.title_neutral), None
-    )
+    ) or story_language(story)
     if neutral_language == locale:
         return None
     translations = story.title_translations or {}
     if translations.get(locale):
         return translations[locale], True
+    # Versione nella lingua del lettore: SOLO quando la lingua rilevata e
+    # quella della testata concordano. Il rilevatore sui titoli brevi può
+    # sbagliare (un titolo norvegese classificato "it"): la doppia
+    # conferma evita sottotitoli nella lingua sbagliata.
     in_lingua = [
         a
         for a in articles
-        if a.language == locale and a.title and a.title != story.title_neutral
+        if a.language == locale
+        and a.source is not None
+        and a.source.language == locale
+        and a.title
+        and a.title != story.title_neutral
     ]
     if in_lingua:
         primo = min(in_lingua, key=lambda a: a.published_at or a.fetched_at)

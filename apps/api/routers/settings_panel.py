@@ -103,7 +103,10 @@ def _diagnostics() -> dict[str, object]:
         from apps.launcher import home_dir
 
         log_file = str(home_dir() / "opennews.log")
+    from core.refresh_state import LAST_RUNS
+
     return {
+        "cicli": dict(LAST_RUNS),
         "log_records": recent(limit=60),
         "log_file": log_file,
         "ultima_generazione": dict(LAST_GENERATION) or None,

@@ -18,6 +18,8 @@
   <script src="/static/js/app.js?v={{ asset_v }}" defer></script>
 </head>
 <body class="{% block bodyclass %}{% endblock %}">
+<div class="barra-aggiornamento" data-aggiorna-barra role="status"
+     aria-label="{{ t('nav.aggiornando') }}"{% if not aggiornamento_in_corso %} hidden{% endif %}></div>
 <a class="salta" href="#contenuto">{{ t('masthead.salta') }}</a>
 
 <header class="masthead" role="banner">
@@ -57,6 +59,13 @@
     {{ t('masthead.fonti_attive') }}: {{ source_count | default("—") }}
     · {{ t('masthead.ultimo_aggiornamento') }}: {{ last_update | ora_breve if last_update is defined else "—" }}
     · <a href="/metodo">{{ t('masthead.metodo_v', v=method_version) }}</a>
+    {% if personal_mode or (current_user and current_user.is_admin) %}
+    · <form method="post" action="/aggiorna" class="aggiorna-form" data-aggiorna-form>
+        <button type="submit" class="aggiorna-bottone"{% if aggiornamento_in_corso %} disabled{% endif %}>
+          {{ t('nav.aggiornando') if aggiornamento_in_corso else t('nav.aggiorna') }}
+        </button>
+      </form>
+    {% endif %}
   </div>
 </header>
 
