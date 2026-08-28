@@ -110,7 +110,6 @@ def _diagnostics() -> dict[str, object]:
     return {
         "trad_argos": traduttore is not None,
         "trad_coppie": len(traduttore.available_pairs()) if traduttore else 0,
-        "trad_llm": get_settings().enable_llm,
         "cicli": dict(LAST_RUNS),
         "log_records": recent(limit=60),
         "log_file": log_file,

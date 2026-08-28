@@ -117,6 +117,7 @@
       });
     }
     var eraInCorso = !barra.hidden;
+    var eraManuale = false;
     var bottoneAgg = document.querySelector(".aggiorna-bottone");
     var etichettaAgg = bottoneAgg ? bottoneAgg.textContent : "";
     function applicaStato(stato) {
@@ -129,22 +130,31 @@
           barra.classList.add("indeterminata");
           barra.style.setProperty("--avanzamento", "100%");
         }
-        if (bottoneAgg) {
-          bottoneAgg.disabled = true;
-          bottoneAgg.textContent =
-            (bottoneAgg.getAttribute("data-attendi") || "…") +
-            (typeof stato.percento === "number" ? " " + stato.percento + "%" : "");
-        }
-      } else if (bottoneAgg) {
-        bottoneAgg.disabled = false;
-        bottoneAgg.textContent = bottoneAgg.getAttribute("data-riposo") || etichettaAgg;
       }
+      // Il BOTTONE segue solo il giro chiesto dal lettore; la barra
+      // racconta anche i cicli automatici.
+      if (bottoneAgg) {
+        if (stato.giro_manuale) {
+          bottoneAgg.disabled = true;
+          var dettaglio = "";
+          if (typeof stato.percento === "number") dettaglio += " " + stato.percento + "%";
+          if (stato.fase) dettaglio += " · " + stato.fase;
+          bottoneAgg.textContent =
+            (bottoneAgg.getAttribute("data-attendi") || "…") + dettaglio;
+        } else {
+          bottoneAgg.disabled = false;
+          bottoneAgg.textContent = bottoneAgg.getAttribute("data-riposo") || etichettaAgg;
+        }
+      }
+      // La ricarica segue SOLO il giro chiesto dal lettore: i cicli
+      // automatici che si accodano non la trattengono all'infinito.
       var richiesto = false;
       try { richiesto = sessionStorage.getItem(FLAG) === "1"; } catch (e) { /* niente */ }
-      if (eraInCorso && !stato.in_corso && richiesto) {
+      if (eraManuale && !stato.giro_manuale && richiesto) {
         try { sessionStorage.removeItem(FLAG); } catch (e) { /* niente */ }
         location.reload();
       }
+      eraManuale = !!stato.giro_manuale;
       eraInCorso = stato.in_corso;
     }
     setInterval(function () {

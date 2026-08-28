@@ -74,10 +74,14 @@ async def fetch_fulltext_job(limit: int = 60) -> None:
     async with tracking("testi"), build_client() as client:
         limiter = DomainRateLimiter()
         robots = RobotsCache(client)
+        from core import refresh_state
+
         async with maker() as session:
             articles = await articles_missing_fulltext(session, limit=limit)
             done = 0
-            for article in articles:
+            refresh_state.set_progress("testi", 0, len(articles))
+            for i, article in enumerate(articles, start=1):
+                refresh_state.set_progress("testi", i, len(articles))
                 if await fetch_fulltext(
                     session, article, client=client, limiter=limiter, robots=robots
                 ):

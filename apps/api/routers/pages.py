@@ -179,6 +179,7 @@ async def stato_aggiornamento() -> dict[str, object]:
     percento, fase = refresh_state.overall()
     return {
         "in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running(),
+        "giro_manuale": bool(_aggiornamento["in_corso"]),
         "percento": percento,
         "fase": fase,
     }

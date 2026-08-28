@@ -127,97 +127,43 @@ def story_language(story: Story) -> str | None:
     return max(set(languages), key=languages.count)
 
 
-LLM_METHOD_NAME = "ollama-translate-v1"
-
-_LINGUE = {"it": "italiano", "en": "English", "fr": "français",
-           "de": "Deutsch", "es": "español"}
-
-
-async def llm_translate_title(text: str, target: str) -> str | None:
-    """Traduzione di riserva col LLM locale, quando Argos non c'è o non ha
-    la coppia. Solo titoli, mai valutazioni; marcata come le altre."""
-    from core.config import get_settings
-    from core.net import build_client
-    from core.nlp.summarize import (
-        generation_payload,
-        strip_think,
-        think_rejected,
-    )
-
-    settings = get_settings()
-    if not settings.enable_llm:
-        return None
-    prompt = (
-        f"Traduci in {_LINGUE.get(target, target)} questo titolo di giornale. "
-        f"Rispondi SOLO con la traduzione, senza virgolette né commenti.\n\n{text}"
-    )
-    url = f"{settings.ollama_url.rstrip('/')}/api/generate"
-    try:
-        async with build_client(timeout=60) as client:
-            resp = await client.post(url, json=generation_payload(prompt, stream=False))
-            if think_rejected(resp.status_code, resp.text):
-                resp = await client.post(
-                    url, json=generation_payload(prompt, stream=False, include_think=False)
-                )
-            resp.raise_for_status()
-            out = strip_think(str(resp.json().get("response", ""))).strip().strip('"«»')
-    except Exception:  # mai bloccare il giro per un titolo
-        return None
-    # Un titolo resta un titolo: scarta risposte assurde o vuote.
-    if not out or len(out) > max(200, len(text) * 3):
-        return None
-    return out
-
-
 async def translate_story_title(
     session: AsyncSession,
     story: Story,
     *,
     targets: Iterable[str] = SUPPORTED_LOCALES,
     translator: Translator | None = None,
-    llm_fallback: bool = False,
 ) -> int:
     """Completa le traduzioni mancanti del titolo neutro. Ritorna quante nuove.
 
-    Catena: Argos (offline, scarica le coppie che servono) e — con
-    `llm_fallback` e generatore acceso — il LLM locale per le coppie che
-    Argos non copre. Così il sottotitolo tradotto c'è in TUTTE le occasioni
-    in cui esiste un motore locale capace di produrlo.
+    Il motore è SOLO Argos (offline; scarica da sé le coppie che servono):
+    il generatore LLM resta riservato ai riassunti, per scelta esplicita.
     """
     translator = translator or get_translator()
+    if translator is None:
+        return 0
     source = story_language(story)
     if source is None:
         return 0
     translations = dict(story.title_translations or {})
     added = 0
-    via_llm = 0
     for target in targets:
         if target == source or target in translations:
             continue
-        translated = None
-        if translator is not None:
-            # Argos è CPU (e al primo giro scarica i modelli): su un thread,
-            # o bloccherebbe l'intera app per minuti.
-            import asyncio
+        # Argos è CPU (e al primo giro scarica i modelli): su un thread,
+        # o bloccherebbe l'intera app per minuti.
+        import asyncio
 
-            translated = await asyncio.to_thread(
-                translator.translate, story.title_neutral, source, target
-            )
-        if not translated and llm_fallback:
-            translated = await llm_translate_title(story.title_neutral, target)
-            if translated:
-                via_llm += 1
+        translated = await asyncio.to_thread(
+            translator.translate, story.title_neutral, source, target
+        )
         if not translated or translated.strip() == story.title_neutral.strip():
             continue
         translations[target] = translated
         added += 1
     if added:
         story.title_translations = translations
-        metodo = LLM_METHOD_NAME if via_llm else (
-            translator.name if translator is not None else LLM_METHOD_NAME
-        )
-        if via_llm and translator is not None and via_llm < added:
-            metodo = f"{translator.name}+{LLM_METHOD_NAME}"
+        metodo = translator.name
         await record(
             session,
             entity_type="story",

@@ -29,8 +29,14 @@ async def cluster_job() -> None:
 
     maker = get_sessionmaker()
     async with tracking("clustering"), maker() as session:
+        from core import refresh_state
+
         stats = await cluster_pending(session)
-        for story_id in stats.touched_story_ids:
+        refresh_state.set_progress("clustering", 0, len(stats.touched_story_ids) or 1)
+        for indice, story_id in enumerate(stats.touched_story_ids, start=1):
+            refresh_state.set_progress(
+                "clustering", indice, len(stats.touched_story_ids)
+            )
             story = (
                 await session.execute(select(Story).where(Story.id == story_id))
             ).scalar_one()
@@ -107,19 +113,16 @@ async def refresh_settings_job() -> None:
 async def translate_titles_job() -> None:
     """Traduce i titoli neutri delle story recenti, in TUTTE le lingue UI.
 
-    Catena: Argos (se installato; scarica da solo le coppie mancanti) e
-    LLM locale come riserva quando il generatore è acceso. Senza nessuno
-    dei due motori il giro è un no-op.
+    Solo Argos (offline; scarica da sé le coppie mancanti): il generatore
+    LLM resta riservato ai riassunti, per scelta esplicita.
     """
     from datetime import timedelta
 
-    from core.config import get_settings
     from core.models import utcnow
     from core.nlp.translate import get_translator, translate_story_title
     from core.refresh_state import tracking
 
-    llm_fallback = get_settings().enable_llm
-    if get_translator() is None and not llm_fallback:
+    if get_translator() is None:
         return
     maker = get_sessionmaker()
     since = utcnow() - timedelta(hours=72)
@@ -136,11 +139,13 @@ async def translate_titles_job() -> None:
             .scalars()
             .all()
         )
+        from core import refresh_state
+
         added = 0
-        for story in stories:
-            added += await translate_story_title(
-                session, story, llm_fallback=llm_fallback
-            )
+        refresh_state.set_progress("traduzioni", 0, len(stories))
+        for indice, story in enumerate(stories, start=1):
+            added += await translate_story_title(session, story)
+            refresh_state.set_progress("traduzioni", indice, len(stories))
             if added >= 60:  # il resto al prossimo giro (ogni 15 minuti)
                 break
         await session.commit()
