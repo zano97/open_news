@@ -50,6 +50,13 @@
   --font-macchina: "Special Elite", "Courier New", monospace;
 
   --misura: 34rem;             /* larghezza colonna di lettura */
+
+  /* Rifinitura: raggi, ombre e transizioni condivisi da tutti i componenti. */
+  --raggio: 10px;
+  --raggio-s: 6px;
+  --ombra: 0 1px 2px rgba(26, 20, 12, 0.06), 0 8px 20px -12px rgba(26, 20, 12, 0.18);
+  --ombra-alta: 0 2px 4px rgba(26, 20, 12, 0.08), 0 14px 30px -12px rgba(26, 20, 12, 0.25);
+  --transizione: 160ms ease;
 }
 
 /* Edizione notturna: carta scura, inchiostro chiaro. Stessi ruoli, ruoli invertiti. */
@@ -63,6 +70,8 @@
     --accento: #cbb08a;          /* bronzo chiaro: 8.1:1 su carta notturna */
     --accento-vivo: #dcbf94;
     --filetto: #4d463a;
+    --ombra: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+    --ombra-alta: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px -12px rgba(0, 0, 0, 0.7);
   }
 }
 :root[data-theme="notte"] {
@@ -74,6 +83,8 @@
   --accento: #cbb08a;
   --accento-vivo: #dcbf94;
   --filetto: #4d463a;
+    --ombra: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+    --ombra-alta: 0 2px 4px rgba(0, 0, 0, 0.4), 0 16px 34px -12px rgba(0, 0, 0, 0.7);
 }
 
 /* ---------- Base ---------- */
@@ -855,20 +866,38 @@ html:has(body.pagina-lampo) {
 
 .badge-trad { color: var(--seppia); }
 
-/* Barra di aggiornamento: visibile ogni volta che un ciclo lavora. */
+/* Barra di aggiornamento: avanzamento REALE (feed e gruppi contati).
+   Un binario discreto e un riempimento fluido; quando la percentuale non
+   è stimabile, un respiro morbido al posto delle bande. */
 .barra-aggiornamento {
   position: fixed;
   top: 0; left: 0; right: 0;
-  height: 3px;
+  height: 4px;
   z-index: 50;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--accento) 0 18%, var(--carta-scura) 18% 36%
-  );
-  background-size: 200% 100%;
-  animation: barra-scorre 1.2s linear infinite;
+  background: color-mix(in srgb, var(--filetto) 35%, transparent);
 }
-@keyframes barra-scorre { to { background-position: -200% 0; } }
+.barra-aggiornamento::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--avanzamento, 4%);
+  background: linear-gradient(90deg, var(--accento), var(--accento-vivo));
+  border-radius: 0 999px 999px 0;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accento) 55%, transparent);
+  transition: width 600ms ease;
+}
+.barra-aggiornamento.indeterminata::before {
+  width: 100%;
+  animation: barra-respiro 1.6s ease-in-out infinite;
+}
+@keyframes barra-respiro {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-aggiornamento::before { transition: none; }
+  .barra-aggiornamento.indeterminata::before { animation: none; opacity: 0.7; }
+}
 .aggiorna-form { display: inline; }
 .aggiorna-bottone {
   background: transparent;
@@ -880,3 +909,135 @@ html:has(body.pagina-lampo) {
   padding: 0;
 }
 .aggiorna-bottone:disabled { text-decoration: none; cursor: wait; opacity: 0.8; }
+
+
+/* ================= RIFINITURA: identità d'epoca, esecuzione morbida =========
+   Stessa carta, stessi caratteri, stesso accento — ma raggi, ombre,
+   transizioni e stati curati: l'app deve sembrare stampata BENE. */
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+::selection { background: color-mix(in srgb, var(--accento) 30%, transparent); }
+
+a, button, input, select, summary {
+  transition: color var(--transizione), background-color var(--transizione),
+              border-color var(--transizione), box-shadow var(--transizione),
+              transform var(--transizione), opacity var(--transizione);
+}
+
+/* Comparsa discreta del contenuto (mai con reduced-motion). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes comparsa {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .contenuto { animation: comparsa 320ms ease both; }
+}
+
+/* Navigazione: aree di clic generose e stati visibili. */
+.masthead-nav a {
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--raggio-s);
+}
+.masthead-nav a:hover { background: var(--carta-scura); color: var(--accento); }
+.tema-toggle { border-radius: 999px; padding: 0.15rem 0.7rem; }
+.lingue a { padding: 0.1rem 0.25rem; border-radius: 4px; }
+.lingue a:hover { background: var(--carta-scura); }
+.lingue .lingua-attiva { border-bottom-width: 0; background: var(--carta-scura); }
+
+/* Filtro paesi: chip, con lo stato attivo pieno. */
+.filtro-paesi a {
+  border: 1px solid var(--filetto);
+  border-radius: 999px;
+  padding: 0.18rem 0.7rem;
+}
+.filtro-paesi a:hover {
+  border-color: var(--accento);
+  background: var(--carta-scura);
+  transform: translateY(-1px);
+}
+.filtro-paesi .paese-attivo {
+  background: var(--accento);
+  border-color: var(--accento);
+  color: var(--carta);
+}
+.filtro-paesi .paese-attivo:hover { color: var(--carta); }
+
+/* Card: contenimento morbido e sollevamento al passaggio. */
+.versione-card,
+.reel-versione,
+.riassunto-neutro,
+.scheda-archivio,
+.avviso-cieco,
+.banner-demo,
+.avviso-disabilitata,
+.llm-stato,
+.diagnostica-log {
+  border-radius: var(--raggio);
+}
+.versione-card, .reel-versione { box-shadow: var(--ombra); }
+.versione-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ombra-alta);
+  border-color: color-mix(in srgb, var(--accento) 45%, var(--filetto));
+}
+@media (prefers-reduced-motion: reduce) {
+  .versione-card:hover { transform: none; }
+}
+.versione-immagine { border-radius: var(--raggio-s); filter: sepia(0.15); }
+
+/* Bottoni: pieni di carta, vivi al tocco. */
+.bottone {
+  border-radius: var(--raggio-s);
+  background: var(--carta);
+  box-shadow: var(--ombra);
+}
+.bottone:hover {
+  background: var(--accento);
+  color: var(--carta);
+  transform: translateY(-1px);
+  box-shadow: var(--ombra-alta);
+}
+.bottone:active { transform: translateY(0); box-shadow: var(--ombra); }
+.aggiorna-bottone { border-radius: 999px; padding: 0.05rem 0.5rem; }
+.aggiorna-bottone:hover { background: var(--carta-scura); text-decoration: none; }
+
+/* Campi del pannello: coerenti in entrambe le edizioni, focus evidente. */
+input[type="text"], input[type="number"], input[type="password"], select, textarea {
+  font: inherit;
+  color: var(--inchiostro);
+  background: var(--carta);
+  border: 1px solid var(--filetto);
+  border-radius: var(--raggio-s);
+  padding: 0.45rem 0.6rem;
+  max-width: 100%;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  border-color: var(--accento);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accento) 25%, transparent);
+}
+
+/* Badge: pastiglie piccole e quiete. */
+.badge {
+  border-radius: 999px;
+  padding: 0.05em 0.55em;
+  background: color-mix(in srgb, currentcolor 10%, transparent);
+}
+
+/* Tabelle e cronologie: righe che rispondono. */
+.tabella-archivio tbody tr:hover td { background: var(--carta-scura); }
+.story-versioni li, .storia-timeline li { transition: background-color var(--transizione); }
+.story-versioni li:hover, .storia-timeline li:hover { background: var(--carta-scura); }
+
+/* Barra di scorrimento discreta (dove supportata). */
+* { scrollbar-width: thin; scrollbar-color: var(--filetto) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--filetto);
+  border-radius: 999px;
+  border: 3px solid var(--carta);
+}
+*::-webkit-scrollbar-track { background: transparent; }

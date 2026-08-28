@@ -180,13 +180,13 @@ async def test_aggiorna_ora_in_sottofondo(
     resp = await client.post("/aggiorna", follow_redirects=False)
     assert resp.status_code == 303
     stato = await client.get("/api/aggiornamento")
-    assert stato.json() == {"in_corso": True}
+    assert stato.json()["in_corso"] is True
     # Un secondo clic durante il giro non ne avvia un altro.
     await client.post("/aggiorna", follow_redirects=False)
     await asyncio.sleep(0.3)
     assert girati == ["via"]
     stato = await client.get("/api/aggiornamento")
-    assert stato.json() == {"in_corso": False}
+    assert stato.json()["in_corso"] is False
 
 
 async def test_aggiorna_negato_senza_permessi(client: AsyncClient, monkeypatch) -> None:
@@ -209,3 +209,27 @@ def test_tracking_dei_cicli() -> None:
     asyncio.run(giro())
     assert not refresh_state.is_running()
     assert refresh_state.LAST_RUNS["prova"]["esito"] == "ok"
+
+
+def test_percentuale_di_avanzamento_reale() -> None:
+    """La barra mostra un avanzamento VERO: feed contati, fasi pesate nel
+    giro manuale, mai salti all'indietro tra una fase e l'altra."""
+    import asyncio
+
+    from core import refresh_state as rs
+
+    async def scenario() -> None:
+        rs.begin_manual()
+        async with rs.tracking("feed"):
+            rs.set_progress("feed", 66, 132)
+            percento, fase = rs.overall()
+            assert fase == "feed"
+            assert 25 <= (percento or 0) <= 30  # metà del peso 0.55
+        # feed completato: la base sale al 55% e non torna più indietro.
+        async with rs.tracking("GDELT"):
+            rs.set_progress("GDELT", 0, 20)
+            percento, _ = rs.overall()
+            assert (percento or 0) >= 55
+        rs.end_manual()
+
+    asyncio.run(scenario())

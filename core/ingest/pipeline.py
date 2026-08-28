@@ -117,7 +117,12 @@ async def ingest_all_feeds(
 
     lock = db_lock or asyncio.Lock()
     created: dict[str, int] = {}
-    for task in asyncio.as_completed([run(*job) for job in jobs]):
+    from core import refresh_state
+
+    refresh_state.set_progress("feed", 0, len(jobs))
+    for fatti, task in enumerate(
+        asyncio.as_completed([run(*job) for job in jobs]), start=1
+    ):
         src, url, fetch = await task
         async with lock, maker() as session:
             merged = await session.get(Source, src.id)
@@ -125,6 +130,7 @@ async def ingest_all_feeds(
             stats = await store_feed(session, merged, url, fetch)
             await session.commit()
         created[src.slug] = created.get(src.slug, 0) + stats.created
+        refresh_state.set_progress("feed", fatti, len(jobs))
         if progress is not None:
             progress(src.slug, url, stats)
     return created
@@ -211,7 +217,10 @@ async def ingest_gdelt_all(
         (gruppi falliti, interruttore scattato)."""
         falliti: list[list[Source]] = []
         consecutivi = 0
+        from core import refresh_state as _rs
+
         for i, gruppo in enumerate(gruppi):
+            _rs.set_progress("GDELT", i, len(gruppi))
             if consecutivi >= 2:
                 log.warning(
                     "GDELT non risponde alla connessione: salto i %d gruppi "
@@ -231,6 +240,9 @@ async def ingest_gdelt_all(
         return falliti, False
 
     gruppi = [[s] for s in solo] + _chunk(complement, batch_size)
+    from core import refresh_state
+
+    refresh_state.set_progress("GDELT", 0, len(gruppi))
     falliti, saltato = await run_groups(gruppi)
     if falliti and not saltato:
         log.info("GDELT: secondo passaggio su %d gruppi falliti", len(falliti))

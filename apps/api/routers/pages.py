@@ -137,6 +137,7 @@ async def _giro_di_aggiornamento() -> None:
     from apps.worker.jobs.analyze import cluster_job
     from apps.worker.jobs.ingest import ingest_feeds_job, ingest_gdelt_job
 
+    refresh_state.begin_manual()
     try:
         await ingest_feeds_job()
         await ingest_gdelt_job()
@@ -145,6 +146,7 @@ async def _giro_di_aggiornamento() -> None:
     except Exception:
         log.exception("aggiornamento su richiesta fallito")
     finally:
+        refresh_state.end_manual()
         _aggiornamento["in_corso"] = False
         _aggiornamento["task"] = None
 
@@ -172,9 +174,14 @@ async def aggiorna_ora(
 
 
 @router.get("/api/aggiornamento")
-async def stato_aggiornamento() -> dict[str, bool]:
-    """Per il client: la barra compare quando QUALSIASI ciclo lavora."""
-    return {"in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running()}
+async def stato_aggiornamento() -> dict[str, object]:
+    """Per il client: barra col progresso VERO (feed e gruppi contati)."""
+    percento, fase = refresh_state.overall()
+    return {
+        "in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running(),
+        "percento": percento,
+        "fase": fase,
+    }
 
 
 @router.get("/lingua/{code}")

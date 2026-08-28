@@ -266,3 +266,27 @@ pannello), documentate su /metodo.
 la significatività: sparisce il rumore. Il badge torna a voler dire
 qualcosa: "questa assenza non è spiegabile col caso". Il segnale per-fonte
 (confronto coi pari dello stesso paese) resta invariato.
+
+## ADR-0021 — Rifinitura dell'interfaccia: identità d'epoca, esecuzione moderna
+
+**Contesto.** L'estetica da quotidiano d'inizio Novecento è identità del
+progetto (ADR di fase 5), ma l'esecuzione — filetti duri ovunque, nessuna
+transizione, controlli nativi spogli, barra di avanzamento a bande —
+faceva percepire l'app «vecchia e macchinosa».
+
+**Decisione.** Si conserva l'identità (carta, Playfair/EB Garamond,
+accento bronzo, filetti) e si ammoderna l'esecuzione con un layer di
+token condivisi: raggi (10/6px), ombre morbide a due livelli, transizioni
+160ms su colori/bordi/ombre/trasformazioni, chip per il filtro paesi
+(stato attivo pieno), card con sollevamento al passaggio, campi modulo
+coerenti con focus ring, badge a pastiglia, comparsa discreta del
+contenuto e scorrimento fluido — tutto dietro `prefers-reduced-motion`.
+La barra di aggiornamento mostra l'avanzamento REALE (feed e gruppi GDELT
+contati; nel giro manuale le tre fasi sono pesate 55/35/10 così la barra
+non torna mai indietro) con percentuale sull'etichetta del pulsante;
+quando il progresso non è stimabile, un respiro di opacità sostituisce le
+bande.
+
+**Conseguenze.** Stessa carta, letta meglio: nessun cambio di palette o
+tipografia, quindi nessun impatto su contrasti già verificati; i token
+rendono coerente ogni componente futuro.

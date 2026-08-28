@@ -61,7 +61,9 @@
     · <a href="/metodo">{{ t('masthead.metodo_v', v=method_version) }}</a>
     {% if personal_mode or (current_user and current_user.is_admin) %}
     · <form method="post" action="/aggiorna" class="aggiorna-form" data-aggiorna-form>
-        <button type="submit" class="aggiorna-bottone"{% if aggiornamento_in_corso %} disabled{% endif %}>
+        <button type="submit" class="aggiorna-bottone"
+                data-riposo="{{ t('nav.aggiorna') }}" data-attendi="{{ t('nav.aggiornando') }}"
+                {% if aggiornamento_in_corso %} disabled{% endif %}>
           {{ t('nav.aggiornando') if aggiornamento_in_corso else t('nav.aggiorna') }}
         </button>
       </form>

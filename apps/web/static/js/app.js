@@ -117,21 +117,42 @@
       });
     }
     var eraInCorso = !barra.hidden;
+    var bottoneAgg = document.querySelector(".aggiorna-bottone");
+    var etichettaAgg = bottoneAgg ? bottoneAgg.textContent : "";
+    function applicaStato(stato) {
+      barra.hidden = !stato.in_corso;
+      if (stato.in_corso) {
+        if (typeof stato.percento === "number") {
+          barra.classList.remove("indeterminata");
+          barra.style.setProperty("--avanzamento", stato.percento + "%");
+        } else {
+          barra.classList.add("indeterminata");
+          barra.style.setProperty("--avanzamento", "100%");
+        }
+        if (bottoneAgg) {
+          bottoneAgg.disabled = true;
+          bottoneAgg.textContent =
+            (bottoneAgg.getAttribute("data-attendi") || "…") +
+            (typeof stato.percento === "number" ? " " + stato.percento + "%" : "");
+        }
+      } else if (bottoneAgg) {
+        bottoneAgg.disabled = false;
+        bottoneAgg.textContent = bottoneAgg.getAttribute("data-riposo") || etichettaAgg;
+      }
+      var richiesto = false;
+      try { richiesto = sessionStorage.getItem(FLAG) === "1"; } catch (e) { /* niente */ }
+      if (eraInCorso && !stato.in_corso && richiesto) {
+        try { sessionStorage.removeItem(FLAG); } catch (e) { /* niente */ }
+        location.reload();
+      }
+      eraInCorso = stato.in_corso;
+    }
     setInterval(function () {
       if (document.hidden) return;
       fetch("/api/aggiornamento").then(function (r) { return r.json(); })
-        .then(function (stato) {
-          barra.hidden = !stato.in_corso;
-          var richiesto = false;
-          try { richiesto = sessionStorage.getItem(FLAG) === "1"; } catch (e) { /* niente */ }
-          if (eraInCorso && !stato.in_corso && richiesto) {
-            try { sessionStorage.removeItem(FLAG); } catch (e) { /* niente */ }
-            location.reload();
-          }
-          eraInCorso = stato.in_corso;
-        })
+        .then(applicaStato)
         .catch(function () { /* server in riavvio: si riprova al giro dopo */ });
-    }, 5000);
+    }, 3000);
   }
 
   // I link alle testate escono dall'app: si aprono nel browser (nuova
