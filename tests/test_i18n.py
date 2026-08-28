@@ -134,3 +134,22 @@ async def test_date_localizzate(client: AsyncClient) -> None:
     assert data_in_lettere(dt, "de") == "Donnerstag, 27. August 2026"
     assert data_in_lettere(dt, "fr") == "Jeudi 27 août 2026"
     assert data_in_lettere(dt, "es") == "Jueves 27 agosto 2026"
+
+
+def test_lingue_usate_hanno_priorita() -> None:
+    """Il job di traduzione serve prima le lingue davvero guardate."""
+    from core import i18n
+
+    i18n._LOCALE_USES.clear()
+    try:
+        # Nessun uso registrato: ordine di default (italiano per primo).
+        assert i18n.locales_by_priority() == i18n.SUPPORTED_LOCALES
+        i18n.note_locale_use("de")
+        i18n.note_locale_use("es")
+        prime = i18n.locales_by_priority()[:2]
+        assert prime == ("es", "de")  # le usate, dalla più recente
+        assert set(i18n.locales_by_priority()) == set(i18n.SUPPORTED_LOCALES)
+        i18n.note_locale_use("xx")  # lingua ignota: ignorata
+        assert "xx" not in i18n.locales_by_priority()
+    finally:
+        i18n._LOCALE_USES.clear()

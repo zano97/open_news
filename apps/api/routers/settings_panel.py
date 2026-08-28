@@ -103,13 +103,16 @@ def _diagnostics() -> dict[str, object]:
         from apps.launcher import home_dir
 
         log_file = str(home_dir() / "opennews.log")
-    from core.nlp.translate import get_translator
+    from core.nlp.translate import get_translator, riepilogo_esiti
     from core.refresh_state import LAST_RUNS
 
     traduttore = get_translator()
+    esiti = riepilogo_esiti()
     return {
         "trad_argos": traduttore is not None,
         "trad_coppie": len(traduttore.available_pairs()) if traduttore else 0,
+        "trad_esiti": esiti["conteggi"],
+        "trad_coppie_ferme": esiti["coppie_ferme"],
         "cicli": dict(LAST_RUNS),
         "log_records": recent(limit=60),
         "log_file": log_file,

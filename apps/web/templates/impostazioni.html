@@ -91,6 +91,14 @@
     {% endif %}
     <p class="fonte-meta">{{ t('imp.diag_traduzioni') }}
       {% if trad_argos %}{{ t('imp.diag_argos_ok', n=trad_coppie) }}{% else %}{{ t('imp.diag_argos_no') }}{% endif %}</p>
+    {% if trad_esiti %}
+    <p class="fonte-meta">{{ t('imp.diag_trad_esiti') }}
+      {% for esito, n in trad_esiti.items() %}{{ esito }}: {{ n }}{{ " · " if not loop.last }}{% endfor %}</p>
+    {% endif %}
+    {% if trad_coppie_ferme %}
+    <p class="fonte-meta">{{ t('imp.diag_trad_ferme') }}
+      {% for coppia, motivo in trad_coppie_ferme.items() %}{{ coppia }} ({{ motivo }}){{ " · " if not loop.last }}{% endfor %}</p>
+    {% endif %}
     {% if cicli %}
     <p class="fonte-meta">{{ t('imp.diag_cicli') }}
       {% for nome, info in cicli.items() %}{{ nome }}: {{ info.quando }} ({{ info.esito }}, {{ info.durata }}){{ " · " if not loop.last }}{% endfor %}

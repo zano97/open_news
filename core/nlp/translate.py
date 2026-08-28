@@ -13,6 +13,8 @@ Regole:
 
 import logging
 import re
+import time
+from collections import deque
 from collections.abc import Iterable
 from typing import Protocol
 
@@ -25,6 +27,39 @@ from core.provenance import record
 log = logging.getLogger(__name__)
 
 METHOD_NAME = "argos-translate-v1"
+
+# L'indice dei modelli Argos si riscarica al più una volta l'ora; una coppia
+# senza modello va in pausa per ore invece di riscaricare l'indice a ogni
+# giro: erano QUESTI tentativi a mangiarsi il tempo del job di traduzione.
+INDEX_TTL_SECONDS = 3600.0
+PAIR_RETRY_COOLDOWN_SECONDS = 6 * 3600.0
+
+# Esiti recenti delle traduzioni, per la Diagnostica: se un titolo resta
+# non tradotto, qui si legge il PERCHÉ (coppia mancante, testo identico…).
+LAST_ESITI: deque[dict[str, object]] = deque(maxlen=60)
+
+
+def _registra_esito(story_id: int | None, source: str, target: str, esito: str) -> None:
+    LAST_ESITI.appendleft(
+        {
+            "quando": time.time(),
+            "story_id": story_id,
+            "coppia": f"{source}→{target}",
+            "esito": esito,
+        }
+    )
+
+
+def riepilogo_esiti() -> dict[str, object]:
+    """Sintesi per il pannello Diagnostica: conteggi per esito e coppie ferme."""
+    conteggi: dict[str, int] = {}
+    coppie_ferme: dict[str, str] = {}
+    for riga in LAST_ESITI:
+        esito = str(riga["esito"])
+        conteggi[esito] = conteggi.get(esito, 0) + 1
+        if esito != "ok":
+            coppie_ferme.setdefault(str(riga["coppia"]), esito)
+    return {"conteggi": conteggi, "coppie_ferme": coppie_ferme}
 
 
 class Translator(Protocol):
@@ -48,6 +83,12 @@ class ArgosTranslator:  # pragma: no cover - richiede l'extra [translate] e i mo
         for lang in self._module.get_installed_languages():
             for other in lang.translations_to:
                 self._pairs.add((lang.code, other.to_lang.code))
+        # Anti-spreco: l'indice si riscarica al più ogni INDEX_TTL_SECONDS,
+        # una coppia fallita non si ritenta prima del cooldown. Prima di
+        # queste due guardie, OGNI titolo con coppia mancante riscaricava
+        # l'indice via rete a ogni giro, e il job non finiva mai il lavoro.
+        self._indice_al: float | None = None
+        self._coppie_negate: dict[tuple[str, str], float] = {}
 
     def available_pairs(self) -> set[tuple[str, str]]:
         return self._pairs
@@ -61,7 +102,14 @@ class ArgosTranslator:  # pragma: no cover - richiede l'extra [translate] e i mo
         try:
             import argostranslate.package  # type: ignore[import-not-found]
 
-            argostranslate.package.update_package_index()
+            if (
+                self._indice_al is None
+                or time.monotonic() - self._indice_al >= INDEX_TTL_SECONDS
+            ):
+                # Si segna il TENTATIVO (non il successo): anche un indice
+                # irraggiungibile non va rimartellato per un'ora.
+                self._indice_al = time.monotonic()
+                argostranslate.package.update_package_index()
             for pkg in argostranslate.package.get_available_packages():
                 if pkg.from_code == source and pkg.to_code == target:
                     log.info("scarico il modello di traduzione %s→%s", source, target)
@@ -76,6 +124,11 @@ class ArgosTranslator:  # pragma: no cover - richiede l'extra [translate] e i mo
         """Garantisce la coppia, direttamente o con perno sull'inglese."""
         if (source, target) in self._pairs:
             return True
+        negata = self._coppie_negate.get((source, target))
+        if negata is not None:
+            if time.monotonic() - negata < PAIR_RETRY_COOLDOWN_SECONDS:
+                return False
+            del self._coppie_negate[(source, target)]
         if self._install_pair(source, target):
             return True
         # Perno: source→en + en→target (Argos concatena da solo).
@@ -84,12 +137,17 @@ class ArgosTranslator:  # pragma: no cover - richiede l'extra [translate] e i mo
         if ok_a and ok_b:
             self._pairs.add((source, target))
             return True
+        self._coppie_negate[(source, target)] = time.monotonic()
         return False
 
     def translate(self, text: str, source: str, target: str) -> str | None:
         if (source, target) not in self._pairs and not self.ensure_pair(source, target):
             return None
-        result = str(self._module.translate(text, source, target)).strip()
+        try:
+            result = str(self._module.translate(text, source, target)).strip()
+        except Exception as exc:  # un testo indigesto non deve fermare il giro
+            log.warning("traduzione %s→%s fallita: %s", source, target, exc)
+            return None
         return result or None
 
 
@@ -121,11 +179,29 @@ def set_translator(translator: Translator | None) -> None:
 
 
 def story_language(story: Story) -> str | None:
-    """Lingua del titolo neutro = lingua dominante degli articoli del cluster."""
+    """Lingua dominante degli articoli del cluster."""
     languages = [a.language for a in story.articles if a.language]
     if not languages:
         return None
     return max(set(languages), key=languages.count)
+
+
+def neutral_title_language(story: Story) -> str | None:
+    """Lingua del TITOLO NEUTRO: quella dell'articolo che l'ha fornito.
+
+    Non è detto che coincida con la lingua dominante del cluster (un titolo
+    inglese può guidare una story per lo più italiana): tradurre con la
+    lingua sorgente sbagliata produce testi identici o senza senso, che
+    venivano scartati — ed era uno dei motivi dei titoli mai tradotti.
+    """
+    return next(
+        (
+            a.language
+            for a in (story.articles or [])
+            if a.language and a.title == story.title_neutral
+        ),
+        None,
+    ) or story_language(story)
 
 
 async def translate_story_title(
@@ -139,11 +215,14 @@ async def translate_story_title(
 
     Il motore è SOLO Argos (offline; scarica da sé le coppie che servono):
     il generatore LLM resta riservato ai riassunti, per scelta esplicita.
+    Una traduzione che torna IDENTICA all'originale (nomi propri, coppia
+    che non morde) si registra come stringa vuota: la UI mostra l'originale
+    e il giro successivo non riprova all'infinito lo stesso testo.
     """
     translator = translator or get_translator()
     if translator is None:
         return 0
-    source = story_language(story)
+    source = neutral_title_language(story)
     if source is None:
         return 0
     translations = dict(story.title_translations or {})
@@ -158,10 +237,17 @@ async def translate_story_title(
         translated = await asyncio.to_thread(
             translator.translate, story.title_neutral, source, target
         )
-        if not translated or translated.strip() == story.title_neutral.strip():
+        if not translated:
+            _registra_esito(story.id, source, target, "coppia non disponibile")
+            continue
+        if translated.strip() == story.title_neutral.strip():
+            translations[target] = ""  # sentinella: tentata, uscita identica
+            added += 1
+            _registra_esito(story.id, source, target, "identica all'originale")
             continue
         translations[target] = translated
         added += 1
+        _registra_esito(story.id, source, target, "ok")
     if added:
         story.title_translations = translations
         metodo = translator.name
@@ -228,9 +314,7 @@ def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
     Richiede story.articles già caricati (le pagine che la usano li hanno).
     """
     articles = list(story.articles or [])
-    neutral_language = next(
-        (a.language for a in articles if a.title == story.title_neutral), None
-    ) or story_language(story)
+    neutral_language = neutral_title_language(story)
     if neutral_language == locale:
         return None
     translations = story.title_translations or {}

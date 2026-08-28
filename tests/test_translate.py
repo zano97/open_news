@@ -286,3 +286,109 @@ def test_sottotitolo_mai_di_unaltra_notizia() -> None:
     assert headline_subtitle(story, "it") == (
         "Trump alza le quote di import di carne bovina negli USA", False
     )
+
+
+class TraduttoreRegistratore:
+    """Backend di prova che registra le chiamate (per contarle e ispezionarle)."""
+
+    name = "registratore-v1"
+
+    def __init__(self, esiti: dict[tuple[str, str], str | None]) -> None:
+        self.esiti = esiti
+        self.chiamate: list[tuple[str, str, str]] = []
+
+    def available_pairs(self) -> set[tuple[str, str]]:
+        return set(self.esiti)
+
+    def translate(self, text: str, source: str, target: str) -> str | None:
+        self.chiamate.append((text, source, target))
+        return self.esiti.get((source, target))
+
+
+async def test_lingua_sorgente_e_quella_del_titolo_neutro(
+    session: AsyncSession,
+) -> None:
+    """Cluster a maggioranza italiana ma titolo neutro INGLESE: la sorgente
+    giusta è l'inglese. Con quella sbagliata Argos restituiva testi identici
+    o senza senso, scartati — e il titolo restava per sempre non tradotto."""
+    from core.nlp.translate import neutral_title_language
+
+    fonti = []
+    for i, lingua in enumerate(["it", "it", "en"]):
+        f = Source(
+            slug=f"src-{i}", name=f"S{i}", domain=f"s{i}.test", country=lingua,
+            language=lingua, region="world", feed_urls=[], terms_note="",
+        )
+        session.add(f)
+        fonti.append(f)
+    await session.flush()
+    story = Story(
+        title_neutral="Government approves the pension reform",
+        first_seen=ORA, last_seen=ORA, article_count=3, source_count=3,
+    )
+    session.add(story)
+    await session.flush()
+    titoli = [
+        ("Il governo approva la riforma", "it"),
+        ("Pensioni, arriva la riforma", "it"),
+        ("Government approves the pension reform", "en"),
+    ]
+    for i, (titolo, lingua) in enumerate(titoli):
+        session.add(
+            Article(
+                source_id=fonti[i].id, url=f"https://s{i}.test/a",
+                title=titolo, language=lingua, story_id=story.id,
+            )
+        )
+    await session.flush()
+    await session.refresh(story)
+
+    assert neutral_title_language(story) == "en"
+
+    finto = TraduttoreRegistratore({("en", "it"): "Il governo approva la riforma"})
+    added = await translate_story_title(
+        session, story, targets=("it",), translator=finto
+    )
+    assert added == 1
+    assert story.title_translations["it"] == "Il governo approva la riforma"
+    assert finto.chiamate[0][1:] == ("en", "it")
+
+
+async def test_traduzione_identica_non_si_ritenta_per_sempre(
+    session: AsyncSession,
+) -> None:
+    """Se Argos restituisce il testo uguale (nomi propri, coppia che non
+    morde), si registra la sentinella vuota: la UI mostra l'originale e il
+    giro dopo NON riprova lo stesso testo all'infinito."""
+    story = await _story_italiana(session)
+    finto = TraduttoreRegistratore({("it", "en"): story.title_neutral})
+    added = await translate_story_title(
+        session, story, targets=("en",), translator=finto
+    )
+    assert added == 1
+    assert story.title_translations["en"] == ""  # sentinella
+    assert display_title(story, "en") == (story.title_neutral, False)
+
+    # Secondo giro: nessuna nuova chiamata al traduttore.
+    prima = len(finto.chiamate)
+    assert await translate_story_title(
+        session, story, targets=("en",), translator=finto
+    ) == 0
+    assert len(finto.chiamate) == prima
+
+
+async def test_coppia_mancante_registrata_negli_esiti(
+    session: AsyncSession,
+) -> None:
+    from core.nlp.translate import LAST_ESITI, riepilogo_esiti
+
+    LAST_ESITI.clear()
+    story = await _story_italiana(session)
+    finto = TraduttoreRegistratore({})  # nessuna coppia disponibile
+    assert await translate_story_title(
+        session, story, targets=("en",), translator=finto
+    ) == 0
+    riepilogo = riepilogo_esiti()
+    assert riepilogo["conteggi"] == {"coppia non disponibile": 1}
+    assert riepilogo["coppie_ferme"] == {"it→en": "coppia non disponibile"}
+    LAST_ESITI.clear()

@@ -63,9 +63,14 @@ def topic_labels_for(locale: str) -> dict[str, str]:
 
 def request_locale(request: Request) -> str:
     """Lingua della richiesta: ?lang=xx > cookie > default (deterministico)."""
-    return resolve_locale(
+    locale = resolve_locale(
         request.query_params.get("lang"), request.cookies.get(LOCALE_COOKIE)
     )
+    # Il job di traduzione dei titoli dà precedenza alle lingue davvero usate.
+    from core.i18n import note_locale_use
+
+    note_locale_use(locale)
+    return locale
 
 
 async def _session_user(

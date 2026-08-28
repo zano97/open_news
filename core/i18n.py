@@ -12,6 +12,7 @@ niente auto-rilevamento dall'Accept-Language: comportamento deterministico,
 documentato in ADR-0016.
 """
 
+import time
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
@@ -86,3 +87,26 @@ def resolve_locale(query_value: str | None, cookie_value: str | None) -> str:
 def reset_cache() -> None:
     """Per i test e per ricaricare i cataloghi modificati."""
     catalog.cache_clear()
+
+
+# Lingue davvero usate dal lettore (ultimo uso, epoch). Serve al job di
+# traduzione dei titoli: prima le lingue che qualcuno sta guardando, il
+# resto quando avanza tempo. Solo in memoria: al riavvio si riparte dal
+# default, e il primo caricamento di pagina ripopola.
+_LOCALE_USES: dict[str, float] = {}
+
+
+def note_locale_use(locale: str) -> None:
+    if locale in SUPPORTED_LOCALES:
+        _LOCALE_USES[locale] = time.time()
+
+
+def locales_by_priority(days: int = 7) -> tuple[str, ...]:
+    """Le lingue dell'interfaccia usate negli ultimi `days` giorni per prime
+    (dalla più recente), poi le altre nell'ordine di ``SUPPORTED_LOCALES``."""
+    cutoff = time.time() - days * 86400
+    usate = sorted(
+        (code for code, quando in _LOCALE_USES.items() if quando >= cutoff),
+        key=lambda code: -_LOCALE_USES[code],
+    )
+    return tuple(usate + [c for c in SUPPORTED_LOCALES if c not in usate])

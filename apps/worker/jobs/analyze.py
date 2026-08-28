@@ -111,13 +111,18 @@ async def refresh_settings_job() -> None:
 
 
 async def translate_titles_job() -> None:
-    """Traduce i titoli neutri delle story recenti, in TUTTE le lingue UI.
+    """Traduce i titoli neutri delle story recenti, prima nelle lingue USATE.
 
     Solo Argos (offline; scarica da sé le coppie mancanti): il generatore
-    LLM resta riservato ai riassunti, per scelta esplicita.
+    LLM resta riservato ai riassunti, per scelta esplicita. Le lingue che
+    il lettore sta davvero guardando passano davanti; un errore su una
+    story non ferma le altre; un budget di tempo garantisce che il giro
+    finisca prima del successivo (ogni 15 minuti).
     """
+    import time
     from datetime import timedelta
 
+    from core.i18n import locales_by_priority
     from core.models import utcnow
     from core.nlp.translate import get_translator, translate_story_title
     from core.refresh_state import tracking
@@ -126,6 +131,7 @@ async def translate_titles_job() -> None:
         return
     maker = get_sessionmaker()
     since = utcnow() - timedelta(hours=72)
+    scadenza = time.monotonic() + 480  # 8 minuti: mai oltre il giro dopo
     async with tracking("traduzioni"), maker() as session:
         stories = (
             (
@@ -133,7 +139,7 @@ async def translate_titles_job() -> None:
                     select(Story)
                     .where(Story.last_seen >= since)
                     .order_by(Story.last_seen.desc())
-                    .limit(40)
+                    .limit(80)
                 )
             )
             .scalars()
@@ -141,13 +147,17 @@ async def translate_titles_job() -> None:
         )
         from core import refresh_state
 
+        targets = locales_by_priority()
         added = 0
         refresh_state.set_progress("traduzioni", 0, len(stories))
         for indice, story in enumerate(stories, start=1):
-            added += await translate_story_title(session, story)
-            refresh_state.set_progress("traduzioni", indice, len(stories))
-            if added >= 60:  # il resto al prossimo giro (ogni 15 minuti)
+            if time.monotonic() > scadenza:
                 break
+            try:
+                added += await translate_story_title(session, story, targets=targets)
+            except Exception as exc:  # una story indigesta non ferma il giro
+                log.warning("titolo della story %s non tradotto: %s", story.id, exc)
+            refresh_state.set_progress("traduzioni", indice, len(stories))
         await session.commit()
     if added:
         log.info("titoli neutri tradotti: %d", added)
