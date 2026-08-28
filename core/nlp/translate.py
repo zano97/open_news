@@ -12,6 +12,7 @@ Regole:
 """
 
 import logging
+import re
 from collections.abc import Iterable
 from typing import Protocol
 
@@ -185,6 +186,33 @@ def display_title(story: Story, locale: str) -> tuple[str, bool]:
     return story.title_neutral, False
 
 
+_PAROLA_RE = re.compile(r"\w+", re.UNICODE)
+_ANNO_RE = re.compile(r"^(19|20)\d\d$")
+
+
+def _parole_forti(testo: str) -> set[str]:
+    """Nomi propri e numeri di un titolo: sopravvivono alla traduzione.
+
+    Sono l'aggancio con cui verificare che due titoli in lingue diverse
+    parlino della stessa notizia. Gli anni (2026…) sono esclusi: compaiono
+    in titoli di notizie qualsiasi e aggancerebbero tutto con tutto.
+    """
+    return {
+        t.lower()
+        for t in _PAROLA_RE.findall(testo)
+        if (t[:1].isupper() and len(t) >= 4)
+        or (t.isdigit() and len(t) >= 2 and not _ANNO_RE.match(t))
+    }
+
+
+def _stessa_notizia(a: set[str], b: set[str]) -> bool:
+    """Vero se due insiemi di parole forti condividono un aggancio.
+
+    Basta un prefisso comune di 4 caratteri: cattura anche i cognati tra
+    lingue vicine ("Governo"/"Government", "pensioni"/"pension")."""
+    return any(x[:4] == y[:4] for x in a for y in b)
+
+
 def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
     """Riga tra parentesi SOTTO il titolo: il senso nella lingua del lettore.
 
@@ -192,7 +220,10 @@ def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
     lingua dell'interfaccia, sotto compare tra parentesi: la traduzione
     automatica se esiste (marcata), altrimenti il titolo di una versione
     nella lingua del lettore (la prima pubblicata: è la formulazione di una
-    testata, elencata comunque tra le versioni). Nessuna delle due → None.
+    testata, elencata comunque tra le versioni). La versione in lingua deve
+    però condividere col titolo neutro almeno un nome proprio o un numero:
+    un cluster può contenere un articolo fuori posto, e meglio nessun
+    sottotitolo che il titolo di un'ALTRA notizia. Nessuna delle due → None.
     Ritorna (testo, è_traduzione_automatica).
     Richiede story.articles già caricati (le pagine che la usano li hanno).
     """
@@ -218,7 +249,22 @@ def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
         and a.title
         and a.title != story.title_neutral
     ]
+    # Aggancio alla notizia: senza un nome proprio o numero in comune col
+    # titolo neutro, la "versione in lingua" potrebbe essere un articolo
+    # finito nel cluster per errore. (Se uno dei due titoli non ha parole
+    # forti non si può giudicare: si lascia passare.)
+    forti_titolo = _parole_forti(story.title_neutral)
+    if forti_titolo:
+        in_lingua = [
+            a
+            for a in in_lingua
+            if not (forti := _parole_forti(a.title))
+            or _stessa_notizia(forti, forti_titolo)
+        ]
     if in_lingua:
-        primo = min(in_lingua, key=lambda a: a.published_at or a.fetched_at)
+        # Meglio un titolo arrivato dal feed (con snippet): quelli via GDELT
+        # hanno apostrofi persi e punteggiatura ricomposta alla meno peggio.
+        puliti = [a for a in in_lingua if (a.snippet or "").strip()] or in_lingua
+        primo = min(puliti, key=lambda a: a.published_at or a.fetched_at)
         return primo.title, False
     return None

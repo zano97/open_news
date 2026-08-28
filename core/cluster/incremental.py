@@ -7,7 +7,9 @@ Metodo (documentato in docs/METHODOLOGY.md §2):
 - aggancio se similarità coseno >= `cluster_similarity_threshold`, soglia
   calibrata su data/seeds/calibration_pairs.yaml (scripts/calibrate_threshold.py);
 - centroide = media incrementale rinormalizzata; titolo neutro = titolo
-  dell'articolo più vicino al centroide (mai generato, salvo LLM esplicito);
+  dell'articolo più vicino al centroide (mai generato, salvo LLM esplicito),
+  preferendo gli articoli col titolo editoriale intatto (dal feed, con
+  snippet) a quelli via GDELT dai titoli ritokenizzati;
 - una story è "lampo" se raggiunge `flash_min_sources` testate entro
   `flash_window_hours` dalla prima apparizione (e lo resta).
 """
@@ -82,7 +84,14 @@ async def _refresh_counts(session: AsyncSession, story: Story) -> None:
 
 
 async def refresh_title_neutral(session: AsyncSession, story: Story) -> None:
-    """Titolo neutro = titolo dell'articolo più vicino al centroide del cluster."""
+    """Titolo neutro = titolo dell'articolo più vicino al centroide del cluster.
+
+    A parità di appartenenza al cluster si preferiscono gli articoli CON
+    snippet: sono quelli arrivati dal feed della testata, col titolo
+    editoriale intatto. Gli articoli via GDELT (senza snippet) hanno titoli
+    ritokenizzati — apostrofi persi, nomi di paese riscritti — e vincono
+    solo quando il cluster non ha di meglio.
+    """
     if story.centroid is None:
         return
     articles = (
@@ -98,7 +107,13 @@ async def refresh_title_neutral(session: AsyncSession, story: Story) -> None:
     )
     if not articles:
         return
-    best = max(articles, key=lambda a: cosine(a.embedding or [], story.centroid or []))
+    best = max(
+        articles,
+        key=lambda a: (
+            1 if (a.snippet or "").strip() else 0,
+            cosine(a.embedding or [], story.centroid or []),
+        ),
+    )
     story.title_neutral = best.title
     story.title_method = "centroide"
 

@@ -79,10 +79,33 @@ _SPAZI_PUNTEGGIATURA = re.compile(r"\s+([,.;:!?%)\]])")
 _PUNTEGGIATURA_APERTA = re.compile(r"([(\[])\s+")
 _BARRA = re.compile(r"(?<=\w)\s+/\s+(?=\w)")
 
+# GDELT sostituisce alcune menzioni di paesi con il nome inglese MINUSCOLO
+# anche dentro titoli non inglesi ("USA erhöhen…" → "united states erhöhen…").
+# L'originale non è recuperabile: si ripara con la forma compatta o con le
+# maiuscole. Solo forme multi-parola: mai legittime in minuscolo in un titolo.
+_PAESI_GDELT = {
+    "united states": "USA",
+    "united kingdom": "UK",
+    "united arab emirates": "United Arab Emirates",
+    "new zealand": "New Zealand",
+    "saudi arabia": "Saudi Arabia",
+    "south korea": "South Korea",
+    "north korea": "North Korea",
+    "south africa": "South Africa",
+    "czech republic": "Czech Republic",
+}
+# Case-sensitive di proposito: ripara solo il minuscolo artefatto, mai
+# un "United States" scritto così dalla testata.
+_PAESI_GDELT_RE = re.compile(
+    r"\b(" + "|".join(sorted(_PAESI_GDELT, key=len, reverse=True)) + r")\b"
+)
+
 
 def tidy_title(title: str) -> str:
-    """GDELT tokenizza i titoli ("9 / 11", "morta , addio"): si ricompone
-    la punteggiatura. Gli apostrofi persi alla fonte non sono recuperabili."""
+    """GDELT tokenizza i titoli ("9 / 11", "morta , addio") e riscrive i nomi
+    di paese in minuscolo: si ricompone la punteggiatura e si riparano i paesi.
+    Gli apostrofi persi alla fonte non sono recuperabili."""
+    title = _PAESI_GDELT_RE.sub(lambda m: _PAESI_GDELT[m.group(1)], title)
     title = _BARRA.sub("/", title)
     title = _SPAZI_PUNTEGGIATURA.sub(r"\1", title)
     title = _PUNTEGGIATURA_APERTA.sub(r"\1", title)

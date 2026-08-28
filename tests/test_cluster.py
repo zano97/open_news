@@ -48,13 +48,13 @@ async def _fonte(session: AsyncSession, slug: str, country: str = "it") -> Sourc
 
 async def _articolo(
     session: AsyncSession, fonte: Source, titolo: str, *,
-    quando: datetime = ORA, url_suffix: str = "",
+    quando: datetime = ORA, url_suffix: str = "", snippet: str = "",
 ) -> Article:
     articolo = Article(
         source_id=fonte.id,
         url=f"https://{fonte.domain}/{abs(hash(titolo + url_suffix))}",
         title=titolo,
-        snippet="",
+        snippet=snippet,
         published_at=quando,
         language="it",
     )
@@ -186,3 +186,25 @@ async def test_titolo_neutro_vicino_al_centroide(session: AsyncSession) -> None:
     prima_scelta = story.title_neutral
     await refresh_title_neutral(session, story)
     assert story.title_neutral == prima_scelta  # deterministico
+
+async def test_titolo_neutro_preferisce_articoli_dal_feed(
+    session: AsyncSession,
+) -> None:
+    """I titoli GDELT (senza snippet) sono ritokenizzati alla fonte: quando
+    il cluster ha anche UN titolo editoriale intatto (dal feed, con snippet),
+    è quello a diventare il titolo neutro, anche se non è il più centrale."""
+    for i, titolo in enumerate(TERREMOTO[:3]):
+        fonte = await _fonte(session, f"tf{i}")
+        await _articolo(session, fonte, titolo)  # snippet vuoto: stile GDELT
+    dal_feed = await _fonte(session, "tf-feed")
+    await _articolo(
+        session, dal_feed, TERREMOTO[3],
+        snippet="Scossa di magnitudo 5.4 avvertita nel centro Italia.",
+    )
+    await cluster_pending(session)
+    story = (await session.execute(select(Story))).scalar_one()
+    assert story.title_neutral == TERREMOTO[3]
+
+    # Senza titoli editoriali il più vicino al centroide resta la scelta.
+    await refresh_title_neutral(session, story)
+    assert story.title_neutral == TERREMOTO[3]  # stabile anche al refresh

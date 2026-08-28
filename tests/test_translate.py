@@ -152,8 +152,10 @@ def test_sottotitolo_nella_lingua_del_lettore() -> None:
 
     # Titolo già nella lingua del lettore: nessun sottotitolo.
     assert headline_subtitle(story, "it") is None
-    # Traduzione automatica assente: la versione IN LINGUA pubblicata prima.
-    assert headline_subtitle(story, "en") == ("Cabinet backs reform bill", False)
+    # Traduzione automatica assente: la versione IN LINGUA pubblicata prima
+    # TRA QUELLE AGGANCIATE alla notizia ("Governo"/"Government" condividono
+    # il prefisso; "Cabinet" no, e non è verificabile che sia la stessa).
+    assert headline_subtitle(story, "en") == ("Government passes the reform", False)
     # La traduzione automatica, quando esiste, vince ed è marcata.
     story.title_translations = {"en": "Government approves the reform"}
     assert headline_subtitle(story, "en") == ("Government approves the reform", True)
@@ -189,3 +191,98 @@ def test_sottotitolo_non_si_fida_della_sola_lingua_rilevata() -> None:
     story.articles = [inglese, nrk]
     assert headline_subtitle(story, "it") is None  # meglio niente che sbagliato
 
+
+def test_sottotitolo_preferisce_titoli_dal_feed() -> None:
+    """A parità di lingua, il sottotitolo evita i titoli GDELT (senza
+    snippet, apostrofi persi) se c'è una versione arrivata dal feed."""
+    from datetime import UTC, datetime
+
+    from core.models import Article, Source, Story
+    from core.nlp.translate import headline_subtitle
+
+    def fonte_it(slug: str) -> Source:
+        return Source(
+            slug=slug, name=slug, domain=f"{slug}.test", country="it",
+            language="it", region="italy", feed_urls=[], terms_note="",
+        )
+
+    story = Story(title_neutral="Japanese artist dies at 97", title_translations={})
+    via_gdelt = Article(
+        title="Lartista è morta , addio alla regina dei pois", language="it",
+        url="https://gd.test/1", snippet="",
+        published_at=datetime(2026, 8, 27, 8, tzinfo=UTC),
+    )
+    via_gdelt.source = fonte_it("gd")
+    dal_feed = Article(
+        title="L'artista è morta, addio alla regina dei pois", language="it",
+        url="https://feed.test/1", snippet="Il mondo dell'arte in lutto.",
+        published_at=datetime(2026, 8, 27, 9, tzinfo=UTC),
+    )
+    dal_feed.source = fonte_it("feed")
+    inglese = Article(
+        title="Japanese artist dies at 97", language="en",
+        url="https://en.test/1", snippet="x",
+        published_at=datetime(2026, 8, 27, 7, tzinfo=UTC),
+    )
+    inglese.source = Source(
+        slug="en", name="EN", domain="en.test", country="gb",
+        language="en", region="europe", feed_urls=[], terms_note="",
+    )
+    story.articles = [inglese, via_gdelt, dal_feed]
+
+    # Il titolo GDELT è più vecchio, ma vince la versione dal feed.
+    assert headline_subtitle(story, "it") == (
+        "L'artista è morta, addio alla regina dei pois", False
+    )
+
+def test_sottotitolo_mai_di_unaltra_notizia() -> None:
+    """Un articolo finito nel cluster per errore NON deve diventare il
+    sottotitolo: senza un nome proprio o numero in comune col titolo
+    neutro, meglio nessuna riga (il caso reale: un liveticker tedesco
+    sui dazi con sotto un titolo italiano sul caporalato a Milano)."""
+    from datetime import UTC, datetime
+
+    from core.models import Article, Source, Story
+    from core.nlp.translate import headline_subtitle
+
+    story = Story(
+        title_neutral=(
+            "Liveticker USA unter Trump: USA erhöhen Importmenge für Rindfleisch"
+        ),
+        title_translations={},
+    )
+    tedesco = Article(
+        title=story.title_neutral, language="de",
+        url="https://de.test/1", snippet="x",
+        published_at=datetime(2026, 8, 27, 8, tzinfo=UTC),
+    )
+    tedesco.source = Source(
+        slug="welt", name="W", domain="de.test", country="de",
+        language="de", region="europe", feed_urls=[], terms_note="",
+    )
+    fuori_posto = Article(
+        title=(
+            "Caporalato a Milano, gli operai del cantiere del Consolato "
+            "ora ricevono 11 euro all'ora"
+        ),
+        language="it", url="https://it.test/1", snippet="y",
+        published_at=datetime(2026, 8, 27, 9, tzinfo=UTC),
+    )
+    fuori_posto.source = Source(
+        slug="rep", name="R", domain="it.test", country="it",
+        language="it", region="italy", feed_urls=[], terms_note="",
+    )
+    story.articles = [tedesco, fuori_posto]
+    assert headline_subtitle(story, "it") is None
+
+    # Con un aggancio vero (nome condiviso) la versione in lingua torna.
+    agganciato = Article(
+        title="Trump alza le quote di import di carne bovina negli USA",
+        language="it", url="https://it.test/2", snippet="z",
+        published_at=datetime(2026, 8, 27, 10, tzinfo=UTC),
+    )
+    agganciato.source = fuori_posto.source
+    story.articles = [tedesco, fuori_posto, agganciato]
+    assert headline_subtitle(story, "it") == (
+        "Trump alza le quote di import di carne bovina negli USA", False
+    )

@@ -35,8 +35,9 @@ from core.extract.dedup import from_hex, is_near_duplicate, simhash64, to_hex
 from core.extract.language import detect_language
 from core.ingest.ratelimit import DomainRateLimiter
 from core.ingest.robots import RobotsCache
-from core.models import SNIPPET_MAX_CHARS, Article, FeedState, Source, utcnow
+from core.models import SNIPPET_MAX_CHARS, Article, FeedState, Source, Story, utcnow
 from core.net import EgressDeniedError
+from core.provenance import record
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,15 @@ _WS_RE = re.compile(r"\s+")
 _ALTERNATE_LINK_RE = re.compile(r"<link\b[^>]*>", re.IGNORECASE)
 _ATTR_RE = re.compile(r"""([a-zA-Z-]+)\s*=\s*["']([^"']*)["']""")
 _FEED_TYPES = {"application/rss+xml", "application/atom+xml"}
+
+# Alcuni siti servono al nostro User-Agent dichiarato una pagina di verifica
+# anti-bot al posto del feed (esito: "feed vuoto o non interpretabile", o 403).
+# In quel caso si ritenta UNA volta con un User-Agent da browser — sempre e
+# solo DOPO il via libera di robots.txt, che resta verificato col nostro nome.
+BROWSER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+)
 
 
 def describe_error(exc: Exception) -> str:
@@ -69,6 +79,9 @@ class IngestStats:
     created: int = 0
     skipped_existing: int = 0
     skipped_duplicates: int = 0
+    # Articoli già in archivio via GDELT il cui titolo è stato rettificato
+    # col titolo editoriale vero portato dal feed.
+    retitled: int = 0
     not_modified: bool = False
     error: str | None = None
     # Feed in pausa dopo errori ripetuti: nessun tentativo in questo giro.
@@ -207,6 +220,30 @@ async def fetch_feed_content(
         fetch.not_modified = True
         return fetch
 
+    # Probabile filtro anti-bot: 403, oppure 200 con contenuto che non è un
+    # feed. Un solo ritento con User-Agent da browser; robots già rispettato.
+    blocked = resp.status_code == 403 or (
+        resp.status_code == 200 and not parse_feed(resp.content)
+    )
+    if blocked:
+        await limiter.wait(host)
+        try:
+            retry = await client.get(
+                feed_url, headers={**headers, "User-Agent": BROWSER_UA}
+            )
+        except (httpx.HTTPError, EgressDeniedError):
+            retry = None
+        if retry is not None and retry.status_code == 200 and parse_feed(retry.content):
+            log.info(
+                "feed %s: leggibile solo con User-Agent browser (filtro anti-bot)",
+                feed_url,
+            )
+            fetch.status_code = 200
+            fetch.content = retry.content
+            fetch.etag = retry.headers.get("ETag")
+            fetch.last_modified = retry.headers.get("Last-Modified")
+            return fetch
+
     needs_discovery = resp.status_code in (404, 410) or (
         resp.status_code == 200
         and not parse_feed(resp.content)
@@ -331,6 +368,45 @@ def in_backoff(state: FeedState) -> bool:
     return utcnow() - state.last_fetched_at < timedelta(hours=settings.feed_backoff_hours)
 
 
+async def _retitle_from_feed(
+    session: AsyncSession, article: Article, entry: FeedEntry
+) -> bool:
+    """Rettifica un articolo arrivato prima via GDELT col titolo VERO del feed.
+
+    I titoli GDELT sono ritokenizzati (apostrofi persi, nomi di paese
+    riscritti): quando il feed ufficiale porta lo stesso URL, il titolo
+    editoriale prende il posto di quello storpiato — e con lui lo snippet e
+    l'immagine mancanti. Se quel titolo era diventato il titolo neutro della
+    story, si corregge anche lì (e le traduzioni si rifanno da capo).
+    Gli articoli nati dal feed (con snippet) non si toccano: la loro
+    formulazione è il dato che misuriamo.
+    """
+    if (article.snippet or "").strip() or not entry.title or entry.title == article.title:
+        return False
+    vecchio = article.title
+    article.title = entry.title
+    article.snippet = entry.snippet
+    if entry.image_url and not article.image_url:
+        article.image_url = entry.image_url
+    article.simhash = to_hex(simhash64(f"{entry.title} {entry.snippet}"))
+    if article.story_id is not None:
+        story = (
+            await session.execute(select(Story).where(Story.id == article.story_id))
+        ).scalar_one_or_none()
+        if story is not None and story.title_neutral == vecchio:
+            story.title_neutral = entry.title
+            story.title_translations = {}
+    await record(
+        session,
+        entity_type="article",
+        entity_id=article.id,
+        field="title",
+        method="rss-rettifica-v1",
+        inputs={"titolo_gdelt": vecchio[:300]},
+    )
+    return True
+
+
 async def store_feed(
     session: AsyncSession,
     source: Source,
@@ -359,8 +435,6 @@ async def store_feed(
 
     if fetch.discovered_url:
         state.resolved_url = fetch.discovered_url
-    state.etag = fetch.etag
-    state.last_modified = fetch.last_modified
 
     entries = parse_feed(fetch.content)
     stats.fetched = len(entries)
@@ -370,52 +444,58 @@ async def store_feed(
         state.consecutive_failures += 1
         return stats
 
-    known_urls = set(
-        (
-            await session.execute(
-                select(Article.url).where(Article.url.in_([e.url for e in entries]))
+    # ETag/Last-Modified si ricordano SOLO di un feed valido: memorizzare
+    # quelli di una pagina anti-bot congelerebbe il feed sul contenuto
+    # sbagliato (304 sul nulla a ogni giro successivo).
+    state.etag = fetch.etag
+    state.last_modified = fetch.last_modified
+
+    known: dict[str, Article] = {}
+    for article in (
+        await session.execute(
+            select(Article).where(Article.url.in_([e.url for e in entries]))
+        )
+    ).scalars():
+        known[article.url] = article
+    for article in (
+        await session.execute(
+            select(Article).where(
+                Article.canonical_url.in_([canonicalize(e.url) for e in entries])
             )
-        ).scalars()
-    )
-    known_canonicals = {
-        c
-        for c in (
-            await session.execute(
-                select(Article.canonical_url).where(
-                    Article.canonical_url.in_([canonicalize(e.url) for e in entries])
-                )
-            )
-        ).scalars()
-        if c
-    }
+        )
+    ).scalars():
+        if article.canonical_url:
+            known.setdefault(article.canonical_url, article)
     recent_hashes = await _recent_simhashes(session, source.id)
 
     for entry in entries:
         canonical = canonicalize(entry.url)
-        if entry.url in known_urls or canonical in known_canonicals:
+        existing = known.get(entry.url) or known.get(canonical)
+        if existing is not None:
             stats.skipped_existing += 1
+            if await _retitle_from_feed(session, existing, entry):
+                stats.retitled += 1
             continue
         fingerprint = simhash64(f"{entry.title} {entry.snippet}")
         if any(is_near_duplicate(fingerprint, h) for h in recent_hashes):
             stats.skipped_duplicates += 1
             continue
         guess = detect_language(f"{entry.title}. {entry.snippet}")
-        session.add(
-            Article(
-                source_id=source.id,
-                url=entry.url,
-                canonical_url=canonical,
-                title=entry.title,
-                snippet=entry.snippet,
-                image_url=entry.image_url,
-                published_at=entry.published_at,
-                language=guess.language or source.language,
-                authors=list(entry.authors),
-                simhash=to_hex(fingerprint),
-            )
+        nuovo = Article(
+            source_id=source.id,
+            url=entry.url,
+            canonical_url=canonical,
+            title=entry.title,
+            snippet=entry.snippet,
+            image_url=entry.image_url,
+            published_at=entry.published_at,
+            language=guess.language or source.language,
+            authors=list(entry.authors),
+            simhash=to_hex(fingerprint),
         )
-        known_urls.add(entry.url)
-        known_canonicals.add(canonical)
+        session.add(nuovo)
+        known[entry.url] = nuovo
+        known[canonical] = nuovo
         recent_hashes.append(fingerprint)
         stats.created += 1
 

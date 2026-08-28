@@ -53,7 +53,10 @@ the *centre* of the group **and** at least one real article inside it (the
 centre alone "drifts" as the group grows and would end up attracting
 everything). Otherwise it opens a new story. The story's "neutral" headline
 is not generated: it is the **real headline closest to the centre of the
-group**.
+group**, preferring — membership being equal — articles that arrived from
+the outlet's own feed: headlines collected via GDELT are re-tokenised at
+the source (lost apostrophes, reassembled punctuation, rewritten country
+names) and are used only when the group has nothing better.
 
 The threshold is not arbitrary: we **calibrated it on 100 hand-annotated
 headline pairs** (50 same-event pairs, 50 different-event pairs, 25 of them

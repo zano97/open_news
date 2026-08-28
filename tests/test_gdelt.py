@@ -187,3 +187,20 @@ def test_tidy_title_ricompone_la_punteggiatura() -> None:
         "Yayoi Kusama è morta, addio alla regina"
     assert tidy_title("Meteo : allerta ( rossa ) in tre regioni !") == \
         "Meteo: allerta (rossa) in tre regioni!"
+
+
+def test_tidy_title_ripara_i_paesi_minuscoli() -> None:
+    """GDELT riscrive i nomi di paese in minuscolo anche nei titoli non
+    inglesi: si ripara solo la forma artefatta, mai quella editoriale."""
+    from core.ingest.gdelt import tidy_title
+
+    assert tidy_title(
+        "Liveticker united states unter Trump : united states erhöhen Importmenge"
+    ) == "Liveticker USA unter Trump: USA erhöhen Importmenge"
+    assert tidy_title("Cantiere del Consolato united states a Milano") == \
+        "Cantiere del Consolato USA a Milano"
+    assert tidy_title("new zealand e south korea firmano l'accordo") == \
+        "New Zealand e South Korea firmano l'accordo"
+    # Le maiuscole editoriali restano come sono: nessun falso positivo.
+    assert tidy_title("United States and United Kingdom sign the deal") == \
+        "United States and United Kingdom sign the deal"

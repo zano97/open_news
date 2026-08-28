@@ -290,3 +290,128 @@ async def test_autodiscovery_percorsi_convenzionali(session: AsyncSession) -> No
         await session.execute(select(FeedState).where(FeedState.feed_url == FEED_URL))
     ).scalar_one()
     assert stato.resolved_url == "https://esempio.test/feed/"
+
+
+@respx.mock
+async def test_ritento_con_user_agent_browser(session: AsyncSession) -> None:
+    """Il sito serve al bot dichiarato una pagina di verifica al posto del
+    feed: un solo ritento con User-Agent da browser lo sblocca (robots.txt
+    resta comunque rispettato, ed è già stato consultato)."""
+    from core.ingest.rss import BROWSER_UA
+
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+
+    def risposta(request: httpx.Request) -> httpx.Response:
+        if request.headers.get("User-Agent") == BROWSER_UA:
+            return httpx.Response(200, content=FIXTURE)
+        return httpx.Response(200, text='{"challenge": "verifica anti-bot"}')
+
+    route = respx.get(FEED_URL).mock(side_effect=risposta)
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.error is None
+    assert stats.created == 2
+    assert len(route.calls) == 2  # tentativo normale + ritento browser
+
+
+@respx.mock
+async def test_feed_vuoto_non_congela_etag(session: AsyncSession) -> None:
+    """L'ETag di una pagina anti-bot NON va ricordato: al giro dopo
+    risponderebbe 304 sul nulla e il feed resterebbe vuoto per sempre."""
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    respx.get(FEED_URL).mock(
+        return_value=httpx.Response(
+            200, text='{"challenge": "x"}', headers={"ETag": '"pagina-anti-bot"'}
+        )
+    )
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.error == "feed vuoto o non interpretabile"
+    stato = (
+        await session.execute(select(FeedState).where(FeedState.feed_url == FEED_URL))
+    ).scalar_one()
+    assert stato.etag is None
+
+
+@respx.mock
+async def test_feed_rettifica_titolo_gdelt(session: AsyncSession) -> None:
+    """Un articolo arrivato prima via GDELT (titolo ritokenizzato, niente
+    snippet) viene rettificato quando il feed ufficiale porta lo stesso URL:
+    titolo editoriale, snippet, e — se era il titolo neutro della story —
+    anche la story, con le traduzioni da rifare."""
+    from core.models import Story
+
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    story = Story(
+        title_neutral="Alluvione nel nord del paese : migliaia di sfollati",
+        title_translations={"en": "[EN] traduzione dal titolo storpiato"},
+        article_count=1, source_count=1,
+    )
+    session.add(story)
+    await session.flush()
+    gdelt_articolo = Article(
+        source_id=fonte.id,
+        url="https://esempio.test/cronaca/alluvione-nord",
+        canonical_url="https://esempio.test/cronaca/alluvione-nord",
+        title="Alluvione nel nord del paese : migliaia di sfollati",
+        snippet="",
+        language="it",
+        story_id=story.id,
+    )
+    session.add(gdelt_articolo)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+    respx.get(FEED_URL).mock(return_value=httpx.Response(200, content=FIXTURE))
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+
+    assert stats.retitled == 1
+    await session.refresh(gdelt_articolo)
+    assert gdelt_articolo.title == (
+        "Alluvione nel nord del paese: migliaia di sfollati nella notte"
+    )
+    assert gdelt_articolo.snippet  # ora c'è quello del feed
+    await session.refresh(story)
+    assert story.title_neutral == (
+        "Alluvione nel nord del paese: migliaia di sfollati nella notte"
+    )
+    assert story.title_translations == {}
+
+    # La rettifica è tracciata nella provenance.
+    from core import provenance
+
+    prova = await provenance.for_entity(session, "article", gdelt_articolo.id)
+    riga = next(p for p in prova if p.field == "title")
+    assert riga.method == "rss-rettifica-v1"
+
+    # Idempotente: al giro successivo non c'è più nulla da rettificare.
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.retitled == 0

@@ -52,7 +52,10 @@ somigliare al *centro* del gruppo **e** ad almeno un articolo reale che ne
 fa parte (il centro, da solo, "deriva" man mano che il gruppo cresce e
 finirebbe per attirare tutto). Altrimenti apre una story nuova. Il titolo
 "neutro" della story non è generato: è il **titolo reale più vicino al
-centro del gruppo**.
+centro del gruppo**, preferendo — a parità di appartenenza — gli articoli
+arrivati dal feed della testata: i titoli raccolti via GDELT sono
+ritokenizzati alla fonte (apostrofi persi, punteggiatura ricomposta, nomi
+di paese riscritti) e vengono usati solo quando il gruppo non ha di meglio.
 
 La soglia non è arbitraria: l'abbiamo **calibrata su 100 coppie di titoli
 annotate a mano** (50 coppie sullo stesso evento, 50 su eventi diversi, di

@@ -290,3 +290,39 @@ bande.
 **Conseguenze.** Stessa carta, letta meglio: nessun cambio di palette o
 tipografia, quindi nessun impatto su contrasti già verificati; i token
 rendono coerente ogni componente futuro.
+
+## ADR-0022 — Titoli sempre editoriali: artefatti GDELT riparati e mai preferiti
+
+**Contesto.** I titoli raccolti via GDELT arrivano ritokenizzati alla
+fonte: apostrofi persi («larte»), punteggiatura staccata («9 / 11»,
+«morta , addio») e nomi di paese riscritti in inglese minuscolo anche nei
+titoli non inglesi («united states erhöhen…»). Quando uno di questi
+diventava titolo neutro o sottotitolo, la prima pagina mostrava titoli
+storpiati; in un caso reale il sottotitolo era il titolo di un'ALTRA
+notizia (articolo finito nel cluster per errore, agganciato proprio dai
+token «united states» duplicati).
+
+**Decisione.** Quattro difese complementari. (1) `tidy_title` ripara
+anche i nomi di paese minuscoli (solo forme multi-parola, mai legittime
+in un titolo: «united states» → «USA»); la migrazione 0007 applica la
+stessa pulizia all'archivio (solo articoli con provenance GDELT) e
+azzera le traduzioni fatte sui titoli storpiati. (2) Il titolo neutro
+preferisce, a parità di appartenenza al cluster, gli articoli CON
+snippet — quelli dal feed, col titolo editoriale intatto (metodologia
+§2 aggiornata). (3) Quando il feed ufficiale porta lo stesso URL di un
+articolo arrivato prima via GDELT, il titolo vero rettifica quello
+storpiato (provenance `rss-rettifica-v1`); l'ETag si memorizza solo per
+un feed valido, mai per una pagina anti-bot. (4) Il sottotitolo «in
+lingua» deve condividere col titolo neutro almeno un nome proprio o un
+numero (prefisso comune ≥4: «Governo»/«Government»): meglio nessuna riga
+che la notizia sbagliata. In più, un feed che risponde 403 o 200 non
+interpretabile viene ritentato UNA volta con User-Agent da browser,
+sempre dopo il via libera di robots.txt (che resta consultato col nostro
+nome dichiarato).
+
+**Conseguenze.** I titoli GDELT restano senza apostrofi quando il
+cluster non ha di meglio (irrecuperabili alla fonte); qualche
+sottotitolo legittimo senza nomi propri condivisi sparisce finché non
+arriva la traduzione automatica (rigenerata comunque entro un quarto
+d'ora); i siti con filtro anti-bot ricevono al più una richiesta doppia
+per giro.
