@@ -146,6 +146,8 @@
           bottoneAgg.textContent = bottoneAgg.getAttribute("data-riposo") || etichettaAgg;
         }
       }
+      var ultimo = document.querySelector("[data-ultimo]");
+      if (ultimo && stato.ultimo) ultimo.textContent = stato.ultimo;
       // La ricarica segue SOLO il giro chiesto dal lettore: i cicli
       // automatici che si accodano non la trattengono all'infinito.
       var richiesto = false;

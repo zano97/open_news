@@ -57,7 +57,7 @@ def _ctx_locale(context: Context) -> str:
 
 def data_in_lettere(dt: datetime, locale: str = DEFAULT_LOCALE) -> str:
     """La data del giorno in lettere, come in testata ('Giovedì 27 agosto 2026')."""
-    local = dt.astimezone(UTC)
+    local = dt.astimezone()  # fuso della macchina: l'ora che vede il lettore
     giorno = _GIORNI[locale][local.weekday()]
     mese = _MESI[locale][local.month - 1]
     if locale == "en":
@@ -75,7 +75,7 @@ def _filtro_data_lettere(context: Context, dt: datetime) -> str:
 def ora_breve(dt: datetime | None) -> str:
     if dt is None:
         return "—"
-    return dt.astimezone(UTC).strftime("%H:%M")
+    return dt.astimezone().strftime("%H:%M")  # ora locale, non UTC
 
 
 @pass_context
@@ -83,7 +83,7 @@ def _filtro_data_breve(context: Context, dt: datetime | None) -> str:
     if dt is None:
         return "—"
     locale = _ctx_locale(context)
-    local = dt.astimezone(UTC)
+    local = dt.astimezone()
     mese = _MESI[locale][local.month - 1]
     if locale == "en":
         return f"{mese} {local.day}, {local.year}"

@@ -63,7 +63,7 @@
 <div class="sotto-testata">
   <div class="masthead-stato">
     {{ t('masthead.fonti_attive') }}: {{ source_count | default("—") }}
-    · {{ t('masthead.ultimo_aggiornamento') }}: {{ last_update | ora_breve if last_update is defined else "—" }}
+    · {{ t('masthead.ultimo_aggiornamento') }}: <span data-ultimo>{{ last_update | ora_breve if last_update is defined else "—" }}</span>
     · <a href="/metodo">{{ t('masthead.metodo_v', v=method_version) }}</a>
     {% if personal_mode or (current_user and current_user.is_admin) %}
     · <form method="post" action="/aggiorna" class="aggiorna-form" data-aggiorna-form>

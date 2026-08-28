@@ -174,14 +174,21 @@ async def aggiorna_ora(
 
 
 @router.get("/api/aggiornamento")
-async def stato_aggiornamento() -> dict[str, object]:
+async def stato_aggiornamento(
+    session: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, object]:
     """Per il client: barra col progresso VERO (feed e gruppi contati)."""
     percento, fase = refresh_state.overall()
+    ultimo = (
+        await session.execute(select(func.max(Article.fetched_at)))
+    ).scalar_one_or_none()
     return {
         "in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running(),
         "giro_manuale": bool(_aggiornamento["in_corso"]),
         "percento": percento,
         "fase": fase,
+        # Ora LOCALE dell'ultimo articolo raccolto: la testata la mostra viva.
+        "ultimo": ultimo.astimezone().strftime("%H:%M") if ultimo else None,
     }
 
 
