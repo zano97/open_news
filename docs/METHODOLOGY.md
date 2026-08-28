@@ -43,6 +43,30 @@ Qui non c'è nessuna etichetta decisa da noi: sono conteggi su quello che le
 testate pubblicano. Prima raggruppiamo gli articoli in **story** (lo stesso
 evento raccontato da testate diverse), poi misuriamo tre cose.
 
+### Da dove arrivano gli articoli
+
+Tre canali, tutti gratuiti e documentati, tutti con la stessa impronta:
+titolo + snippet breve + link, dedup per URL.
+
+1. **I feed RSS/Atom** delle testate (il canale principale).
+2. **GDELT DOC 2.0**, che vede anche articoli assenti dai feed.
+3. **I canali social UFFICIALI delle testate** — per ora Bluesky e
+   Mastodon, le piattaforme con API pubbliche, gratuite e senza chiave.
+   Dei post si usano solo i metadati della scheda-link (titolo,
+   descrizione, URL) e contano SOLO i post che linkano il dominio della
+   testata stessa: il profilo social è un altro posto dove la testata
+   pubblica i propri articoli, mai una fonte di contenuti di terzi. Su
+   Bluesky si accettano solo account con **handle a dominio verificato**
+   (l'handle è il dominio della testata: l'autenticità la garantisce il
+   protocollo). **X (Twitter) e Instagram restano fuori** finché non
+   offrono un accesso programmatico gratuito e lecito: le API sono a
+   pagamento e i termini d'uso vietano la raccolta automatica — e questo
+   progetto non paga API né viola termini (ADR-0023).
+
+Più canali per la stessa testata significano più richiamo: la copertura
+per paese e gli angoli ciechi diventano più fedeli, perché un articolo
+visto solo sui social entra comunque nel conteggio della sua testata.
+
 ### Il raggruppamento in story
 
 Ogni articolo viene trasformato in un vettore numerico (*embedding*) a

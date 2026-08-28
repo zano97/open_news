@@ -56,6 +56,18 @@ Reuters e Associated Press non offrono feed RSS pubblici: la loro copertura
 è rilevata tramite i metadati di **GDELT** (titolo e link; con citazione del
 GDELT Project come richiesto), senza ripubblicare alcun contenuto.
 
+## Canali social delle testate
+
+Per alcune testate il catalogo dichiara il profilo **Bluesky** o
+**Mastodon** ufficiale. Da quei profili si leggono, via API pubbliche e
+gratuite, solo i **metadati della scheda-link** dei post (titolo,
+descrizione breve, URL dell'articolo): il testo dei post non viene
+conservato, nessun dato di utenti terzi viene raccolto, e contano solo i
+post che linkano il dominio della testata stessa. **X (Twitter) e
+Instagram** non offrono un accesso programmatico gratuito e lecito (API a
+pagamento; termini d'uso che vietano la raccolta automatica): restano
+esclusi finché è così.
+
 ## Dati personali
 
 - Il sito pubblico non traccia gli utenti: nessun cookie di profilazione,

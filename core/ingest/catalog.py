@@ -36,6 +36,10 @@ class CatalogSource:
     disabled_reason: str | None = None
     terms_note: str = ""
     self_declared_line: dict[str, str] | None = None
+    # Canali social UFFICIALI della testata, usati come canale di raccolta
+    # aggiuntivo (vedi core/ingest/social.py): {"bluesky": handle,
+    # "mastodon": "https://istanza/@account"}.
+    social: dict[str, str] = field(default_factory=dict)
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -46,7 +50,7 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogSource]:
         known = {
             "slug", "name", "domain", "country", "language", "region", "feed_urls",
             "gdelt_domain", "wikidata_qid", "founded", "enabled", "disabled_reason",
-            "terms_note", "self_declared_line",
+            "terms_note", "self_declared_line", "social",
         }
         extra = {k: v for k, v in item.items() if k not in known}
         sources.append(
@@ -65,6 +69,9 @@ def load_catalog(path: Path = CATALOG_PATH) -> list[CatalogSource]:
                 disabled_reason=item.get("disabled_reason"),
                 terms_note=(item.get("terms_note") or "").strip(),
                 self_declared_line=item.get("self_declared_line"),
+                social={
+                    str(k): str(v) for k, v in (item.get("social") or {}).items()
+                },
                 extra=extra,
             )
         )

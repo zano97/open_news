@@ -28,6 +28,7 @@ STATIC_ALLOWED_SUFFIXES: frozenset[str] = frozenset(
         "media-ownership.eu",  # EurOMo, CC BY 4.0
         "raw.githubusercontent.com",  # font OFL e asset vendorizzati (solo script di setup)
         "argosopentech.com",  # modelli di traduzione Argos (solo script di setup)
+        "public.api.bsky.app",  # AppView pubblica Bluesky, senza chiave (vedi NOTICE)
         "test",  # dominio riservato RFC 2606: usato solo nei test
     }
 )
@@ -46,7 +47,8 @@ class EgressDeniedError(RuntimeError):
 
 
 def _catalog_hosts() -> frozenset[str]:
-    """Domini delle fonti dal catalogo (dominio testata + host dei feed)."""
+    """Domini delle fonti dal catalogo: dominio testata, host dei feed e
+    istanze Mastodon dei canali social dichiarati."""
     # Import locale per evitare dipendenze circolari con core.ingest.
     from core.ingest.catalog import load_catalog
 
@@ -55,6 +57,10 @@ def _catalog_hosts() -> frozenset[str]:
         hosts.add(src.domain.lower())
         for feed in src.feed_urls:
             host = urlsplit(feed).hostname
+            if host:
+                hosts.add(host.lower())
+        for url in src.social.values():
+            host = urlsplit(url).hostname if "://" in url else None
             if host:
                 hosts.add(host.lower())
     return frozenset(hosts)

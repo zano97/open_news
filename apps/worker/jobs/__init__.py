@@ -17,6 +17,7 @@ from apps.worker.jobs.ingest import (
     fetch_fulltext_job,
     ingest_feeds_job,
     ingest_gdelt_job,
+    ingest_social_job,
     sync_catalog_job,
 )
 
@@ -54,6 +55,12 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(
         ingest_gdelt_job, "interval", minutes=30, id="ingest_gdelt",
         max_instances=1, next_run_time=tra(40),
+    )
+    # Canali social ufficiali delle testate (Bluesky/Mastodon): pochi account,
+    # API pubbliche leggere — ogni 30 minuti, poco dopo il primo giro feed.
+    scheduler.add_job(
+        ingest_social_job, "interval", minutes=30, id="ingest_social",
+        max_instances=1, next_run_time=tra(70),
     )
     scheduler.add_job(
         fetch_fulltext_job, "interval", minutes=15, id="fetch_fulltext",

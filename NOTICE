@@ -27,6 +27,14 @@ Attribuzioni di dati e servizi di terze parti usati dal progetto:
   (https://informazioneeditoria.gov.it/) — elenchi pubblici dei contributi
   diretti all'editoria (Fondo per il pluralismo).
 
+- Bluesky (https://bsky.app/) — metadati delle schede-link dei post
+  pubblici dei profili ufficiali delle testate, via AppView pubblica
+  (public.api.bsky.app), gratuita e senza chiave (protocollo AT).
+
+- Mastodon (https://joinmastodon.org/) — metadati delle schede-link dei
+  post pubblici dei profili ufficiali delle testate, via API pubblica
+  delle rispettive istanze (software libero AGPL).
+
 - Font (self-hosted in apps/web/static/fonts/ con le rispettive licenze):
   Playfair Display (Claus Eggers Sørensen, SIL OFL 1.1),
   EB Garamond (Georg Duffner / Octavio Pardo, SIL OFL 1.1),

@@ -44,6 +44,30 @@ There is no label decided by us here: these are counts over what the
 outlets publish. First we group articles into **stories** (the same event
 told by different outlets), then we measure three things.
 
+### Where articles come from
+
+Three channels, all free and documented, all with the same footprint:
+headline + short snippet + link, deduplicated by URL.
+
+1. **The outlets' RSS/Atom feeds** (the main channel).
+2. **GDELT DOC 2.0**, which also sees articles missing from feeds.
+3. **The outlets' OFFICIAL social channels** — for now Bluesky and
+   Mastodon, the platforms with public, free, key-less APIs. Of each post
+   we only use the link-card metadata (title, description, URL) and only
+   posts linking the outlet's own domain count: an outlet's social
+   profile is another place where it publishes its own articles, never a
+   source of third-party content. On Bluesky only accounts with a
+   **domain-verified handle** are accepted (the handle IS the outlet's
+   domain: authenticity is guaranteed by the protocol). **X (Twitter)
+   and Instagram stay out** until they offer free, lawful programmatic
+   access: their APIs are paid and their terms forbid automated
+   collection — and this project pays for no API and breaks no terms
+   (ADR-0023).
+
+More channels per outlet mean better recall: per-country coverage and
+blind spots become more faithful, because an article seen only on social
+media still counts for its outlet.
+
 ### Grouping into stories
 
 Every article is turned into a numeric vector (*embedding*) from its

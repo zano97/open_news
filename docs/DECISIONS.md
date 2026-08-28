@@ -326,3 +326,36 @@ sottotitolo legittimo senza nomi propri condivisi sparisce finché non
 arriva la traduzione automatica (rigenerata comunque entro un quarto
 d'ora); i siti con filtro anti-bot ricevono al più una richiesta doppia
 per giro.
+
+## ADR-0023 — Canali social delle testate: Bluesky e Mastodon sì, X e Instagram no (per ora)
+
+**Contesto.** Molta informazione passa ormai dai social, e l'utente vuole
+che contino per notizie, copertura e angoli ciechi. Ma il progetto ha tre
+vincoli non negoziabili: solo software libero e servizi gratuiti (mai API
+a pagamento), solo titolo+snippet+link (docs/LEGAL.md), egress in
+allowlist. E un vincolo di misura: gli indicatori contano «che cosa
+pubblica quale testata in quale paese» — un post social di terzi non ha
+una testata né un paese attribuibili in modo onesto.
+
+**Decisione.** I social entrano come **canale di raccolta aggiuntivo
+delle testate esistenti**, non come fonti a sé: il profilo ufficiale di
+una testata è un altro posto dove la testata pubblica i PROPRI articoli.
+Dei post si usano solo i metadati della scheda-link (titolo, descrizione,
+URL) e contano solo i post che linkano il dominio della testata; dedup
+per URL con i canali feed e GDELT. Piattaforme: **Bluesky** (AppView
+pubblica senza chiave; si accettano SOLO handle a dominio verificato —
+l'autenticità la garantisce il protocollo, un impostore non può entrare
+per errore di configurazione) e **Mastodon** (API pubblica dell'istanza
+dichiarata nel catalogo; le istanze entrano nell'allowlist solo via
+catalogo). **X (Twitter) e Instagram restano esclusi**: le API sono a
+pagamento e i termini vietano la raccolta automatica — non c'è oggi un
+modo gratuito e lecito, e il progetto non paga API né viola termini. La
+decisione si riesamina se le condizioni di accesso cambiano.
+
+**Conseguenze.** Copertura e angoli ciechi guadagnano richiamo (un
+articolo visto solo sui social conta comunque per la sua testata) senza
+toccare la semantica degli indicatori; la provenance di ogni articolo
+social è tracciata (`bluesky-public-api` / `mastodon-public-api`, col
+link al post). Il limite è dichiarato: niente X/Instagram significa
+nessuna pretesa di misurare «l'attenzione social» — misuriamo sempre e
+solo che cosa pubblicano le testate.

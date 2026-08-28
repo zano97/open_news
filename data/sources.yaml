@@ -203,6 +203,8 @@ sources:
   founded: 2010
   enabled: true
   terms_note: Nessuna restrizione nota per titolo+snippet+link.
+  social:
+    bluesky: ilpost.it
 
 - slug: internazionale
   name: Internazionale
@@ -373,6 +375,8 @@ sources:
   terms_note: >-
     L'uso dei feed richiede attribuzione e link alla fonte; consentito
     titolo+snippet+link.
+  social:
+    bluesky: theguardian.com
 
 - slug: le-monde
   name: Le Monde
@@ -390,6 +394,8 @@ sources:
   founded: 1944
   enabled: true
   terms_note: Nessuna restrizione nota per titolo+snippet+link.
+  social:
+    bluesky: lemonde.fr
 
 - slug: le-figaro
   name: Le Figaro
@@ -576,6 +582,8 @@ sources:
     I termini NPR consentono l'uso personale non commerciale dei feed con
     attribuzione; per un aggregatore pubblico mostriamo solo
     titolo+snippet+link con attribuzione e senza pubblicità.
+  social:
+    bluesky: npr.org
 
 - slug: nyt
   name: The New York Times
@@ -596,6 +604,8 @@ sources:
   terms_note: >-
     I feed pubblici NYT sono per uso non commerciale con attribuzione e
     link; mostriamo solo titolo+snippet+link.
+  social:
+    bluesky: nytimes.com
 
 - slug: washington-post
   name: The Washington Post
@@ -792,6 +802,8 @@ sources:
   terms_note: >-
     Testata indipendente finanziata da lettori e grant (dichiarato dalla
     testata stessa; registrato al livello 1 quando documentabile).
+  social:
+    bluesky: kyivindependent.com
 
 - slug: moscow-times
   name: The Moscow Times
@@ -860,6 +872,8 @@ sources:
   founded: 1947
   enabled: true
   terms_note: Nessuna restrizione nota per titolo+snippet+link.
+  social:
+    bluesky: spiegel.de
 
 - slug: zeit
   name: Die Zeit
@@ -890,6 +904,8 @@ sources:
   terms_note: >-
     Cooperativa di lettori (assetto registrato al livello 1 quando
     documentato). Nessuna restrizione nota per titolo+snippet+link.
+  social:
+    bluesky: taz.de
 
 - slug: orf
   name: ORF News
@@ -948,6 +964,8 @@ sources:
   terms_note: >-
     Testata finanziata dai soli abbonati (dichiarato dalla testata; fatto
     di livello 1 quando documentato). Contenuti in gran parte a pagamento.
+  social:
+    bluesky: mediapart.fr
 
 - slug: nos
   name: NOS Nieuws
@@ -1826,6 +1844,8 @@ sources:
   terms_note: >-
     Cofondata dalla premio Nobel Maria Ressa; le pressioni legali subite
     sono fatti di livello 1 quando documentati.
+  social:
+    bluesky: rappler.com
 
 - slug: rnz
   name: RNZ News
@@ -1927,3 +1947,576 @@ sources:
   terms_note: >-
     Proprietà Cox Enterprises (fatto di livello 1 quando documentato).
     Nessuna restrizione nota per titolo+snippet+link.
+
+  # ------------------------- AFRICA (tranche 2026-08) -------------------------
+- slug: citi-newsroom
+  name: Citi Newsroom
+  domain: citinewsroom.com
+  country: gh
+  language: en
+  region: world
+  feed_urls:
+  - https://citinewsroom.com/feed/
+  gdelt_domain: citinewsroom.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: addis-standard
+  name: Addis Standard
+  domain: addisstandard.com
+  country: et
+  language: en
+  region: world
+  feed_urls:
+  - https://addisstandard.com/feed/
+  gdelt_domain: addisstandard.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: the-citizen-tz
+  name: The Citizen (Tanzania)
+  domain: thecitizen.co.tz
+  country: tz
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: thecitizen.co.tz
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: daily-monitor
+  name: Daily Monitor
+  domain: monitor.co.ug
+  country: ug
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: monitor.co.ug
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: seneweb
+  name: Seneweb
+  domain: seneweb.com
+  country: sn
+  language: fr
+  region: world
+  feed_urls: []
+  gdelt_domain: seneweb.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: hespress
+  name: Hespress
+  domain: hespress.com
+  country: ma
+  language: ar
+  region: world
+  feed_urls:
+  - https://www.hespress.com/feed
+  gdelt_domain: hespress.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: tsa-algerie
+  name: TSA — Tout sur l'Algérie
+  domain: tsa-algerie.com
+  country: dz
+  language: fr
+  region: world
+  feed_urls:
+  - https://www.tsa-algerie.com/feed/
+  gdelt_domain: tsa-algerie.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: la-presse-tn
+  name: La Presse de Tunisie
+  domain: lapresse.tn
+  country: tn
+  language: fr
+  region: world
+  feed_urls: []
+  gdelt_domain: lapresse.tn
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: newsday-zw
+  name: NewsDay Zimbabwe
+  domain: newsday.co.zw
+  country: zw
+  language: en
+  region: world
+  feed_urls:
+  - https://www.newsday.co.zw/feed/
+  gdelt_domain: newsday.co.zw
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: lusaka-times
+  name: Lusaka Times
+  domain: lusakatimes.com
+  country: zm
+  language: en
+  region: world
+  feed_urls:
+  - https://www.lusakatimes.com/feed/
+  gdelt_domain: lusakatimes.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: new-times-rw
+  name: The New Times (Rwanda)
+  domain: newtimes.co.rw
+  country: rw
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: newtimes.co.rw
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  # ---------------------- MEDIO ORIENTE (tranche 2026-08) ----------------------
+- slug: naharnet
+  name: Naharnet
+  domain: naharnet.com
+  country: lb
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: naharnet.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: jordan-times
+  name: The Jordan Times
+  domain: jordantimes.com
+  country: jo
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: jordantimes.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: rudaw
+  name: Rudaw
+  domain: rudaw.net
+  country: iq
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: rudaw.net
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: iranwire
+  name: IranWire
+  domain: iranwire.com
+  country: ir
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: iranwire.com
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Redazione in diaspora (giornalisti iraniani fuori dal paese). Nessuna
+    restrizione nota per titolo+snippet+link.
+- slug: kuwait-times
+  name: Kuwait Times
+  domain: kuwaittimes.com
+  country: kw
+  language: en
+  region: world
+  feed_urls:
+  - https://kuwaittimes.com/feed/
+  gdelt_domain: kuwaittimes.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  # ------------------------- ASIA (tranche 2026-08) -------------------------
+- slug: kathmandu-post
+  name: The Kathmandu Post
+  domain: kathmandupost.com
+  country: np
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: kathmandupost.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: daily-mirror-lk
+  name: Daily Mirror (Sri Lanka)
+  domain: dailymirror.lk
+  country: lk
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: dailymirror.lk
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: irrawaddy
+  name: The Irrawaddy
+  domain: irrawaddy.com
+  country: mm
+  language: en
+  region: world
+  feed_urls:
+  - https://www.irrawaddy.com/feed
+  gdelt_domain: irrawaddy.com
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Redazione indipendente birmana (parte della redazione in esilio).
+    Nessuna restrizione nota per titolo+snippet+link.
+- slug: khmer-times
+  name: Khmer Times
+  domain: khmertimeskh.com
+  country: kh
+  language: en
+  region: world
+  feed_urls:
+  - https://www.khmertimeskh.com/feed/
+  gdelt_domain: khmertimeskh.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: laotian-times
+  name: The Laotian Times
+  domain: laotiantimes.com
+  country: la
+  language: en
+  region: world
+  feed_urls:
+  - https://laotiantimes.com/feed/
+  gdelt_domain: laotiantimes.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: astana-times
+  name: The Astana Times
+  domain: astanatimes.com
+  country: kz
+  language: en
+  region: world
+  feed_urls:
+  - https://astanatimes.com/feed/
+  gdelt_domain: astanatimes.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: gazeta-uz
+  name: Gazeta.uz
+  domain: gazeta.uz
+  country: uz
+  language: ru
+  region: world
+  feed_urls:
+  - https://www.gazeta.uz/ru/rss/
+  gdelt_domain: gazeta.uz
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: civil-ge
+  name: Civil Georgia
+  domain: civil.ge
+  country: ge
+  language: en
+  region: world
+  feed_urls:
+  - https://civil.ge/feed
+  gdelt_domain: civil.ge
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: tolonews
+  name: TOLOnews
+  domain: tolonews.com
+  country: af
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: tolonews.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: jakarta-post
+  name: The Jakarta Post
+  domain: thejakartapost.com
+  country: id
+  language: en
+  region: world
+  feed_urls: []
+  gdelt_domain: thejakartapost.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+
+  # --------------------- AMERICA LATINA (tranche 2026-08) ---------------------
+- slug: el-observador-uy
+  name: El Observador
+  domain: elobservador.com.uy
+  country: uy
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: elobservador.com.uy
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: abc-color
+  name: ABC Color
+  domain: abc.com.py
+  country: py
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: abc.com.py
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: el-deber
+  name: El Deber
+  domain: eldeber.com.bo
+  country: bo
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: eldeber.com.bo
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: el-universo
+  name: El Universo
+  domain: eluniverso.com
+  country: ec
+  language: es
+  region: world
+  feed_urls:
+  - https://www.eluniverso.com/arc/outboundfeeds/rss/?outputType=xml
+  gdelt_domain: eluniverso.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: efecto-cocuyo
+  name: Efecto Cocuyo
+  domain: efectococuyo.com
+  country: ve
+  language: es
+  region: world
+  feed_urls:
+  - https://efectococuyo.com/feed/
+  gdelt_domain: efectococuyo.com
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Testata indipendente venezuelana. Nessuna restrizione nota per
+    titolo+snippet+link.
+- slug: crhoy
+  name: CRHoy
+  domain: crhoy.com
+  country: cr
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: crhoy.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: diario-libre
+  name: Diario Libre
+  domain: diariolibre.com
+  country: do
+  language: es
+  region: world
+  feed_urls: []
+  gdelt_domain: diariolibre.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: prensa-libre
+  name: Prensa Libre
+  domain: prensalibre.com
+  country: gt
+  language: es
+  region: world
+  feed_urls:
+  - https://www.prensalibre.com/feed/
+  gdelt_domain: prensalibre.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: catorce-y-medio
+  name: 14ymedio
+  domain: 14ymedio.com
+  country: cu
+  language: es
+  region: world
+  feed_urls:
+  - https://www.14ymedio.com/rss.xml
+  gdelt_domain: 14ymedio.com
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Testata indipendente cubana (redazione in parte fuori dal paese).
+    Nessuna restrizione nota per titolo+snippet+link.
+
+  # ------------------------- EUROPA (tranche 2026-08) -------------------------
+- slug: dnevnik-bg
+  name: Dnevnik
+  domain: dnevnik.bg
+  country: bg
+  language: bg
+  region: europe
+  feed_urls:
+  - https://www.dnevnik.bg/rss/
+  gdelt_domain: dnevnik.bg
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: rtvslo
+  name: RTV Slovenija
+  domain: rtvslo.si
+  country: si
+  language: sl
+  region: europe
+  feed_urls:
+  - https://img.rtvslo.si/feeds/00.xml
+  gdelt_domain: rtvslo.si
+  wikidata_qid:
+  enabled: true
+  terms_note: Servizio pubblico. Nessuna restrizione nota per titolo+snippet+link.
+- slug: lrt-english
+  name: LRT English
+  domain: lrt.lt
+  country: lt
+  language: en
+  region: europe
+  feed_urls:
+  - https://www.lrt.lt/en/rss
+  gdelt_domain: lrt.lt
+  wikidata_qid:
+  enabled: true
+  terms_note: Servizio pubblico. Nessuna restrizione nota per titolo+snippet+link.
+- slug: lsm-english
+  name: LSM (Latvia)
+  domain: lsm.lv
+  country: lv
+  language: en
+  region: europe
+  feed_urls:
+  - https://eng.lsm.lv/rss/
+  gdelt_domain: lsm.lv
+  wikidata_qid:
+  enabled: true
+  terms_note: Servizio pubblico. Nessuna restrizione nota per titolo+snippet+link.
+- slug: ruv
+  name: RÚV
+  domain: ruv.is
+  country: is
+  language: is
+  region: europe
+  feed_urls:
+  - https://www.ruv.is/rss/frettir
+  gdelt_domain: ruv.is
+  wikidata_qid:
+  enabled: true
+  terms_note: Servizio pubblico. Nessuna restrizione nota per titolo+snippet+link.
+- slug: cyprus-mail
+  name: Cyprus Mail
+  domain: cyprus-mail.com
+  country: cy
+  language: en
+  region: europe
+  feed_urls:
+  - https://cyprus-mail.com/feed/
+  gdelt_domain: cyprus-mail.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: klix-ba
+  name: Klix.ba
+  domain: klix.ba
+  country: ba
+  language: bs
+  region: europe
+  feed_urls:
+  - https://www.klix.ba/rss/naslovnica
+  gdelt_domain: klix.ba
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: zerkalo
+  name: Zerkalo
+  domain: news.zerkalo.io
+  country: by
+  language: ru
+  region: europe
+  feed_urls: []
+  gdelt_domain: zerkalo.io
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Testata bielorussa indipendente in esilio (erede di TUT.by). Nessuna
+    restrizione nota per titolo+snippet+link.
+- slug: tagesschau
+  name: tagesschau (ARD)
+  domain: tagesschau.de
+  country: de
+  language: de
+  region: europe
+  feed_urls:
+  - https://www.tagesschau.de/index~rss2.xml
+  gdelt_domain: tagesschau.de
+  wikidata_qid:
+  enabled: true
+  terms_note: Servizio pubblico. Nessuna restrizione nota per titolo+snippet+link.
+  social:
+    mastodon: https://ard.social/@tagesschau
+
+  # ---------------- NORD AMERICA E OCEANIA (tranche 2026-08) ----------------
+- slug: propublica
+  name: ProPublica
+  domain: propublica.org
+  country: us
+  language: en
+  region: world
+  feed_urls:
+  - https://www.propublica.org/feeds/propublica/main
+  gdelt_domain: propublica.org
+  wikidata_qid:
+  enabled: true
+  terms_note: >-
+    Nonprofit; molti articoli in CC BY-NC-ND (comunque qui solo
+    titolo+snippet+link).
+  social:
+    bluesky: propublica.org
+- slug: le-devoir
+  name: Le Devoir
+  domain: ledevoir.com
+  country: ca
+  language: fr
+  region: world
+  feed_urls:
+  - https://www.ledevoir.com/rss/manchettes.xml
+  gdelt_domain: ledevoir.com
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
+- slug: smh
+  name: The Sydney Morning Herald
+  domain: smh.com.au
+  country: au
+  language: en
+  region: world
+  feed_urls:
+  - https://www.smh.com.au/rss/feed.xml
+  gdelt_domain: smh.com.au
+  wikidata_qid:
+  enabled: true
+  terms_note: Nessuna restrizione nota per titolo+snippet+link.
