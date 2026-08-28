@@ -42,11 +42,9 @@ sources:
   language: it
   region: italy
   feed_urls:
+  - https://xml2.corriereobjects.it/feed-hp/homepage-restyle-2025.xml
   - https://xml2.corriereobjects.it/rss/homepage.xml
   - https://xml2.corriereobjects.it/rss/esteri.xml
-  - https://xml2.corriereobjects.it/rss/politica.xml
-  - https://xml2.corriereobjects.it/rss/economia.xml
-  - https://xml2.corriereobjects.it/rss/cronache.xml
   gdelt_domain: corriere.it
   wikidata_qid: Q748141
   founded: 1876
@@ -104,9 +102,7 @@ sources:
   country: it
   language: it
   region: italy
-  feed_urls:
-  - https://www.ilgiornale.it/feed.xml
-  - https://www.ilgiornale.it/rss.xml
+  feed_urls: []
   gdelt_domain: ilgiornale.it
   wikidata_qid: Q580060
   founded: 1974
@@ -133,8 +129,7 @@ sources:
   country: it
   language: it
   region: italy
-  feed_urls:
-  - https://www.avvenire.it/rss
+  feed_urls: []
   gdelt_domain: avvenire.it
   wikidata_qid:
   founded: 1968
@@ -167,7 +162,9 @@ sources:
   language: it
   region: italy
   feed_urls:
-  - https://www.ilfoglio.it/rss.xml
+  - https://naxos.ilfoglio.it/api/v5/rss/stories/latest
+  - https://naxos.ilfoglio.it/api/v5/rss/stories/politica
+  - https://naxos.ilfoglio.it/api/v5/rss/stories/esteri
   gdelt_domain: ilfoglio.it
   wikidata_qid:
   founded: 1996
@@ -304,7 +301,8 @@ sources:
   language: it
   region: italy
   feed_urls:
-  - https://www.adnkronos.com/rss
+  - https://www.adnkronos.com/RSS_Ultimora.xml
+  - https://www.adnkronos.com/RSS_Cronaca.xml
   gdelt_domain: adnkronos.com
   wikidata_qid:
   founded: 1963
@@ -778,6 +776,7 @@ sources:
   region: world
   feed_urls:
   - https://www.haaretz.com/srv/haaretz-latest.rss
+  - https://www.haaretz.com/cmlink/haaretz.com-all-headlines-rss-1.4605102
   gdelt_domain: haaretz.com
   wikidata_qid: Q216243
   founded: 1918
@@ -1264,8 +1263,7 @@ sources:
   country: tr
   language: en
   region: world
-  feed_urls:
-  - https://www.hurriyetdailynews.com/rss
+  feed_urls: []
   gdelt_domain: hurriyetdailynews.com
   wikidata_qid:
   founded: 1961
@@ -1416,6 +1414,7 @@ sources:
   language: es
   region: world
   feed_urls:
+  - https://www.eluniversal.com.mx/arc/outboundfeeds/rss/
   - https://www.eluniversal.com.mx/rss.xml
   gdelt_domain: eluniversal.com.mx
   wikidata_qid:
@@ -1519,8 +1518,7 @@ sources:
   country: id
   language: en
   region: world
-  feed_urls:
-  - https://en.tempo.co/rss
+  feed_urls: []
   gdelt_domain: tempo.co
   wikidata_qid:
   founded: 1971
@@ -1656,7 +1654,8 @@ sources:
   language: fr
   region: europe
   feed_urls:
-  - https://www.lepoint.fr/rss.xml
+  - https://www.lepoint.fr/arc/outboundfeeds/rss/
+  - https://www.lepoint.fr/arc/outboundfeeds/rss/category/monde/
   gdelt_domain: lepoint.fr
   wikidata_qid:
   founded: 1972
@@ -2131,7 +2130,7 @@ sources:
   language: en
   region: world
   feed_urls:
-  - https://kuwaittimes.com/feed/
+  - https://www.kuwaittimes.com/feed/
   gdelt_domain: kuwaittimes.com
   wikidata_qid:
   enabled: true

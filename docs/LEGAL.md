@@ -29,9 +29,15 @@ un'istanza pubblica di Open News è responsabile della propria conformità.
 
 ## Come raccogliamo
 
-- **robots.txt rispettato** per ogni richiesta (feed, pagine, testo
-  integrale), con cache; in assenza del file l'accesso è consentito come da
-  prassi.
+- **robots.txt rispettato per il crawling**: pagine web (homepage per
+  l'autodiscovery, pagine articolo, testo integrale), con cache; in assenza
+  del file l'accesso è consentito come da prassi. Il fetch dei **feed
+  RSS/Atom** non passa dal filtro robots: un feed è pubblicato apposta per
+  essere letto dagli aggregatori per conto dei lettori iscritti, e i
+  lettori di feed non applicano robots al feed stesso (Google Feedfetcher
+  documenta esplicitamente questo comportamento e il perché). Restano
+  sempre attivi rate limit, cache condizionale e User-Agent identificativo.
+  Vedi ADR-0025.
 - **User-Agent identificativo** (`OpenNewsBot`, con link al repository).
 - **Rate limit per dominio**: massimo una richiesta ogni 2 secondi per
   ciascun sito (5 secondi per GDELT, come richiesto dal servizio).

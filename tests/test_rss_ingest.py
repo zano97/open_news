@@ -107,7 +107,11 @@ async def test_ingest_dedup_e_cache_condizionale(session: AsyncSession) -> None:
 
 
 @respx.mock
-async def test_robots_vieta_il_feed(session: AsyncSession) -> None:
+async def test_robots_non_blocca_il_feed(session: AsyncSession) -> None:
+    """Il fetch di un FEED non passa dal filtro robots.txt: il feed è
+    un'interfaccia di abbonamento pubblicata per gli aggregatori, e i
+    lettori di feed non vi applicano robots (ADR-0025; Google Feedfetcher
+    documenta lo stesso comportamento). robots resta per il crawling."""
     fonte = _fonte()
     session.add(fonte)
     await session.flush()
@@ -115,6 +119,7 @@ async def test_robots_vieta_il_feed(session: AsyncSession) -> None:
     respx.get("https://esempio.test/robots.txt").mock(
         return_value=httpx.Response(200, text="User-agent: *\nDisallow: /")
     )
+    respx.get(FEED_URL).mock(return_value=httpx.Response(200, content=FIXTURE))
     async with httpx.AsyncClient() as client:
         stats = await ingest_feed(
             session,
@@ -124,9 +129,8 @@ async def test_robots_vieta_il_feed(session: AsyncSession) -> None:
             limiter=_limiter(),
             robots=RobotsCache(client),
         )
-    assert stats.error is not None
-    assert "robots" in stats.error
-    assert stats.created == 0
+    assert stats.error is None
+    assert stats.created == 2
 
 
 @respx.mock
@@ -336,13 +340,20 @@ async def test_feed_vuoto_non_congela_etag(session: AsyncSession) -> None:
             200, text='{"challenge": "x"}', headers={"ETag": '"pagina-anti-bot"'}
         )
     )
+    # L'autodiscovery che segue il contenuto illeggibile trova solo 404.
+    respx.get(url__regex=r"https://esempio\.test/.*").mock(
+        return_value=httpx.Response(404)
+    )
 
     async with httpx.AsyncClient() as client:
         stats = await ingest_feed(
             session, fonte, FEED_URL,
             client=client, limiter=_limiter(), robots=RobotsCache(client),
         )
-    assert stats.error == "feed vuoto o non interpretabile"
+    assert stats.error is not None
+    # La diagnosi dice COSA è arrivato al posto del feed.
+    assert stats.error.startswith("feed vuoto o non interpretabile")
+    assert "challenge" in stats.error
     stato = (
         await session.execute(select(FeedState).where(FeedState.feed_url == FEED_URL))
     ).scalar_one()
@@ -415,3 +426,63 @@ async def test_feed_rettifica_titolo_gdelt(session: AsyncSession) -> None:
             client=client, limiter=_limiter(), robots=RobotsCache(client),
         )
     assert stats.retitled == 0
+
+
+@respx.mock
+async def test_autodiscovery_anche_con_homepage_vietata(
+    session: AsyncSession,
+) -> None:
+    """robots.txt resta rispettato per la HOMEPAGE (crawling), ma i
+    candidati convenzionali sono FEED e si provano comunque."""
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(
+        return_value=httpx.Response(200, text="User-agent: *\nDisallow: /")
+    )
+    respx.get(FEED_URL).mock(return_value=httpx.Response(404))
+    homepage = respx.get("https://esempio.test/").mock(
+        return_value=httpx.Response(200, text="<html>mai visitata</html>")
+    )
+    respx.get("https://esempio.test/feed/").mock(
+        return_value=httpx.Response(200, content=FIXTURE)
+    )
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.created == 2
+    assert not homepage.called  # la homepage vietata non si tocca
+
+
+@respx.mock
+async def test_202_di_attesa_fa_scattare_il_ritento_browser(
+    session: AsyncSession,
+) -> None:
+    """Alcuni filtri anti-bot rispondono 202 «in attesa»: è un blocco e
+    si ritenta con l'identità browser."""
+    from core.ingest.rss import BROWSER_UA
+
+    fonte = _fonte()
+    session.add(fonte)
+    await session.flush()
+
+    respx.get("https://esempio.test/robots.txt").mock(return_value=httpx.Response(404))
+
+    def risposta(request: httpx.Request) -> httpx.Response:
+        if request.headers.get("User-Agent") == BROWSER_UA:
+            return httpx.Response(200, content=FIXTURE)
+        return httpx.Response(202, text="richiesta in coda")
+
+    respx.get(FEED_URL).mock(side_effect=risposta)
+
+    async with httpx.AsyncClient() as client:
+        stats = await ingest_feed(
+            session, fonte, FEED_URL,
+            client=client, limiter=_limiter(), robots=RobotsCache(client),
+        )
+    assert stats.error is None
+    assert stats.created == 2

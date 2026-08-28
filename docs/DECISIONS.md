@@ -388,3 +388,38 @@ avrebbe bloccato per sempre l'arrivo di notizie nuove.
 **Conseguenze.** /lampo aveva già la sua finestra (12 ore) e non cambia;
 l'archivio resta tutto raggiungibile (pagina story, export /dati); la
 metodologia («Le regole di presentazione») documenta finestra e sconto.
+
+## ADR-0025 — Il fetch dei feed non passa da robots.txt (il crawling sì)
+
+**Contesto.** Il primo seed reale su Mac mostrava famiglie di errori:
+«robots.txt vieta l'accesso» al feed di testate che il feed lo pubblicano
+apposta (il Fatto Quotidiano, Civil.ge, Ekathimerini, Axios, Times of
+Israel), 403/202 da filtri anti-bot, 404 da URL migrati, e «feed vuoto o
+non interpretabile» senza indizi su cosa fosse arrivato davvero.
+
+**Decisione.** (1) Il fetch di un FEED RSS/Atom non passa più dal filtro
+robots.txt: il protocollo robots governa i crawler, mentre un feed è
+un'interfaccia di abbonamento pubblicata proprio per gli aggregatori che
+leggono per conto dei lettori iscritti — è la prassi dei lettori di feed,
+e Google Feedfetcher la documenta esplicitamente («le richieste partono
+da un'azione umana, non da un crawler»; chi non vuole il fetch serve
+404/410 al singolo agente). robots.txt resta rispettato per il crawling
+vero: homepage (autodiscovery), pagine articolo, testo integrale; restano
+sempre rate limit, cache condizionale e User-Agent identificativo, e una
+testata può sempre negare il feed con 403/404 mirati, che onoriamo col
+backoff. (2) Il ritento anti-bot usa l'identità browser COMPLETA
+(intestazioni Accept/Accept-Language/Sec-Fetch-*), e scatta anche su 202.
+(3) «Feed vuoto o non interpretabile» ora registra content-type e
+anteprima del corpo: la diagnosi si legge dal log. (4) L'autodiscovery
+prova più percorsi convenzionali (WordPress /?feed=rss2, Arc XP
+/arc/outboundfeeds/rss/), non applica robots ai candidati (sono feed) e
+ritenta i candidati bloccati con identità browser. (5) URL del catalogo
+corretti da ricerca: Corriere (feed-hp restyle 2025), Adnkronos
+(RSS_Ultimora/Cronaca), Il Foglio (API naxos), Le Point e El Universal
+(Arc XP), Haaretz (cmlink di riserva), Kuwait Times (www); Avvenire,
+Hürriyet Daily News, il Giornale e Tempo English non documentano più un
+feed → feed_urls vuoti, copre GDELT senza rumore a ogni giro.
+
+**Conseguenze.** docs/LEGAL.md aggiornato («robots.txt rispettato per il
+crawling»); più feed vivi al primo avvio; i 403 da fingerprinting TLS
+(La Stampa) restano non risolvibili onestamente e coperti da GDELT.

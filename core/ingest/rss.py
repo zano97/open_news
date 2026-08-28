@@ -48,13 +48,25 @@ _ATTR_RE = re.compile(r"""([a-zA-Z-]+)\s*=\s*["']([^"']*)["']""")
 _FEED_TYPES = {"application/rss+xml", "application/atom+xml"}
 
 # Alcuni siti servono al nostro User-Agent dichiarato una pagina di verifica
-# anti-bot al posto del feed (esito: "feed vuoto o non interpretabile", o 403).
-# In quel caso si ritenta UNA volta con un User-Agent da browser — sempre e
-# solo DOPO il via libera di robots.txt, che resta verificato col nostro nome.
+# anti-bot al posto del feed (esito: "feed vuoto o non interpretabile", 403,
+# o 202 di attesa). In quel caso si ritenta UNA volta con l'identità di un
+# browser: non solo lo User-Agent, ma il corredo di intestazioni che i
+# firewall applicativi si aspettano da una visita reale.
 BROWSER_UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 )
+BROWSER_HEADERS: dict[str, str] = {
+    "User-Agent": BROWSER_UA,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9,it;q=0.8",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+}
+# Stati che tradiscono un filtro anti-bot davanti al feed.
+_BLOCKED_STATUSES = {202, 403}
 
 
 def describe_error(exc: Exception) -> str:
@@ -95,6 +107,7 @@ class FeedFetch:
     requested_url: str
     status_code: int | None = None
     content: bytes = b""
+    content_type: str | None = None
     etag: str | None = None
     last_modified: str | None = None
     error: str | None = None
@@ -121,9 +134,13 @@ def discover_feed_links(page_html: str, base_url: str) -> list[str]:
     return found
 
 
-def _looks_like_html(content: bytes) -> bool:
-    head = content[:2048].lstrip().lower()
-    return head.startswith(b"<!doctype html") or b"<html" in head
+# Percorsi convenzionali dei feed, in ordine di diffusione: WordPress
+# (/feed/, /?feed=rss2 quando /feed/ è disattivato), generici, piattaforma
+# Arc XP (Le Point, El Universo…: /arc/outboundfeeds/rss/).
+_PERCORSI_CONVENZIONALI = (
+    "/feed/", "/feed", "/rss", "/rss/", "/rss.xml", "/feed.xml",
+    "/index.rss", "/?feed=rss2", "/arc/outboundfeeds/rss/",
+)
 
 
 async def _try_autodiscovery(
@@ -134,45 +151,55 @@ async def _try_autodiscovery(
     limiter: DomainRateLimiter,
     robots: RobotsCache,
 ) -> FeedFetch | None:
-    """Cerca un feed alternativo sulla homepage della testata e lo prova."""
+    """Cerca un feed alternativo sulla testata e lo prova.
+
+    La homepage è una pagina web: si visita solo col permesso di
+    robots.txt (è crawling). I candidati sono FEED: come per l'URL del
+    catalogo, il fetch non passa dal filtro robots (vedi ADR-0025).
+    """
     homepage = f"https://{domain}/"
-    if not await robots.can_fetch(homepage):
-        return None
-    await limiter.wait(domain)
-    try:
-        resp = await client.get(homepage)
-    except (httpx.HTTPError, EgressDeniedError):
-        return None
-    if resp.status_code != 200:
-        return None
-    candidates = [
-        url
-        for url in discover_feed_links(resp.text, homepage)
-        if url != original_url
-        and (urlsplit(url).hostname or "").lower().endswith(domain.lower())
-    ]
+    candidates: list[str] = []
+    if await robots.can_fetch(homepage):
+        await limiter.wait(domain)
+        try:
+            resp = await client.get(homepage)
+        except (httpx.HTTPError, EgressDeniedError):
+            resp = None
+        if resp is not None and resp.status_code == 200:
+            candidates = [
+                url
+                for url in discover_feed_links(resp.text, homepage)
+                if url != original_url
+                and (urlsplit(url).hostname or "").lower().endswith(domain.lower())
+            ]
     if not candidates:
-        # Nessun <link rel="alternate"> in homepage (capita con i siti
-        # renderizzati via JS): si provano i percorsi convenzionali.
+        # Nessun <link rel="alternate"> leggibile (homepage vietata dai
+        # robots, o renderizzata via JS): si provano i percorsi convenzionali.
         candidates = [
             f"https://{domain}{percorso}"
-            for percorso in ("/feed/", "/feed", "/rss", "/rss.xml", "/feed.xml")
+            for percorso in _PERCORSI_CONVENZIONALI
             if f"https://{domain}{percorso}" != original_url
         ]
-    for candidate in candidates[:3]:
-        if not await robots.can_fetch(candidate):
-            continue
+    for candidate in candidates[:5]:
         await limiter.wait(urlsplit(candidate).hostname or domain)
         try:
             cand_resp = await client.get(candidate)
         except (httpx.HTTPError, EgressDeniedError):
             continue
+        if cand_resp.status_code in _BLOCKED_STATUSES:
+            # Anche i candidati possono stare dietro un filtro anti-bot.
+            await limiter.wait(urlsplit(candidate).hostname or domain)
+            try:
+                cand_resp = await client.get(candidate, headers=BROWSER_HEADERS)
+            except (httpx.HTTPError, EgressDeniedError):
+                continue
         if cand_resp.status_code == 200 and parse_feed(cand_resp.content):
             log.info("feed %s irraggiungibile: uso %s (autodiscovery)", original_url, candidate)
             return FeedFetch(
                 requested_url=original_url,
                 status_code=200,
                 content=cand_resp.content,
+                content_type=cand_resp.headers.get("Content-Type"),
                 etag=cand_resp.headers.get("ETag"),
                 last_modified=cand_resp.headers.get("Last-Modified"),
                 discovered_url=candidate,
@@ -190,17 +217,20 @@ async def fetch_feed_content(
     last_modified: str | None = None,
     discovery_domain: str | None = None,
 ) -> FeedFetch:
-    """Scarica un feed (solo rete): robots, rate limit, cache condizionale.
+    """Scarica un feed (solo rete): rate limit e cache condizionale.
+
+    Il fetch di un FEED non passa dal filtro robots.txt: un feed è
+    pubblicato apposta per essere letto dagli aggregatori per conto dei
+    lettori iscritti, e i lettori di feed (Google Feedfetcher in testa,
+    che lo documenta) non applicano robots al feed stesso. robots.txt
+    resta rispettato per il crawling vero: homepage (autodiscovery),
+    pagine articolo, testo integrale. Vedi ADR-0025 e docs/LEGAL.md.
 
     Con `discovery_domain`, un 404/410 o una risposta HTML fanno scattare
     l'autodiscovery del feed dalla homepage di quel dominio.
     """
     fetch = FeedFetch(requested_url=feed_url)
     host = urlsplit(feed_url).hostname or discovery_domain or ""
-
-    if not await robots.can_fetch(feed_url):
-        fetch.error = f"robots.txt vieta l'accesso a {feed_url}"
-        return fetch
 
     headers: dict[str, str] = {}
     if etag:
@@ -220,34 +250,34 @@ async def fetch_feed_content(
         fetch.not_modified = True
         return fetch
 
-    # Probabile filtro anti-bot: 403, oppure 200 con contenuto che non è un
-    # feed. Un solo ritento con User-Agent da browser; robots già rispettato.
-    blocked = resp.status_code == 403 or (
+    # Probabile filtro anti-bot: 403, 202 di attesa, oppure 200 con
+    # contenuto che non è un feed. Un solo ritento con l'identità browser.
+    blocked = resp.status_code in _BLOCKED_STATUSES or (
         resp.status_code == 200 and not parse_feed(resp.content)
     )
     if blocked:
         await limiter.wait(host)
         try:
             retry = await client.get(
-                feed_url, headers={**headers, "User-Agent": BROWSER_UA}
+                feed_url, headers={**headers, **BROWSER_HEADERS}
             )
         except (httpx.HTTPError, EgressDeniedError):
             retry = None
         if retry is not None and retry.status_code == 200 and parse_feed(retry.content):
             log.info(
-                "feed %s: leggibile solo con User-Agent browser (filtro anti-bot)",
+                "feed %s: leggibile solo con identità browser (filtro anti-bot)",
                 feed_url,
             )
             fetch.status_code = 200
             fetch.content = retry.content
+            fetch.content_type = retry.headers.get("Content-Type")
             fetch.etag = retry.headers.get("ETag")
             fetch.last_modified = retry.headers.get("Last-Modified")
             return fetch
 
     needs_discovery = resp.status_code in (404, 410) or (
-        resp.status_code == 200
-        and not parse_feed(resp.content)
-        and _looks_like_html(resp.content)
+        resp.status_code in _BLOCKED_STATUSES
+        or (resp.status_code == 200 and not parse_feed(resp.content))
     )
     if needs_discovery and discovery_domain:
         discovered = await _try_autodiscovery(
@@ -261,6 +291,7 @@ async def fetch_feed_content(
         return fetch
 
     fetch.content = resp.content
+    fetch.content_type = resp.headers.get("Content-Type")
     fetch.etag = resp.headers.get("ETag")
     fetch.last_modified = resp.headers.get("Last-Modified")
     return fetch
@@ -439,7 +470,15 @@ async def store_feed(
     entries = parse_feed(fetch.content)
     stats.fetched = len(entries)
     if not entries:
-        stats.error = "feed vuoto o non interpretabile"
+        # Diagnosi nel messaggio: COSA è arrivato al posto del feed (pagina
+        # anti-bot? HTML? XML strano?) si legge dal log, senza terminale.
+        anteprima = _WS_RE.sub(
+            " ", fetch.content[:300].decode("utf-8", "replace")
+        ).strip()[:90]
+        tipo = (fetch.content_type or "tipo ignoto").split(";")[0].strip()
+        stats.error = (
+            f"feed vuoto o non interpretabile ({tipo}; inizia con: {anteprima!r})"
+        )
         state.error = stats.error
         state.consecutive_failures += 1
         return stats
