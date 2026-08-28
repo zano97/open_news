@@ -263,6 +263,110 @@ async def translate_story_title(
     return added
 
 
+async def stories_to_translate(
+    session: AsyncSession, *, limit: int = 200
+) -> list[Story]:
+    """Le story da tradurre, NELL'ORDINE in cui il lettore le vedrà.
+
+    Stessa finestra e stesso peso della prima pagina (core.ranking): prima
+    il job traduceva «le più recenti», la pagina mostrava «le più pesate»,
+    e le due liste divergevano — risultato: prima pagina piena di titoli
+    mai tradotti mentre il job lavorava su story che nessuno guardava.
+    Finestra vuota (archivio fermo): si ripiega sulle più recenti.
+    """
+    from sqlalchemy import select as sql_select
+
+    from core.ranking import finestra_attualita, peso_attualita
+
+    candidate = list(
+        (
+            await session.execute(
+                sql_select(Story)
+                .where(Story.last_seen >= finestra_attualita())
+                .order_by(Story.last_seen.desc())
+                .limit(max(limit * 2, 400))
+            )
+        ).scalars()
+    )
+    if not candidate:
+        candidate = list(
+            (
+                await session.execute(
+                    sql_select(Story).order_by(Story.last_seen.desc()).limit(limit)
+                )
+            ).scalars()
+        )
+    candidate.sort(key=lambda s: -peso_attualita(s.source_count, s.last_seen))
+    return candidate[:limit]
+
+
+async def translate_missing(
+    session: AsyncSession,
+    story_ids: list[int],
+    locale: str,
+    *,
+    translator: Translator | None = None,
+) -> int:
+    """Traduzioni mirate: solo le story elencate, solo nella lingua data."""
+    from sqlalchemy import select as sql_select
+
+    fatte = 0
+    for story_id in story_ids:
+        story = (
+            await session.execute(sql_select(Story).where(Story.id == story_id))
+        ).scalar_one_or_none()
+        if story is None:
+            continue
+        try:
+            fatte += await translate_story_title(
+                session, story, targets=(locale,), translator=translator
+            )
+        except Exception as exc:  # una story indigesta non ferma le altre
+            log.warning("titolo della story %s non tradotto: %s", story_id, exc)
+    return fatte
+
+
+# Story già in lavorazione on-demand: mai due volte lo stesso lavoro insieme.
+_KICK_IN_CORSO: set[tuple[int, str]] = set()
+
+
+def kick_translations(story_ids: list[int], locale: str) -> object | None:
+    """Fuoco-e-dimentica dalla prima pagina: le story VISIBILI senza
+    traduzione nella lingua del lettore si traducono subito in background,
+    senza aspettare il giro dei 15 minuti. Al prossimo caricamento la riga
+    tra parentesi c'è. Ritorna il task (o None se non c'è nulla da fare)."""
+    import asyncio
+
+    if get_translator() is None:
+        return None
+    nuovi = [s for s in story_ids if (s, locale) not in _KICK_IN_CORSO][:12]
+    if not nuovi:
+        return None
+    for story_id in nuovi:
+        _KICK_IN_CORSO.add((story_id, locale))
+
+    async def _run() -> None:
+        try:
+            from core.db import get_sessionmaker
+
+            maker = get_sessionmaker()
+            async with maker() as session:
+                fatte = await translate_missing(session, nuovi, locale)
+                await session.commit()
+            if fatte:
+                log.info(
+                    "tradotti on-demand %d titoli in %s (prima pagina)",
+                    fatte, locale,
+                )
+        except Exception as exc:  # DB occupato o Argos in download: riproverà
+            log.info("traduzioni on-demand rimandate: %s", exc)
+        finally:
+            for story_id in nuovi:
+                _KICK_IN_CORSO.discard((story_id, locale))
+
+    return asyncio.create_task(_run())
+
+
 def display_title(story: Story, locale: str) -> tuple[str, bool]:
     """(titolo da mostrare, è_una_traduzione) per la lingua dell'interfaccia."""
     translations = story.title_translations or {}

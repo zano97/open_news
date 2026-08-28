@@ -1,6 +1,6 @@
 """Fixture condivise: DB SQLite in-memory, app FastAPI, client HTTP."""
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterator
 
 import pytest
 from fastapi import FastAPI
@@ -57,3 +57,14 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
+
+
+@pytest.fixture(autouse=True)
+def _traduttore_isolato() -> Iterator[None]:
+    """Nessun traduttore residuo tra un test e l'altro: i test di pagina
+    non devono mai far partire traduzioni on-demand vere."""
+    from core.nlp.translate import set_translator
+
+    set_translator(None)
+    yield
+    set_translator(None)

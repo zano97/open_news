@@ -126,31 +126,23 @@ async def translate_titles_job() -> None:
     finisca prima del successivo (ogni 15 minuti).
     """
     import time
-    from datetime import timedelta
 
     from core.i18n import locales_by_priority
-    from core.models import utcnow
-    from core.nlp.translate import get_translator, translate_story_title
+    from core.nlp.translate import (
+        get_translator,
+        stories_to_translate,
+        translate_story_title,
+    )
     from core.refresh_state import tracking
 
     if get_translator() is None:
         return
     maker = get_sessionmaker()
-    since = utcnow() - timedelta(hours=72)
     scadenza = time.monotonic() + 480  # 8 minuti: mai oltre il giro dopo
     async with tracking("traduzioni"), maker() as session:
-        stories = (
-            (
-                await session.execute(
-                    select(Story)
-                    .where(Story.last_seen >= since)
-                    .order_by(Story.last_seen.desc())
-                    .limit(80)
-                )
-            )
-            .scalars()
-            .all()
-        )
+        # NELL'ORDINE della prima pagina (core.ranking): si traduce prima
+        # ciò che il lettore sta per vedere, mai story che nessuno guarda.
+        stories = await stories_to_translate(session, limit=200)
         from core import refresh_state
 
         targets = locales_by_priority()

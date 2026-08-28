@@ -5,7 +5,7 @@ import logging
 import math
 import os
 from collections.abc import AsyncIterator
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Annotated, Any
 
 import httpx
@@ -48,6 +48,7 @@ from core.models import (
 )
 from core.nlp.topics import load_topics
 from core.provenance import for_entity
+from core.ranking import finestra_attualita, peso_attualita
 
 log = logging.getLogger(__name__)
 
@@ -212,22 +213,8 @@ async def cambia_lingua(code: str, next: str = "/") -> RedirectResponse:
     return response
 
 
-def _finestra_attualita() -> datetime:
-    """Inizio della finestra di attualità della prima pagina (last_seen)."""
-    from core.config import get_settings
-
-    return utcnow() - timedelta(hours=get_settings().front_page_window_hours)
-
-
-# La copertura si sconta del tempo trascorso dall'ultimo aggiornamento:
-# dimezza ogni PESO_DIMEZZAMENTO_ORE. Così una story enorme di ieri non
-# copre per sempre una story nata oggi, ma una ancora viva resta in alto.
-PESO_DIMEZZAMENTO_ORE = 12.0
-
-
-def _peso_attualita(copertura: int, last_seen: datetime) -> float:
-    ore = max((utcnow() - last_seen).total_seconds() / 3600.0, 0.0)
-    return max(int(copertura), 1) * math.pow(0.5, ore / PESO_DIMEZZAMENTO_ORE)
+# Finestra e peso vivono in core.ranking (condivisi col job di traduzione
+# dei titoli, che serve prima ciò che il lettore sta per vedere).
 
 
 async def _conteggi_per_paese(session: AsyncSession) -> list[tuple[str, int]]:
@@ -241,7 +228,7 @@ async def _conteggi_per_paese(session: AsyncSession) -> list[tuple[str, int]]:
             select(Source.country, func.count(func.distinct(Article.story_id)))
             .join(Article, Article.source_id == Source.id)
             .join(Story, Story.id == Article.story_id)
-            .where(Story.last_seen >= _finestra_attualita())
+            .where(Story.last_seen >= finestra_attualita())
             .group_by(Source.country)
         )
     ).all()
@@ -425,7 +412,7 @@ async def index(
     # finestra di attualità, ordinate per copertura scontata del tempo
     # (_peso_attualita). Senza finestra, le story più grandi dell'archivio
     # restavano in cima per sempre e le notizie del giorno non entravano mai.
-    since = _finestra_attualita()
+    since = finestra_attualita()
     if paese:
         # Solo story coperte da almeno una testata del paese; il peso usa
         # quanto QUEL paese le ha coperte.
@@ -457,7 +444,7 @@ async def index(
                 )
             ).all()
         ordinate = sorted(
-            rows, key=lambda r: -_peso_attualita(int(r[1]), r[0].last_seen)
+            rows, key=lambda r: -peso_attualita(int(r[1]), r[0].last_seen)
         )
         stories = [story for story, _ in ordinate][:36]
     else:
@@ -481,13 +468,27 @@ async def index(
             )
         stories = sorted(
             candidate,
-            key=lambda s: -_peso_attualita(s.source_count, s.last_seen),
+            key=lambda s: -peso_attualita(s.source_count, s.last_seen),
         )[:36]
     coverages = await _coverages_for(session, [s.id for s in stories])
     versions_map = {
         s.id: order_versions(s.articles, paese, locale) for s in stories
     }
     topic_labels = topic_labels_for(locale)
+    # Le story VISIBILI senza traduzione nella lingua del lettore si
+    # traducono subito in background: al prossimo caricamento la riga
+    # tra parentesi c'è, senza aspettare il giro dei 15 minuti.
+    from core.nlp.translate import kick_translations, neutral_title_language
+
+    mancanti = [
+        s.id
+        for s in stories
+        if s.title_translations is not None
+        and locale not in (s.title_translations or {})
+        and neutral_title_language(s) not in (None, locale)
+    ]
+    if mancanti:
+        kick_translations(mancanti, locale)
     return templates.TemplateResponse(
         request,
         "index.html",

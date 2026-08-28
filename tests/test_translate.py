@@ -392,3 +392,86 @@ async def test_coppia_mancante_registrata_negli_esiti(
     assert riepilogo["conteggi"] == {"coppia non disponibile": 1}
     assert riepilogo["coppie_ferme"] == {"it→en": "coppia non disponibile"}
     LAST_ESITI.clear()
+
+
+async def test_si_traduce_cio_che_il_lettore_vede(session: AsyncSession) -> None:
+    """Il job traduce NELL'ORDINE della prima pagina: prima la story più
+    pesata della finestra di attualità; quelle fuori finestra non rubano
+    lavoro. (Prima le due liste divergevano: pagina piena di titoli mai
+    tradotti mentre il job lavorava su story che nessuno guardava.)"""
+    from datetime import datetime, timedelta
+
+    from core.nlp.translate import stories_to_translate
+
+    adesso = datetime.now(UTC)
+    in_apertura = Story(
+        title_neutral="Story di apertura, grande e fresca",
+        first_seen=adesso, last_seen=adesso - timedelta(hours=1),
+        article_count=40, source_count=20,
+    )
+    minore = Story(
+        title_neutral="Story minore ma attuale",
+        first_seen=adesso, last_seen=adesso - timedelta(hours=2),
+        article_count=4, source_count=3,
+    )
+    fuori = Story(
+        title_neutral="Story gigantesca ma fuori finestra",
+        first_seen=adesso, last_seen=adesso - timedelta(hours=90),
+        article_count=200, source_count=50,
+    )
+    session.add_all([in_apertura, minore, fuori])
+    await session.flush()
+
+    ordinate = await stories_to_translate(session, limit=10)
+    titoli = [s.title_neutral for s in ordinate]
+    assert titoli[0] == "Story di apertura, grande e fresca"
+    assert "Story minore ma attuale" in titoli
+    assert "Story gigantesca ma fuori finestra" not in titoli
+
+
+async def test_traduzione_mirata_delle_story_visibili(
+    session: AsyncSession,
+) -> None:
+    """translate_missing: solo le story chieste, solo nella lingua chiesta."""
+    from core.nlp.translate import translate_missing
+
+    story = await _story_italiana(session)
+    finto = TraduttoreRegistratore({("it", "en"): "[EN] visibile subito"})
+    fatte = await translate_missing(session, [story.id, 99999], "en", translator=finto)
+    assert fatte == 1
+    assert story.title_translations["en"] == "[EN] visibile subito"
+    # Una sola chiamata: la lingua era una, la story inesistente si ignora.
+    assert len(finto.chiamate) == 1
+
+
+async def test_kick_traduzioni_dalla_prima_pagina(
+    session: AsyncSession, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Il fuoco-e-dimentica della prima pagina traduce davvero in
+    background e non accoda mai due volte la stessa story."""
+    import asyncio
+
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
+    from core import db
+    from core.nlp.translate import kick_translations, set_translator
+
+    story = await _story_italiana(session)
+    await session.commit()
+
+    finto = TraduttoreRegistratore({("it", "en"): "[EN] dal kick"})
+    set_translator(finto)
+    maker = async_sessionmaker(session.bind, expire_on_commit=False)
+    monkeypatch.setattr(db, "get_sessionmaker", lambda: maker)
+
+    task = kick_translations([story.id], "en")
+    assert task is not None
+    # Ri-chiedere subito la stessa story non accoda un secondo lavoro.
+    assert kick_translations([story.id], "en") is None
+    await asyncio.wait_for(task, timeout=10)
+
+    await session.refresh(story)
+    assert story.title_translations["en"] == "[EN] dal kick"
+    # A lavoro finito si può richiedere di nuovo (ma non serve più).
+    set_translator(None)
+    assert kick_translations([story.id], "en") is None  # traduttore assente
