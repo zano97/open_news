@@ -203,6 +203,13 @@ demo.banner: "This instance shows <strong>invented demo news</strong>, attribute
 
 # Filtro per paese
 filtro.tutto_mondo: "Whole world"
+filtro.mappa: "Map"
+mappa_paesi.titolo: "The world, by coverage"
+mappa_paesi.occhiello: "Each country is shaded by how many stories its outlets covered. Click a country to read the news from its point of view, or go back to the whole world."
+mappa_paesi.tutto: "All the world's news"
+mappa_paesi.meno: "less coverage"
+mappa_paesi.piu: "more coverage"
+mappa_paesi.credito: "Map:"
 filtro.altri: "{n} more countries ▾"
 filtro.aria: "Filter the front page by outlet country"
 filtro.nota: "You are seeing stories covered by at least one outlet from: {paese}. The unfiltered front page stays worldwide."

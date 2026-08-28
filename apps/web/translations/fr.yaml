@@ -217,6 +217,13 @@ demo.banner: "Cette instance affiche des <strong>actualités de démonstration, 
 
 # Filtro per paese
 filtro.tutto_mondo: "Monde entier"
+filtro.mappa: "Carte"
+mappa_paesi.titolo: "Le monde, par couverture"
+mappa_paesi.occhiello: "Chaque pays est coloré selon le nombre d'événements couverts par ses médias. Cliquez un pays pour lire l'actualité de son point de vue, ou revenez au monde entier."
+mappa_paesi.tutto: "Toute l'actualité du monde"
+mappa_paesi.meno: "moins de couverture"
+mappa_paesi.piu: "plus de couverture"
+mappa_paesi.credito: "Carte :"
 filtro.altri: "{n} autres pays ▾"
 filtro.aria: "Filtrer la une par pays des journaux"
 filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {paese}. La une sans filtre reste mondiale."

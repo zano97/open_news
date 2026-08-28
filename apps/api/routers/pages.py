@@ -199,6 +199,40 @@ async def cambia_lingua(code: str, next: str = "/") -> RedirectResponse:
     return response
 
 
+async def _conteggi_per_paese(session: AsyncSession) -> list[tuple[str, int]]:
+    """(paese, story coperte) per il filtro e la mappa, per copertura."""
+    rows = (
+        await session.execute(
+            select(Source.country, func.count(func.distinct(Article.story_id)))
+            .join(Article, Article.source_id == Source.id)
+            .where(Article.story_id.is_not(None))
+            .group_by(Source.country)
+        )
+    ).all()
+    return sorted(
+        ((c, int(n)) for c, n in rows if n), key=lambda cn: (-cn[1], cn[0])
+    )
+
+
+@router.get("/paesi", response_class=HTMLResponse)
+async def mappa_paesi(
+    request: Request, session: Annotated[AsyncSession, Depends(get_session)]
+) -> HTMLResponse:
+    """La mappa del mondo: colore = copertura, clic = filtro per paese."""
+    countries = await _conteggi_per_paese(session)
+    massimo = countries[0][1] if countries else 1
+    return templates.TemplateResponse(
+        request,
+        "mappa_paesi.html",
+        {
+            **await page_context(request, session),
+            "countries": countries,
+            "massimo": massimo,
+            "conteggi_json": json.dumps(dict(countries)),
+        },
+    )
+
+
 async def _owners_by_source(
     session: AsyncSession, source_ids: list[int]
 ) -> dict[int, str]:

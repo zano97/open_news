@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ t('mappa_paesi.titolo') }} — {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="pagina-mappa-paesi">
+  <h2 class="titolo-sezione">{{ t('mappa_paesi.titolo') }}</h2>
+  <p class="occhiello">{{ t('mappa_paesi.occhiello') }}</p>
+
+  <p class="mappa-tutto">
+    <a class="chip-paese chip-grande" href="/">🌍 {{ t('mappa_paesi.tutto') }}</a>
+  </p>
+
+  <div class="mappa-mondo" data-mappa-mondo>
+    {# Colore per copertura: quota del paese più coperto, in scala d'accento. #}
+    <style>
+      {% for c, n in countries %}
+      .mappa-mondo #{{ c }} { fill: color-mix(in srgb, var(--accento) {{ (20 + 70 * n / massimo) | round | int }}%, var(--carta-scura)); }
+      {% endfor %}
+    </style>
+    {% include "_mappa_mondo.svg" %}
+  </div>
+  <p class="mappa-legenda" aria-hidden="true">
+    {{ t('mappa_paesi.meno') }}
+    <span class="legenda-scala"></span>
+    {{ t('mappa_paesi.piu') }}
+  </p>
+
+  <div class="filtro-paesi mappa-elenco">
+    {% for c, n in countries %}
+    <a href="/?paese={{ c }}" class="chip-paese" hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> <span class="chip-nome" data-paese="{{ c }}">{{ c | upper }}</span><span class="chip-n">{{ n }}</span></a>
+    {% endfor %}
+  </div>
+
+  <p class="fonte-meta mappa-credito">{{ t('mappa_paesi.credito') }}
+    <a href="https://github.com/VictorCazanave/svg-maps" rel="noopener">@svg-maps/world</a> (CC BY 4.0).</p>
+</section>
+<script id="dati-mappa" type="application/json">{{ conteggi_json | safe }}</script>
+{% endblock %}

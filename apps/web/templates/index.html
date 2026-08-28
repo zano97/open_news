@@ -55,15 +55,16 @@
   <a href="/" class="chip-paese {{ 'paese-attivo' if not paese }}">🌍 {{ t('filtro.tutto_mondo') }}</a>
   {% for c, n in in_vista %}
   <a href="/?paese={{ c }}" class="chip-paese {{ 'paese-attivo' if paese == c }}"
-     hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> {{ c | upper }}<span class="chip-n">{{ n }}</span></a>
+     hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> <span class="chip-nome" data-paese="{{ c }}">{{ c | upper }}</span><span class="chip-n">{{ n }}</span></a>
   {% endfor %}
+  <a href="/paesi" class="chip-paese chip-mappa">🗺 {{ t('filtro.mappa') }}</a>
   {% if altri %}
   <details class="filtro-altri">
     <summary class="chip-paese">{{ t('filtro.altri', n=altri | length) }}</summary>
     <div class="filtro-altri-pannello">
       {% for c, n in altri %}
       <a href="/?paese={{ c }}" class="chip-paese {{ 'paese-attivo' if paese == c }}"
-         hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> {{ c | upper }}<span class="chip-n">{{ n }}</span></a>
+         hreflang="{{ c }}"><span class="chip-bandiera">{{ c | bandiera }}</span> <span class="chip-nome" data-paese="{{ c }}">{{ c | upper }}</span><span class="chip-n">{{ n }}</span></a>
       {% endfor %}
     </div>
   </details>

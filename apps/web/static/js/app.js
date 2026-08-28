@@ -167,6 +167,43 @@
     }
   });
 
+  // Nomi dei paesi nella lingua dell'interfaccia: li sa già il browser
+  // (Intl.DisplayNames), niente elenchi da mantenere in cinque lingue.
+  var nomiPaesi = null;
+  try {
+    nomiPaesi = new Intl.DisplayNames([document.documentElement.lang || "it"], { type: "region" });
+  } catch (e) { /* browser datato: restano le sigle */ }
+  if (nomiPaesi) {
+    Array.prototype.forEach.call(document.querySelectorAll(".chip-nome[data-paese]"), function (el) {
+      var codice = (el.getAttribute("data-paese") || "").toUpperCase();
+      try {
+        var nome = nomiPaesi.of(codice);
+        if (nome && nome !== codice) el.textContent = nome;
+      } catch (e) { /* codice non ISO: resta la sigla */ }
+    });
+  }
+
+  // Mappa del mondo (/paesi): clic su un paese coperto = filtro.
+  var mappa = document.querySelector("[data-mappa-mondo]");
+  var datiMappa = document.getElementById("dati-mappa");
+  if (mappa && datiMappa) {
+    var conteggi = {};
+    try { conteggi = JSON.parse(datiMappa.textContent) || {}; } catch (e) { /* vuota */ }
+    Array.prototype.forEach.call(mappa.querySelectorAll("svg path[id]"), function (path) {
+      var codice = path.id;
+      if (!Object.prototype.hasOwnProperty.call(conteggi, codice)) return;
+      path.classList.add("paese-cliccabile");
+      var nome = codice.toUpperCase();
+      if (nomiPaesi) { try { nome = nomiPaesi.of(codice.toUpperCase()) || nome; } catch (e) { /* sigla */ } }
+      var titolo = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      titolo.textContent = nome + " · " + conteggi[codice];
+      path.appendChild(titolo);
+      path.addEventListener("click", function () {
+        window.location.href = "/?paese=" + codice;
+      });
+    });
+  }
+
   // Edizione lampo: navigazione con i tasti freccia (miglioramento progressivo;
   // senza JS il reel resta una lista verticale scorrevole).
   var reel = document.getElementById("reel");

@@ -217,6 +217,13 @@ demo.banner: "Diese Instanz zeigt <strong>erfundene Demo-Nachrichten</strong>, d
 
 # Filtro per paese
 filtro.tutto_mondo: "Ganze Welt"
+filtro.mappa: "Karte"
+mappa_paesi.titolo: "Die Welt, nach Abdeckung"
+mappa_paesi.occhiello: "Jedes Land ist danach eingefärbt, wie viele Meldungen seine Medien aufgegriffen haben. Ein Klick zeigt die Nachrichten aus seiner Sicht — oder zurück zur ganzen Welt."
+mappa_paesi.tutto: "Alle Nachrichten der Welt"
+mappa_paesi.meno: "weniger Abdeckung"
+mappa_paesi.piu: "mehr Abdeckung"
+mappa_paesi.credito: "Karte:"
 filtro.altri: "{n} weitere Länder ▾"
 filtro.aria: "Titelseite nach Land der Zeitungen filtern"
 filtro.nota: "Sie sehen Storys, die von mindestens einer Zeitung aus {paese} abgedeckt wurden. Die ungefilterte Titelseite bleibt weltweit."

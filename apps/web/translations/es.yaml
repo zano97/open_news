@@ -217,6 +217,13 @@ demo.banner: "Esta instancia muestra <strong>noticias de demostración, inventad
 
 # Filtro per paese
 filtro.tutto_mondo: "Todo el mundo"
+filtro.mappa: "Mapa"
+mappa_paesi.titolo: "El mundo, por cobertura"
+mappa_paesi.occhiello: "Cada país está coloreado según cuántas noticias cubrieron sus medios. Pulsa un país para leer las noticias desde su punto de vista, o vuelve al mundo entero."
+mappa_paesi.tutto: "Todas las noticias del mundo"
+mappa_paesi.meno: "menos cobertura"
+mappa_paesi.piu: "más cobertura"
+mappa_paesi.credito: "Mapa:"
 filtro.altri: "{n} países más ▾"
 filtro.aria: "Filtrar la portada por país de los periódicos"
 filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico de: {paese}. La portada sin filtro sigue siendo mundial."

@@ -217,3 +217,15 @@ async def test_filtro_per_paese(client: AsyncClient, session: AsyncSession) -> N
     invalido = await client.get("/?paese=zz")
     assert "Notizia solo italiana" in invalido.text
     assert "British-only story" in invalido.text
+
+
+async def test_mappa_dei_paesi(client: AsyncClient, session: AsyncSession) -> None:
+    """/paesi: la mappa del mondo con i paesi coperti colorati e cliccabili."""
+    await _mini_giornale(session)
+    resp = await client.get("/paesi")
+    assert resp.status_code == 200
+    testo = resp.text
+    assert 'id="it"' in testo  # il tracciato dell'Italia c'è
+    assert "dati-mappa" in testo  # i conteggi per il JS
+    assert 'href="/?paese=it"' in testo  # e il chip di riserva senza JS
+    assert "chip-nome" in testo

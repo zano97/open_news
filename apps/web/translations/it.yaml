@@ -218,6 +218,13 @@ demo.banner: "Questa istanza mostra <strong>notizie dimostrative, inventate</str
 
 # Filtro per paese
 filtro.tutto_mondo: "Tutto il mondo"
+filtro.mappa: "Mappa"
+mappa_paesi.titolo: "Il mondo, per copertura"
+mappa_paesi.occhiello: "Ogni paese è colorato per quante notizie le sue testate hanno coperto. Clicca un paese per leggere le notizie dal suo punto di vista, o torna al mondo intero."
+mappa_paesi.tutto: "Tutte le notizie del mondo"
+mappa_paesi.meno: "meno copertura"
+mappa_paesi.piu: "più copertura"
+mappa_paesi.credito: "Mappa:"
 filtro.altri: "Altri {n} paesi ▾"
 filtro.aria: "Filtra la prima pagina per paese delle testate"
 filtro.nota: "Stai vedendo le story coperte da almeno una testata di: {paese}. La prima pagina senza filtro resta mondiale."
