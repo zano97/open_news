@@ -71,6 +71,21 @@ async def summarize_job() -> None:
         log.info("riassunti neutri generati: %d", done)
 
 
+async def blindspot_job() -> None:
+    """Ricalcola gli angoli ciechi (v2, test di significatività).
+
+    Fuori dal giro settimanale: i flag devono aggiornarsi (e AZZERARSI,
+    quando le condizioni non valgono più) entro ore, non entro lunedì.
+    """
+    from core.bias.selection import compute_blindspots
+    from core.refresh_state import tracking
+
+    maker = get_sessionmaker()
+    async with tracking("angoli ciechi"), maker() as session:
+        await compute_blindspots(session)
+        await session.commit()
+
+
 async def refresh_settings_job() -> None:
     """Ricarica gli override del pannello admin (prevalgono sull'ambiente)."""
     from core.runtime_settings import load_overrides

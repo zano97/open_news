@@ -5,6 +5,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from apps.worker.jobs.analyze import (
+    blindspot_job,
     cluster_job,
     enrich_owners_job,
     link_entities_job,
@@ -73,7 +74,12 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     # Traduzioni dei titoli neutri: attive solo con l'extra [translate].
     scheduler.add_job(
         translate_titles_job, "interval", minutes=15, id="translate_titles",
-        max_instances=1,
+        max_instances=1, next_run_time=tra(180),
+    )
+    # Angoli ciechi: presto dopo l'avvio (per azzerare flag stantii) e ogni 12 ore.
+    scheduler.add_job(
+        blindspot_job, "interval", hours=12, id="blindspots",
+        max_instances=1, next_run_time=tra(900),
     )
     # I riassunti NON girano in automatico: si generano solo su richiesta
     # del lettore (pulsante nella pagina story) o dell'admin (pannello).

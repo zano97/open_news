@@ -188,3 +188,44 @@ def test_sottotitolo_non_si_fida_della_sola_lingua_rilevata() -> None:
     )
     story.articles = [inglese, nrk]
     assert headline_subtitle(story, "it") is None  # meglio niente che sbagliato
+
+
+async def test_titoli_tradotti_col_llm_di_riserva(session, monkeypatch) -> None:
+    """Senza Argos ma col generatore acceso, i titoli si traducono lo
+    stesso (marcati ollama-translate-v1): il sottotitolo c'è comunque."""
+    import httpx
+    import respx
+
+    from core import provenance
+    from core.config import get_settings
+    from core.models import Article, Source, Story
+    from core.nlp.translate import set_translator, translate_story_title
+
+    set_translator(None)
+    monkeypatch.setattr(get_settings(), "enable_llm", True)
+
+    fonte = Source(slug="no-arg", name="F", domain="noarg.test", country="gb",
+                   language="en", region="world", feed_urls=[], terms_note="")
+    session.add(fonte)
+    await session.flush()
+    story = Story(title_neutral="Nepal flash floods", title_translations={})
+    session.add(story)
+    await session.flush()
+    session.add(Article(source_id=fonte.id, story_id=story.id,
+                        url="https://noarg.test/a", title="Nepal flash floods",
+                        language="en"))
+    await session.flush()
+    await session.refresh(story, ["articles"])
+
+    with respx.mock:
+        respx.post("http://localhost:11434/api/generate").mock(
+            return_value=httpx.Response(200, json={"response": "Alluvioni lampo in Nepal"})
+        )
+        aggiunte = await translate_story_title(
+            session, story, targets=["it"], llm_fallback=True
+        )
+    assert aggiunte == 1
+    assert story.title_translations["it"] == "Alluvioni lampo in Nepal"
+    prova = await provenance.for_entity(session, "story", story.id)
+    riga = next(p for p in prova if p.field == "title_translations")
+    assert riga.method == "ollama-translate-v1"

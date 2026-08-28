@@ -196,7 +196,13 @@ async def translate_story_title(
             continue
         translated = None
         if translator is not None:
-            translated = translator.translate(story.title_neutral, source, target)
+            # Argos è CPU (e al primo giro scarica i modelli): su un thread,
+            # o bloccherebbe l'intera app per minuti.
+            import asyncio
+
+            translated = await asyncio.to_thread(
+                translator.translate, story.title_neutral, source, target
+            )
         if not translated and llm_fallback:
             translated = await llm_translate_title(story.title_neutral, target)
             if translated:

@@ -89,6 +89,9 @@
     {% else %}
     <p class="fonte-meta">{{ t('imp.diag_nota_docker') }}</p>
     {% endif %}
+    <p class="fonte-meta">{{ t('imp.diag_traduzioni') }}
+      {% if trad_argos %}{{ t('imp.diag_argos_ok', n=trad_coppie) }}{% else %}{{ t('imp.diag_argos_no') }}{% endif %}
+      · {{ t('imp.diag_llm_riserva') }} {{ t('imp.diag_acceso') if trad_llm else t('imp.diag_spento') }}</p>
     {% if cicli %}
     <p class="fonte-meta">{{ t('imp.diag_cicli') }}
       {% for nome, info in cicli.items() %}{{ nome }}: {{ info.quando }} ({{ info.esito }}, {{ info.durata }}){{ " · " if not loop.last }}{% endfor %}

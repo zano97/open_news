@@ -53,6 +53,7 @@
   <div class="barra-tab-interna">
     <a href="/" {% if percorso == '/' or percorso.startswith('/storia') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.prima_pagina') }}</a>
     <a href="/lampo" {% if percorso.startswith('/lampo') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.lampo') }}</a>
+    <a href="/paesi" {% if percorso.startswith('/paesi') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.paesi') }}</a>
     <a href="/fonti" {% if percorso.startswith('/font') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.testate') }}</a>
     <a href="/metodo" {% if percorso.startswith('/metodo') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.metodo') }}</a>
     <a href="/dati" {% if percorso.startswith('/dati') %}class="tab-attiva" aria-current="page"{% endif %}>{{ t('nav.dati') }}</a>
