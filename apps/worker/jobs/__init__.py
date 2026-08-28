@@ -76,9 +76,11 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
         translate_titles_job, "interval", minutes=15, id="translate_titles",
         max_instances=1, next_run_time=tra(180),
     )
-    # Angoli ciechi: presto dopo l'avvio (per azzerare flag stantii) e ogni 12 ore.
+    # Angoli ciechi: il ricalcolo VERO avviene a ogni clustering (cioè a
+    # ogni aggiornamento delle notizie, pulsante compreso); questo giro
+    # copre solo i passaggi di maturità quando non arriva nulla di nuovo.
     scheduler.add_job(
-        blindspot_job, "interval", hours=12, id="blindspots",
+        blindspot_job, "interval", hours=2, id="blindspots",
         max_instances=1, next_run_time=tra(900),
     )
     # I riassunti NON girano in automatico: si generano solo su richiesta

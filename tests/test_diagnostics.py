@@ -233,3 +233,46 @@ def test_percentuale_di_avanzamento_reale() -> None:
         rs.end_manual()
 
     asyncio.run(scenario())
+
+
+async def test_clustering_ricalcola_gli_angoli_ciechi(
+    engine, monkeypatch,
+) -> None:
+    """Ogni aggiornamento delle notizie (il clustering è il suo ultimo
+    passo, anche per «Aggiorna ora») ricalcola subito gli angoli ciechi."""
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
+    from apps.worker.jobs import analyze
+
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    monkeypatch.setattr(analyze, "get_sessionmaker", lambda: maker)
+
+    from typing import ClassVar
+
+    class StatsFinte:
+        processed = 3
+        attached = 3
+        created = 0
+        touched_story_ids: ClassVar[list[int]] = []
+        new_flash: ClassVar[list[int]] = []
+
+    async def finto_cluster(session, **kw):
+        return StatsFinte()
+
+    ricalcoli: list[bool] = []
+
+    async def finto_blindspots(session, **kw):
+        ricalcoli.append(True)
+        return 0
+
+    monkeypatch.setattr(analyze, "cluster_pending", finto_cluster)
+    monkeypatch.setattr(
+        "core.bias.selection.compute_blindspots", finto_blindspots
+    )
+    await analyze.cluster_job()
+    assert ricalcoli == [True]
+
+    # Nessun articolo nuovo: nessun ricalcolo (ci pensa il giro periodico).
+    StatsFinte.processed = 0
+    await analyze.cluster_job()
+    assert ricalcoli == [True]

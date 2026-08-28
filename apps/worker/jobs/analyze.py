@@ -24,6 +24,7 @@ async def signals_job() -> None:
 
 
 async def cluster_job() -> None:
+    from core.bias.selection import compute_blindspots
     from core.refresh_state import tracking
 
     maker = get_sessionmaker()
@@ -35,6 +36,11 @@ async def cluster_job() -> None:
             ).scalar_one()
             await compute_coverage(session, story)
             await assign_story_entities(session, story)
+        if stats.processed:
+            # Notizie nuove = copertura cambiata: gli angoli ciechi si
+            # ricalcolano SUBITO, a ogni aggiornamento (anche quello del
+            # pulsante «Aggiorna ora», che finisce proprio qui).
+            await compute_blindspots(session)
         await session.commit()
     if stats.processed:
         log.info(
