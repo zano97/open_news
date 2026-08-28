@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.models import Article, Coverage, Owner, Ownership, Source, Story
 from core.nlp.entities import extract_entities
 
-ORA = datetime(2026, 8, 27, 9, 0, tzinfo=UTC)
+ORA = datetime.now(UTC) - timedelta(hours=2)  # sempre dentro le finestre
 
 TITOLI = [
     "Vertice europeo sull'energia: intesa raggiunta a notte fonda",

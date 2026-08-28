@@ -204,7 +204,7 @@ filtro.nota: "You are seeing stories covered by at least one outlet from: {paese
 
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "The story in brief"
-storia.riassunto_nota: "Summary generated automatically by an open model running locally, from the outlets’ headlines and excerpts only (never from full text). It is marked as automatic and may contain inaccuracies: the original articles linked below are authoritative."
+storia.riassunto_nota: "Summary generated automatically by an open model running locally: it reads the headlines, excerpts and text of the collected articles (internal use) and rewrites the facts in its own words, in your language. It is marked as automatic and may contain inaccuracies: the original articles linked below are authoritative."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Settings"

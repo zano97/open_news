@@ -219,7 +219,7 @@ filtro.nota: "Stai vedendo le story coperte da almeno una testata di: {paese}. L
 
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "Il fatto in breve"
-storia.riassunto_nota: "Riassunto generato automaticamente da un modello aperto eseguito in locale, a partire dai soli titoli ed estratti delle testate (mai dal testo integrale). È marcato come automatico e può contenere imprecisioni: fanno fede gli articoli originali, linkati qui sotto."
+storia.riassunto_nota: "Riassunto generato automaticamente da un modello aperto eseguito in locale, che legge titoli, estratti e il testo degli articoli raccolti (uso interno) e riscrive i fatti in parole proprie, nella tua lingua. È marcato come automatico e può contenere imprecisioni: fanno fede gli articoli originali, linkati qui sotto."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Impostazioni"

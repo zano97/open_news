@@ -163,10 +163,13 @@ async def riassunti_prova(
         return _forbidden(request, annotator)
     done = 0
     if get_settings().enable_llm:
+        locale = request_locale(request)
         stories = await stories_needing_summary(session, limit=3)
         async with build_client(timeout=200) as client:
             for story in stories:
-                if await summarize_story(session, story, client=client):
+                if await summarize_story(
+                    session, story, client=client, locale=locale
+                ):
                     done += 1
         await session.commit()
     return RedirectResponse(f"/impostazioni?riassunti={done}", status_code=303)

@@ -218,7 +218,7 @@ filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico d
 
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "La historia en breve"
-storia.riassunto_nota: "Resumen generado automáticamente por un modelo abierto ejecutado en local, solo a partir de los titulares y extractos de los periódicos (nunca del texto íntegro). Está marcado como automático y puede contener imprecisiones: los artículos originales enlazados abajo son los que hacen fe."
+storia.riassunto_nota: "Resumen generado automáticamente por un modelo abierto ejecutado en local: lee los titulares, extractos y textos de los artículos recogidos (uso interno) y reescribe los hechos con sus propias palabras, en tu idioma. Está marcado como automático y puede contener imprecisiones: los artículos originales enlazados abajo son los que dan fe."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Ajustes"

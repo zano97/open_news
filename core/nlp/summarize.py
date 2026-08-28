@@ -6,7 +6,10 @@ breve" senza lasciare la pagina. Il riassunto:
 
 - è generato IN LOCALE da un modello aperto via Ollama (nessun servizio a
   pagamento, nessun dato che lascia la macchina);
-- usa SOLO titoli ed estratti già pubblici nei feed, mai il testo integrale;
+- legge titoli, estratti e il testo integrale scaricato per uso interno,
+  ma l'output è SEMPRE in parole proprie: mai frasi degli articoli, mai il
+  testo integrale mostrato (docs/LEGAL.md);
+- è nella lingua dell'interfaccia del lettore, salvato per lingua;
 - è sempre marcato "riassunto automatico" con provenance (modello, versione);
 - non è mai il giudice del bias: descrive l'evento, non valuta le testate.
 
@@ -27,11 +30,11 @@ from core.provenance import record
 
 log = logging.getLogger(__name__)
 
-METHOD_NAME = "ollama-summary-v1"
+METHOD_NAME = "ollama-summary-v2"
 MAX_INPUT_ARTICLES = 8
-# Budget di token della risposta: abbondante, perché i modelli "pensanti"
-# possono comunque spenderne una parte in ragionamento.
-NUM_PREDICT = 400
+# Budget di token della risposta: il riassunto è di 120-180 parole e i
+# modelli "pensanti" possono comunque spenderne una parte in ragionamento.
+NUM_PREDICT = 700
 
 
 class ThinkFilter:
@@ -128,50 +131,103 @@ def record_generation(esito: str, *, ok: bool) -> None:
 
 _PROMPTS = {
     "it": (
-        "Sei un'agenzia di stampa neutrale. Scrivi un riassunto di 3-4 frasi "
-        "dell'evento descritto dai titoli e dagli estratti seguenti, presi da "
-        "testate diverse. Regole: usa SOLO le informazioni presenti qui sotto; "
-        "non aggiungere fatti, numeri o nomi non presenti; nessuna opinione, "
-        "nessun aggettivo valutativo; se le testate si contraddicono, dillo. "
-        "Rispondi solo con il riassunto, in italiano.\n\n{materiale}"
+        "Sei un'agenzia di stampa neutrale. Qui sotto trovi gli articoli di "
+        "più testate sullo stesso evento (titolo, estratto e, quando "
+        "disponibile, il testo). Scrivi in ITALIANO un riassunto di 120-180 "
+        "parole con le informazioni fondamentali: cosa è successo, chi è "
+        "coinvolto, dove e quando, numeri e conseguenze riportati. Regole: "
+        "PAROLE TUE, mai frasi copiate dagli articoli; usa SOLO le "
+        "informazioni presenti qui sotto; non aggiungere fatti, numeri o "
+        "nomi non presenti; nessuna opinione, nessun aggettivo valutativo; "
+        "se le testate riportano versioni diverse, dillo. Rispondi solo con "
+        "il riassunto.\n\n{materiale}"
     ),
     "en": (
-        "You are a neutral wire service. Write a 3-4 sentence summary of the "
-        "event described by the following headlines and excerpts from "
-        "different outlets. Rules: use ONLY the information below; do not add "
-        "facts, numbers or names not present; no opinions, no evaluative "
-        "adjectives; if outlets contradict each other, say so. Reply with the "
-        "summary only, in English.\n\n{materiale}"
+        "You are a neutral wire service. Below are articles from several "
+        "outlets about the same event (headline, excerpt and, when "
+        "available, the text). Write in ENGLISH a 120-180 word summary with "
+        "the essential information: what happened, who is involved, where "
+        "and when, reported figures and consequences. Rules: YOUR OWN "
+        "WORDS, never sentences copied from the articles; use ONLY the "
+        "information below; do not add facts, numbers or names not present; "
+        "no opinions, no evaluative adjectives; if outlets report different "
+        "versions, say so. Reply with the summary only.\n\n{materiale}"
+    ),
+    "fr": (
+        "Vous êtes une agence de presse neutre. Ci-dessous, des articles de "
+        "plusieurs médias sur le même événement (titre, extrait et, si "
+        "disponible, le texte). Rédigez en FRANÇAIS un résumé de 120 à 180 "
+        "mots avec les informations essentielles : ce qui s'est passé, qui "
+        "est impliqué, où et quand, les chiffres et conséquences rapportés. "
+        "Règles : VOS PROPRES MOTS, jamais de phrases copiées ; utilisez "
+        "UNIQUEMENT les informations ci-dessous ; n'ajoutez ni faits, ni "
+        "chiffres, ni noms absents ; aucune opinion, aucun adjectif "
+        "évaluatif ; si les médias divergent, dites-le. Répondez uniquement "
+        "par le résumé.\n\n{materiale}"
+    ),
+    "de": (
+        "Sie sind eine neutrale Nachrichtenagentur. Unten stehen Artikel "
+        "mehrerer Medien zum selben Ereignis (Titel, Auszug und, falls "
+        "verfügbar, der Text). Schreiben Sie auf DEUTSCH eine "
+        "Zusammenfassung von 120-180 Wörtern mit den wesentlichen "
+        "Informationen: was geschah, wer beteiligt ist, wo und wann, "
+        "berichtete Zahlen und Folgen. Regeln: EIGENE WORTE, keine "
+        "kopierten Sätze; NUR die Informationen unten verwenden; keine "
+        "Fakten, Zahlen oder Namen hinzufügen, die nicht vorkommen; keine "
+        "Meinungen, keine wertenden Adjektive; wenn die Medien "
+        "unterschiedlich berichten, sagen Sie es. Antworten Sie nur mit der "
+        "Zusammenfassung.\n\n{materiale}"
+    ),
+    "es": (
+        "Eres una agencia de noticias neutral. Abajo hay artículos de "
+        "varios medios sobre el mismo hecho (titular, extracto y, cuando "
+        "está disponible, el texto). Escribe en ESPAÑOL un resumen de "
+        "120-180 palabras con la información esencial: qué ocurrió, "
+        "quiénes participan, dónde y cuándo, cifras y consecuencias "
+        "reportadas. Reglas: TUS PROPIAS PALABRAS, nunca frases copiadas; "
+        "usa SOLO la información de abajo; no añadas hechos, cifras o "
+        "nombres ausentes; sin opiniones ni adjetivos valorativos; si los "
+        "medios difieren, dilo. Responde solo con el resumen.\n\n{materiale}"
     ),
 }
 
+# Quanto testo integrale per articolo entra nel prompt (uso INTERNO: serve
+# al riassunto in parole proprie, non viene mai mostrato né citato).
+MAX_CHARS_PER_ARTICLE = 1200
 
-def build_prompt(story: Story) -> str:
-    """Prompt dal materiale già pubblico (titoli+estratti), mai testo integrale."""
+
+def build_prompt(story: Story, locale: str = "it") -> str:
+    """Prompt dagli articoli della story, nella lingua dell'interfaccia.
+
+    Include titolo, estratto e — quando è stato scaricato — il testo
+    integrale (troncato): è l'uso interno previsto da docs/LEGAL.md, il
+    riassunto che ne esce è sempre in parole proprie e marcato automatico.
+    """
     articles = story.articles[:MAX_INPUT_ARTICLES]
-    languages = [a.language for a in articles if a.language]
-    dominant = max(set(languages), key=languages.count) if languages else "en"
-    template = _PROMPTS.get(dominant, _PROMPTS["en"])
+    template = _PROMPTS.get(locale, _PROMPTS["en"])
     lines = []
     for a in articles:
         line = f"- [{a.source.name}] {a.title}"
         if a.snippet:
             line += f" — {a.snippet}"
+        if a.full_text:
+            line += f"\n  Testo: {a.full_text[:MAX_CHARS_PER_ARTICLE]}"
         lines.append(line)
     return template.format(materiale="\n".join(lines))
 
 
 async def summarize_story(
-    session: AsyncSession, story: Story, *, client: httpx.AsyncClient
+    session: AsyncSession, story: Story, *, client: httpx.AsyncClient,
+    locale: str = "it",
 ) -> bool:
-    """Genera e salva il riassunto neutro. False se il flag è spento o fallisce."""
+    """Genera e salva il riassunto neutro nella lingua indicata."""
     settings = get_settings()
     if not settings.enable_llm:
         return False
     if not story.articles:
         return False
     url = f"{settings.ollama_url.rstrip('/')}/api/generate"
-    prompt = build_prompt(story)
+    prompt = build_prompt(story, locale)
     try:
         resp = await client.post(
             url, json=generation_payload(prompt, stream=False), timeout=180
@@ -197,7 +253,11 @@ async def summarize_story(
         return False
     record_generation(f"riassunto salvato per la story {story.id}", ok=True)
 
-    story.summary_neutral = text
+    riassunti = dict(story.summaries or {})
+    riassunti[locale] = text
+    story.summaries = riassunti
+    if not story.summary_neutral:
+        story.summary_neutral = text  # compatibilità ed export /dati
     story.summary_method = "llm"
     await record(
         session,
@@ -208,7 +268,8 @@ async def summarize_story(
         inputs={
             "model": settings.ollama_model,
             "n_articles": min(len(story.articles), MAX_INPUT_ARTICLES),
-            "input": "titoli+estratti (mai testo integrale)",
+            "locale": locale,
+            "input": "titoli+estratti+testo integrale (uso interno, mai mostrato)",
         },
     )
     await session.flush()

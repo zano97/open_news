@@ -140,15 +140,15 @@ def display_title(story: Story, locale: str) -> tuple[str, bool]:
     return story.title_neutral, False
 
 
-def headline_for(story: Story, locale: str) -> tuple[str, bool]:
-    """Titolo della story nella lingua del lettore, quando esiste.
+def headline_subtitle(story: Story, locale: str) -> tuple[str, bool] | None:
+    """Riga tra parentesi SOTTO il titolo: il senso nella lingua del lettore.
 
-    Il titolo neutro è già la formulazione di una testata (l'articolo più
-    vicino al centroide): se non è nella lingua dell'interfaccia ma la story
-    ha versioni in quella lingua, si mostra la prima pubblicata tra queste —
-    stesso criterio, vincolato alla lingua, e un originale batte sempre una
-    traduzione automatica. Ordine: neutro se già in lingua → originale in
-    lingua → traduzione automatica → neutro com'è.
+    Il titolo resta sempre quello originale (è il dato); quando non è nella
+    lingua dell'interfaccia, sotto compare tra parentesi: la traduzione
+    automatica se esiste (marcata), altrimenti il titolo di una versione
+    nella lingua del lettore (la prima pubblicata: è la formulazione di una
+    testata, elencata comunque tra le versioni). Nessuna delle due → None.
+    Ritorna (testo, è_traduzione_automatica).
     Richiede story.articles già caricati (le pagine che la usano li hanno).
     """
     articles = list(story.articles or [])
@@ -156,9 +156,16 @@ def headline_for(story: Story, locale: str) -> tuple[str, bool]:
         (a.language for a in articles if a.title == story.title_neutral), None
     )
     if neutral_language == locale:
-        return story.title_neutral, False
-    in_lingua = [a for a in articles if a.language == locale and a.title]
+        return None
+    translations = story.title_translations or {}
+    if translations.get(locale):
+        return translations[locale], True
+    in_lingua = [
+        a
+        for a in articles
+        if a.language == locale and a.title and a.title != story.title_neutral
+    ]
     if in_lingua:
         primo = min(in_lingua, key=lambda a: a.published_at or a.fetched_at)
         return primo.title, False
-    return display_title(story, locale)
+    return None

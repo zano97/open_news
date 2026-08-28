@@ -12,11 +12,33 @@ requisito.
 """
 
 import importlib
+import os
 import sys
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 ICON_PNG = Path(__file__).resolve().parent / "web/static/icons/opennews-512.png"
+
+
+def _home_dir() -> Path:
+    return Path(os.environ.get("OPENNEWS_HOME", str(Path.home() / ".opennews")))
+
+
+def _spegni_giornale(url: str) -> None:
+    """Chiudere la finestra chiude TUTTO: avvisa il server di spegnersi."""
+    token_file = _home_dir() / "shutdown_token"
+    if not token_file.exists():
+        return
+    try:
+        req = urllib.request.Request(
+            f"{url.rstrip('/')}/spegni",
+            method="POST",
+            headers={"X-Opennews-Spegni": token_file.read_text().strip()},
+        )
+        urllib.request.urlopen(req, timeout=3)
+    except OSError:
+        pass  # il server era già spento: va bene così
 
 
 def _menu(appkit: Any, app: Any) -> None:
@@ -84,6 +106,42 @@ def main() -> None:
 
     config = webkit.WKWebViewConfiguration.alloc().init()
     web = webkit.WKWebView.alloc().initWithFrame_configuration_(rect, config)
+
+    # I link alle testate si aprono nel BROWSER predefinito (la finestra
+    # del giornale non ha una barra degli indirizzi per tornare indietro).
+    workspace = appkit.NSWorkspace.sharedWorkspace()
+
+    def _politica(_self: Any, _web: Any, action: Any, handler: Any) -> None:
+        target = action.request().URL()
+        host = str(target.host() or "")
+        if host and host not in ("127.0.0.1", "localhost"):
+            workspace.openURL_(target)
+            handler(0)  # WKNavigationActionPolicyCancel
+        else:
+            handler(1)  # WKNavigationActionPolicyAllow
+
+    def _nuova_finestra(
+        _self: Any, _web: Any, _config: Any, action: Any, _features: Any
+    ) -> Any:
+        workspace.openURL_(action.request().URL())
+        return None
+
+    selettore_nuova = (
+        "webView_createWebViewWithConfiguration_"
+        "forNavigationAction_windowFeatures_"
+    )
+    delegato_cls: Any = type(
+        "OpenNewsWebDelegate",
+        (appkit.NSObject,),
+        {
+            "webView_decidePolicyForNavigationAction_decisionHandler_": _politica,
+            selettore_nuova: _nuova_finestra,
+        },
+    )
+    objc_delegate = delegato_cls.alloc().init()
+    web.setNavigationDelegate_(objc_delegate)
+    web.setUIDelegate_(objc_delegate)
+
     web.loadRequest_(
         foundation.NSURLRequest.requestWithURL_(foundation.NSURL.URLWithString_(url))
     )
@@ -92,9 +150,12 @@ def main() -> None:
     finestra.makeKeyAndOrderFront_(None)
     app.activateIgnoringOtherApps_(True)
 
-    # Chiusa la finestra, l'app della finestra esce (il giornale resta acceso).
+    def _chiusura(_notifica: Any) -> None:
+        _spegni_giornale(url)  # chiudere la finestra spegne tutto il giornale
+        app.terminate_(None)
+
     foundation.NSNotificationCenter.defaultCenter().addObserverForName_object_queue_usingBlock_(
-        "NSWindowWillCloseNotification", finestra, None, lambda _n: app.terminate_(None)
+        "NSWindowWillCloseNotification", finestra, None, _chiusura
     )
     app.run()
 

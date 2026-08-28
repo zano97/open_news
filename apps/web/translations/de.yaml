@@ -218,7 +218,7 @@ filtro.nota: "Sie sehen Storys, die von mindestens einer Zeitung aus {paese} abg
 
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "Das Wichtigste in Kürze"
-storia.riassunto_nota: "Zusammenfassung, automatisch erzeugt von einem offenen, lokal laufenden Modell — nur aus den Schlagzeilen und Auszügen der Zeitungen (nie aus dem Volltext). Sie ist als automatisch gekennzeichnet und kann Ungenauigkeiten enthalten: Maßgeblich sind die unten verlinkten Originalartikel."
+storia.riassunto_nota: "Automatisch erstellte Zusammenfassung eines lokal laufenden offenen Modells: Es liest Titel, Auszüge und Texte der gesammelten Artikel (interne Nutzung) und gibt die Fakten in eigenen Worten in Ihrer Sprache wieder. Sie ist als automatisch gekennzeichnet und kann Ungenauigkeiten enthalten: Maßgeblich sind die unten verlinkten Originalartikel."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Einstellungen"

@@ -19,9 +19,13 @@ un'istanza pubblica di Open News è responsabile della propria conformità.
 - Non aggiriamo paywall; non ripubblichiamo lanci di agenzia.
 - Il **riassunto neutro** ("il fatto in breve") mostrato nella pagina di una
   story non è testo delle testate: è generato in locale da un modello aperto
-  a partire dai soli titoli ed estratti già pubblici nei feed, è sempre
-  marcato come automatico e rimanda agli articoli originali, che restano
-  l'unica versione che fa fede.
+  che legge titoli, estratti e il testo integrale raccolto per uso interno
+  (mai più di un frammento per articolo) e RISCRIVE i fatti in parole
+  proprie — il prompt vieta esplicitamente frasi copiate, e il testo
+  integrale continua a non essere mai mostrato né esposto. Il riassunto è
+  sempre marcato come automatico e rimanda agli articoli originali, che
+  restano l'unica versione che fa fede. I fatti in sé non sono oggetto di
+  diritto d'autore; la forma espressiva delle testate non viene riprodotta.
 
 ## Come raccogliamo
 

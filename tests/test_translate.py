@@ -107,27 +107,27 @@ async def test_ui_mostra_traduzione_marcata(
     story.title_translations = {"en": "Government approves pension reform"}
     await session.commit()
 
-    # Interfaccia inglese: titolo tradotto + marcatura + originale dichiarato.
+    # Interfaccia inglese: titolo ORIGINALE, traduzione tra parentesi, marcata.
     pagina = await client.get(f"/storia/{story.id}?lang=en")
-    assert "Government approves pension reform" in pagina.text
+    assert "Il governo approva la riforma delle pensioni" in pagina.text
+    assert "(Government approves pension reform)" in pagina.text
     assert "automatic translation" in pagina.text
-    assert "Original headline" in pagina.text
 
     prima = await client.get("/?lang=en")
-    assert "Government approves pension reform" in prima.text
+    assert "(Government approves pension reform)" in prima.text
     assert "transl." in prima.text
 
-    # Interfaccia italiana: originale, nessuna marcatura.
+    # Interfaccia italiana: solo l'originale, nessuna riga tra parentesi.
     it_pagina = await client.get(f"/storia/{story.id}")
     assert "Il governo approva la riforma delle pensioni" in it_pagina.text
-    assert "traduzione automatica" not in it_pagina.text
+    assert "titolo-traduzione" not in it_pagina.text
 
 
-def test_headline_for_preferisce_la_lingua_del_lettore() -> None:
+def test_sottotitolo_nella_lingua_del_lettore() -> None:
     from datetime import UTC, datetime
 
     from core.models import Article, Story
-    from core.nlp.translate import headline_for
+    from core.nlp.translate import headline_subtitle
 
     def articolo(titolo: str, lingua: str, ora: int) -> Article:
         return Article(
@@ -142,15 +142,12 @@ def test_headline_for_preferisce_la_lingua_del_lettore() -> None:
         articolo("Cabinet backs reform bill", "en", 8),
     ]
 
-    # Lettore italiano: il titolo neutro è già in italiano.
-    assert headline_for(story, "it") == ("Governo approva la riforma", False)
-    # Lettore inglese: la versione IN INGLESE pubblicata per prima.
-    assert headline_for(story, "en") == ("Cabinet backs reform bill", False)
-    # Un originale nella lingua batte la traduzione automatica.
-    story.title_translations = {"en": "Government approves the reform (MT)"}
-    assert headline_for(story, "en") == ("Cabinet backs reform bill", False)
-    # Lingua senza versioni: vale la traduzione automatica, marcata.
-    story.title_translations = {"fr": "Le gouvernement approuve la réforme"}
-    assert headline_for(story, "fr") == ("Le gouvernement approuve la réforme", True)
-    # Nessuna versione né traduzione: il titolo neutro com'è.
-    assert headline_for(story, "de") == ("Governo approva la riforma", False)
+    # Titolo già nella lingua del lettore: nessun sottotitolo.
+    assert headline_subtitle(story, "it") is None
+    # Traduzione automatica assente: la versione IN LINGUA pubblicata prima.
+    assert headline_subtitle(story, "en") == ("Cabinet backs reform bill", False)
+    # La traduzione automatica, quando esiste, vince ed è marcata.
+    story.title_translations = {"en": "Government approves the reform"}
+    assert headline_subtitle(story, "en") == ("Government approves the reform", True)
+    # Lingua senza versioni né traduzione: niente riga.
+    assert headline_subtitle(story, "de") is None

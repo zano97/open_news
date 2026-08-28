@@ -104,6 +104,18 @@
     });
   }
 
+  // I link alle testate escono dall'app: si aprono nel browser (nuova
+  // scheda/finestra), mai DENTRO la finestra del giornale, che non ha
+  // una barra degli indirizzi per tornare indietro.
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest("a[href]");
+    if (!a || !a.host) return;
+    if (a.host !== window.location.host) {
+      a.target = "_blank";
+      a.rel = "noopener";
+    }
+  });
+
   // Edizione lampo: navigazione con i tasti freccia (miglioramento progressivo;
   // senza JS il reel resta una lista verticale scorrevole).
   var reel = document.getElementById("reel");

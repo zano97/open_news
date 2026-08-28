@@ -57,8 +57,10 @@ async def _story_multi_fonte(session: AsyncSession) -> Story:
     return story
 
 
-def test_prompt_usa_solo_materiale_pubblico() -> None:
-    """Il prompt contiene titoli ed estratti, mai il testo integrale."""
+def test_prompt_include_articoli_e_lingua_del_lettore() -> None:
+    """Il prompt porta titoli, estratti e testo integrale (troncato, uso
+    interno) e chiede la lingua dell'interfaccia; il testo non è mai
+    illimitato."""
     # build_prompt legge story.articles: basta un oggetto compatibile.
     class FonteFinta:
         name = "Testata X"
@@ -68,17 +70,24 @@ def test_prompt_usa_solo_materiale_pubblico() -> None:
         title = "Titolo pubblico"
         snippet = "Estratto pubblico."
         language = "it"
-        full_text = "TESTO INTEGRALE RISERVATO CHE NON DEVE FINIRE NEL PROMPT"
+        full_text = "Corpo dell'articolo. " * 300  # ben oltre il limite
 
     class StoryFinta:
         def __init__(self) -> None:
             self.articles = [ArticoloFinto()]
 
-    prompt = build_prompt(StoryFinta())  # type: ignore[arg-type]
+    from core.nlp.summarize import MAX_CHARS_PER_ARTICLE
+
+    prompt = build_prompt(StoryFinta(), "en")  # type: ignore[arg-type]
     assert "Titolo pubblico" in prompt
     assert "Estratto pubblico." in prompt
-    assert "RISERVATO" not in prompt
-    assert "riassunto" in prompt.lower()
+    assert "Corpo dell'articolo." in prompt  # il testo ENTRA nel prompt…
+    # …ma troncato al limite per articolo.
+    corpo = prompt.split("Testo: ", 1)[1]
+    assert len(corpo) <= MAX_CHARS_PER_ARTICLE + 10
+    assert "ENGLISH" in prompt  # la lingua dell'output è quella del lettore
+    prompt_de = build_prompt(StoryFinta(), "de")  # type: ignore[arg-type]
+    assert "DEUTSCH" in prompt_de
 
 
 @respx.mock
@@ -98,8 +107,8 @@ async def test_riassunto_generato_e_marcato(
 
     prova = await provenance.for_entity(session, "story", story.id)
     riga = next(p for p in prova if p.field == "summary")
-    assert riga.method == "ollama-summary-v1"
-    assert "mai testo integrale" in str(riga.inputs)
+    assert riga.method == "ollama-summary-v2"
+    assert "uso interno, mai mostrato" in str(riga.inputs)
 
 
 async def test_flag_spento_non_fa_nulla(session: AsyncSession) -> None:

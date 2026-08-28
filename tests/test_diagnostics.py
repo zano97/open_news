@@ -126,3 +126,33 @@ def test_avviso_riavvio_dopo_aggiornamento(monkeypatch) -> None:
         logbuffer, "STARTED_AT", datetime(2100, 1, 1, tzinfo=UTC)
     )
     assert not update_pending()
+
+
+async def test_spegni_richiede_il_token(
+    client: AsyncClient, monkeypatch,
+) -> None:
+    """Chiudere la finestra spegne tutto — ma solo col token del launcher;
+    senza, la rotta non esiste (404) e in modalità server è inerte."""
+    from apps.api.routers import health
+
+    fermate: list[bool] = []
+    monkeypatch.setattr(health, "_termina", lambda: fermate.append(True))
+    monkeypatch.setenv("OPENNEWS_EMBEDDED_WORKER", "1")
+    monkeypatch.setenv("OPENNEWS_SHUTDOWN_TOKEN", "token-di-prova")
+
+    negato = await client.post("/spegni")
+    assert negato.status_code == 404
+    sbagliato = await client.post("/spegni", headers={"X-Opennews-Spegni": "no"})
+    assert sbagliato.status_code == 404
+
+    ok = await client.post("/spegni", headers={"X-Opennews-Spegni": "token-di-prova"})
+    assert ok.status_code == 200
+    import asyncio
+
+    await asyncio.sleep(0.5)
+    assert fermate == [True]
+
+    # In modalità server (senza worker incorporato) l'endpoint è inerte.
+    monkeypatch.delenv("OPENNEWS_EMBEDDED_WORKER")
+    servito = await client.post("/spegni", headers={"X-Opennews-Spegni": "token-di-prova"})
+    assert servito.status_code == 404

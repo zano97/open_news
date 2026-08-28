@@ -183,6 +183,21 @@ def _file_logging() -> None:
         root.setLevel(logging.INFO)
 
 
+def _shutdown_token() -> str:
+    """Token per l'endpoint /spegni: la finestra lo usa per chiudere tutto.
+
+    Vive in un file 0600 dentro OPENNEWS_HOME così anche una finestra
+    aperta da un processo diverso (es. dall'installer) può leggerlo.
+    """
+    import secrets
+
+    token_file = home_dir() / "shutdown_token"
+    token = secrets.token_hex(16)
+    token_file.write_text(token)
+    token_file.chmod(0o600)
+    return token
+
+
 def cmd_run(port: int, open_browser: bool, app_window: bool = True) -> None:
     import uvicorn
 
@@ -191,6 +206,7 @@ def cmd_run(port: int, open_browser: bool, app_window: bool = True) -> None:
     _migrate()
     # Il raccoglitore gira nello stesso processo (un solo worker uvicorn).
     os.environ["OPENNEWS_EMBEDDED_WORKER"] = "1"
+    os.environ["OPENNEWS_SHUTDOWN_TOKEN"] = _shutdown_token()
     url = f"http://127.0.0.1:{port}"
     print(f"Open News → {url}   (Ctrl+C per fermare; dati in {home_dir()})")
     if open_browser:

@@ -24,6 +24,9 @@ class Story(Base):
     # Metodo con cui è stato scelto il titolo neutro: "centroide" oppure "llm".
     title_method: Mapped[str] = mapped_column(String(20), default="centroide")
     summary_neutral: Mapped[str | None] = mapped_column(Text)
+    # Riassunti generati per lingua dell'interfaccia: {"it": "...", "en": "..."}.
+    # summary_neutral resta il primo generato (compatibilità ed export).
+    summaries: Mapped[dict[str, str]] = mapped_column(JSONVariant, default=dict)
     # Traduzioni automatiche del titolo neutro, per lingua dell'interfaccia:
     # {"en": "...", "fr": "..."} — sempre marcate come automatiche nella UI.
     title_translations: Mapped[dict[str, str]] = mapped_column(JSONVariant, default=dict)

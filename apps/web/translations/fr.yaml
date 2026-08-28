@@ -218,7 +218,7 @@ filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {pae
 
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "L’essentiel en bref"
-storia.riassunto_nota: "Résumé généré automatiquement par un modèle ouvert exécuté en local, à partir des seuls titres et extraits des journaux (jamais du texte intégral). Il est marqué comme automatique et peut contenir des imprécisions : les articles originaux liés ci-dessous font foi."
+storia.riassunto_nota: "Résumé généré automatiquement par un modèle ouvert exécuté en local : il lit les titres, extraits et textes des articles collectés (usage interne) et réécrit les faits avec ses propres mots, dans votre langue. Il est marqué comme automatique et peut contenir des imprécisions : les articles originaux liés ci-dessous font foi."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Paramètres"

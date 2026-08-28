@@ -103,16 +103,14 @@ def build_templates() -> Jinja2Templates:
     templates.env.globals["now"] = lambda: datetime.now(UTC)
 
     # Titolo della story nella lingua dell'interfaccia (traduzione marcata).
-    from core.nlp.translate import headline_for
+    from core.nlp.translate import headline_subtitle
 
-    # Titolo per la lingua dell'interfaccia: originale in lingua quando
-    # esiste, poi traduzione automatica, poi il titolo neutro com'è.
+    # Il titolo resta SEMPRE quello originale (è il dato); il senso nella
+    # lingua del lettore compare tra parentesi sotto (sottotitolo_story).
     templates.env.globals["titolo_story"] = (
-        lambda story, locale: headline_for(story, locale)[0]
+        lambda story, locale: story.title_neutral
     )
-    templates.env.globals["titolo_tradotto"] = (
-        lambda story, locale: headline_for(story, locale)[1]
-    )
+    templates.env.globals["sottotitolo_story"] = headline_subtitle
     return templates
 
 

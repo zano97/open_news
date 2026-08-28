@@ -7,10 +7,10 @@
     {% if story.topic %}
     <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
     {% endif %}
-    <h2 class="storia-titolo">{{ titolo_story(story, locale) }}
-      {%- if titolo_tradotto(story, locale) %} <span class="badge badge-trad">{{ t('trad.badge') }}</span>{% endif %}</h2>
-    {% if titolo_tradotto(story, locale) %}
-    <p class="fonte-meta">{{ t('trad.originale', titolo=story.title_neutral) }} — {{ t('trad.automatica') }}</p>
+    <h2 class="storia-titolo">{{ titolo_story(story, locale) }}</h2>
+    {% set sotto = sottotitolo_story(story, locale) %}
+    {% if sotto %}
+    <p class="titolo-traduzione">({{ sotto[0] }}){% if sotto[1] %} <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span>{% endif %}</p>
     {% endif %}
     <p class="story-meta">
       {{ t('storia.titolo_centroide') if story.title_method == "centroide" else t('storia.titolo_llm') }}
@@ -27,11 +27,11 @@
     {% endif %}
   </header>
 
-  {% if story.summary_neutral or llm_on %}
+  {% if riassunto_locale or llm_on %}
   <section class="riassunto-neutro scheda-sezione">
     <h3>{{ t('storia.riassunto_titolo') }}</h3>
-    {% if story.summary_neutral %}
-    <p class="riassunto-testo">{{ story.summary_neutral }}</p>
+    {% if riassunto_locale %}
+    <p class="riassunto-testo">{{ riassunto_locale }}</p>
     <p class="fonte-meta">{{ t('storia.riassunto_nota') }}</p>
     {% else %}
     <p class="riassunto-testo" data-riassunto-testo hidden></p>

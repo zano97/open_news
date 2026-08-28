@@ -13,8 +13,11 @@
   {% if story.topic %}
   <p class="story-occhiello">{{ topic_labels.get(story.topic, story.topic) }}</p>
   {% endif %}
-  <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ titolo_story(story, locale) }}</a>
-    {%- if titolo_tradotto(story, locale) %} <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span>{% endif %}</h2>
+  <h2 class="story-titolo"><a href="/storia/{{ story.id }}">{{ titolo_story(story, locale) }}</a></h2>
+  {% set sotto = sottotitolo_story(story, locale) %}
+  {% if sotto %}
+  <p class="titolo-traduzione">({{ sotto[0] }}){% if sotto[1] %} <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span>{% endif %}</p>
+  {% endif %}
   <p class="story-meta">
     {{ story.source_count }} {{ t('comune.testata') if story.source_count == 1 else t('comune.testate') }}
     · {{ story.article_count }} {{ t('comune.articoli') }}

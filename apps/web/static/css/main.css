@@ -779,6 +779,11 @@ html:has(body.pagina-lampo) {
 .impostazione input[type="text"] { width: 100%; }
 .impostazione-aiuto { display: block; color: var(--seppia); font-weight: 400; }
 .impostazione-errore { color: var(--accento); font-weight: 700; margin: 0.2rem 0 0; }
+.titolo-traduzione {
+  font-style: italic;
+  color: var(--seppia);
+  margin: 0.15rem 0 0.4rem;
+}
 .riassunto-errore {
   color: var(--inchiostro);
   background: var(--carta-scura);

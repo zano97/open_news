@@ -63,7 +63,7 @@ async def ingest_gdelt_job() -> None:
                 log.info("%s: +%d articoli via GDELT", slug, n)
 
 
-async def fetch_fulltext_job(limit: int = 25) -> None:
+async def fetch_fulltext_job(limit: int = 60) -> None:
     maker = get_sessionmaker()
     async with build_client() as client:
         limiter = DomainRateLimiter()

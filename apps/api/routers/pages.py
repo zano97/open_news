@@ -388,8 +388,28 @@ async def storia(
             "provenances": provenances,
             "topic_labels": topic_labels,
             "llm_on": _gs().enable_llm,
+            "riassunto_locale": _riassunto_per(story, locale, _gs().enable_llm),
         },
     )
+
+
+def _riassunto_per(story: Story, locale: str, llm_on: bool) -> str | None:
+    """Riassunto da mostrare per la lingua dell'interfaccia.
+
+    Nella lingua giusta se c'è; un riassunto legacy (solo summary_neutral)
+    vale comunque; uno in un'altra lingua si mostra SOLO quando il
+    generatore è spento — acceso, meglio il pulsante «genera nella tua
+    lingua».
+    """
+    summaries = story.summaries or {}
+    testo = summaries.get(locale)
+    if testo:
+        return testo
+    if not summaries and story.summary_neutral:
+        return story.summary_neutral
+    if summaries and not llm_on:
+        return next(iter(summaries.values()))
+    return None
 
 
 # Story con una generazione già in corso (mai due richieste sovrapposte).
@@ -443,8 +463,10 @@ async def genera_riassunto(
     ).scalar_one_or_none()
     if story is None:
         raise HTTPException(status_code=404, detail="story sconosciuta")
-    if story.summary_neutral:
-        return PlainTextResponse(story.summary_neutral)
+    locale = request_locale(request)
+    esistenti = story.summaries or {}
+    if esistenti.get(locale):
+        return PlainTextResponse(esistenti[locale])
     if not settings.enable_llm:
         raise HTTPException(status_code=503, detail=t("storia.riassunto_spento"))
     if not story.articles:
@@ -454,7 +476,7 @@ async def genera_riassunto(
             status_code=409, detail=t("storia.riassunto_in_corso")
         )
 
-    prompt = build_prompt(story)
+    prompt = build_prompt(story, locale)
     n_articles = len(story.articles)
 
     # Pre-flight: la connessione a Ollama viene aperta PRIMA di rispondere,
@@ -538,9 +560,13 @@ async def genera_riassunto(
                 yield "\n⚠ " + t("storia.riassunto_vuoto")
             if len(testo) >= 40:
                 record_generation(
-                    f"riassunto generato per la story {story_id}", ok=True
+                    f"riassunto generato per la story {story_id} ({locale})", ok=True
                 )
-                story.summary_neutral = testo
+                riassunti = dict(story.summaries or {})
+                riassunti[locale] = testo
+                story.summaries = riassunti
+                if not story.summary_neutral:
+                    story.summary_neutral = testo  # compatibilità ed export
                 story.summary_method = "llm"
                 await record_provenance(
                     session,
@@ -551,8 +577,9 @@ async def genera_riassunto(
                     inputs={
                         "model": settings.ollama_model,
                         "n_articles": n_articles,
+                        "locale": locale,
                         "trigger": "richiesta del lettore",
-                        "input": "titoli+estratti (mai testo integrale)",
+                        "input": "titoli+estratti+testo integrale (uso interno, mai mostrato)",
                     },
                 )
                 await session.commit()
