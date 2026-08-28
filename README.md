@@ -98,8 +98,9 @@ browser. From then on:
 - **start** it by clicking the icon, or with `opennews` in a terminal
   (`opennews --port 8100` for another port, `--tab` to open in a normal
   browser tab, `--no-browser` to open nothing);
-- **stop** it with Ctrl+C (or by closing the window): next time it picks
-  up where it left off;
+- **stop** it with Ctrl+C (or, on macOS, by closing the window: it shuts
+  everything down); on the next start it **catches up immediately** on
+  missed news, then resumes the normal cadence;
 - your **data** (news, settings, annotations) lives in `~/.opennews` and
   survives updates and reinstalls;
 - `opennews seed` re-downloads the last 24 hours whenever you want.
@@ -184,8 +185,9 @@ The pages:
 
 ## Administration
 
-The **first profile registered** on `/annota` becomes the instance
-administrator: they see the "Settings" link in the masthead and the
+In **personal mode** Settings opens directly, no account needed: the app
+is yours. On a **shared server** the **first profile registered** on
+`/annota` becomes the instance administrator: they see the "Settings" link in the masthead and the
 `/impostazioni` panel, where they tune — with an explanation next to every
 field — the Ollama model and URL, the embedding engine, clustering and
 "flash" thresholds, the collection courtesy interval, the signal windows.

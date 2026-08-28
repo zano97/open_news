@@ -21,6 +21,7 @@ nav.testate: "Las cabeceras"
 nav.metodo: "Cómo lo calculamos"
 nav.dati: "Datos abiertos"
 nav.annota: "Anota"
+annota.nota_personale: "En una instalación personal el juicio humano (nivel 4) no puede recogerse de verdad: hacen falta varias personas anotadoras de orientaciones distintas en una instancia compartida. La página queda por completitud y para probar el protocolo."
 footer.licenza: "{app} es software libre (<a href=\"https://www.gnu.org/licenses/agpl-3.0.html\">AGPL-3.0</a>); los datos derivados se publican bajo <a href=\"https://creativecommons.org/licenses/by-sa/4.0/deed.es\">CC BY-SA 4.0</a>. Los titulares y los fragmentos siguen siendo de sus respectivas cabeceras y se muestran dentro de los límites de la cita, con enlace a la fuente."
 footer.note: "Contiene datos del <a href=\"https://www.gdeltproject.org/\">GDELT Project</a> · datos societarios de <a href=\"https://www.wikidata.org/\">Wikidata</a> (CC0), <a href=\"https://media-ownership.eu/\">EurOMo</a> (CC BY 4.0) y registros públicos (<a href=\"https://www.agcom.it/registro-degli-operatori-di-comunicazione\">ROC AGCOM</a>, <a href=\"https://informazioneeditoria.gov.it/\">DIE</a>). Cada cifra mostrada tiene su <a href=\"/metodo\">procedencia declarada</a>."
 
@@ -50,7 +51,7 @@ storia.titolo_centroide: "Titular neutro: el más cercano al centroide del grupo
 storia.titolo_llm: "Titular neutro: resumen automático (LLM local), marcado como tal"
 storia.apparsa: "primera aparición el {data} a las {ora}"
 storia.conteggi: "{testate} cabeceras en {articoli} artículos"
-storia.angolo_avviso: "<strong>Punto ciego:</strong> ninguna fuente activa de {gruppi} ha cubierto esta story (umbral del {soglia}%, países con ≥3 fuentes activas)."
+storia.angolo_avviso: "<strong>Ángulo ciego:</strong> ningún medio activo de {gruppi} cubrió esta noticia, cubierta por {testate} medios de {paesi} países. La probabilidad de que esa ausencia sea casual es inferior al 5 % (método en /metodo)."
 storia.come_raccontano: "Cómo la cuentan las cabeceras"
 storia.leggi_fonte: "leer en la fuente →"
 storia.prima_pubblicata: "Quién la publicó primero"
@@ -219,6 +220,8 @@ filtro.nota: "Estás viendo las historias cubiertas por al menos un periódico d
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "La historia en breve"
 storia.riassunto_nota: "Resumen generado automáticamente por un modelo abierto ejecutado en local: lee los titulares, extractos y textos de los artículos recogidos (uso interno) y reescribe los hechos con sus propias palabras, en tu idioma. Está marcado como automático y puede contener imprecisiones: los artículos originales enlazados abajo son los que dan fe."
+storia.riassunto_base: "Base del resumen: {articoli} artículos de {testate} medios, {testo} con texto íntegro (uso interno)."
+storia.riassunto_altra_lingua: "Existe un resumen en {lingua}; con el botón de abajo lo generas en tu idioma."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Ajustes"

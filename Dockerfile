@@ -16,7 +16,7 @@ COPY scripts ./scripts
 COPY alembic.ini ./
 COPY alembic ./alembic
 
-RUN pip install --no-cache-dir . \
+RUN pip install --no-cache-dir ".[translate]" \
     && useradd --create-home --uid 1000 opennews \
     && chown -R opennews:opennews /app
 

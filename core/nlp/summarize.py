@@ -19,6 +19,7 @@ Feature-flag: ENABLE_LLM=false di default; il sistema funziona senza.
 import logging
 from dataclasses import dataclass, field
 from datetime import timedelta
+from typing import Any
 
 import httpx
 from sqlalchemy import select
@@ -31,7 +32,7 @@ from core.provenance import record
 log = logging.getLogger(__name__)
 
 METHOD_NAME = "ollama-summary-v2"
-MAX_INPUT_ARTICLES = 8
+MAX_INPUT_ARTICLES = 12
 # Budget di token della risposta: il riassunto è di 120-180 parole e i
 # modelli "pensanti" possono comunque spenderne una parte in ragionamento.
 NUM_PREDICT = 700
@@ -196,6 +197,34 @@ _PROMPTS = {
 MAX_CHARS_PER_ARTICLE = 1200
 
 
+def select_input_articles(story: Story) -> list[Any]:
+    """Gli articoli che alimentano il riassunto: uno per testata, fino a
+    MAX_INPUT_ARTICLES, preferendo chi ha il testo integrale scaricato
+    (più sostanza) e poi l'ordine di pubblicazione. Niente ordine
+    arbitrario: la scelta è dichiarata e riproducibile."""
+    per_source: dict[int, Any] = {}
+    for a in story.articles:
+        gia = per_source.get(a.source_id)
+        if gia is None or (a.full_text and not gia.full_text):
+            per_source[a.source_id] = a
+    scelti = sorted(
+        per_source.values(),
+        key=lambda a: (
+            0 if a.full_text else 1,
+            a.published_at or a.fetched_at or utcnow(),
+        ),
+    )
+    return scelti[:MAX_INPUT_ARTICLES]
+
+
+def input_stats(story: Story) -> tuple[int, int, int]:
+    """(articoli usati, testate, di cui con testo integrale) — mostrati al
+    lettore accanto al riassunto: la base del testo è verificabile."""
+    scelti = select_input_articles(story)
+    con_testo = sum(1 for a in scelti if a.full_text)
+    return len(scelti), len({a.source_id for a in scelti}), con_testo
+
+
 def build_prompt(story: Story, locale: str = "it") -> str:
     """Prompt dagli articoli della story, nella lingua dell'interfaccia.
 
@@ -203,7 +232,7 @@ def build_prompt(story: Story, locale: str = "it") -> str:
     integrale (troncato): è l'uso interno previsto da docs/LEGAL.md, il
     riassunto che ne esce è sempre in parole proprie e marcato automatico.
     """
-    articles = story.articles[:MAX_INPUT_ARTICLES]
+    articles = select_input_articles(story)
     template = _PROMPTS.get(locale, _PROMPTS["en"])
     lines = []
     for a in articles:
@@ -267,7 +296,8 @@ async def summarize_story(
         method=METHOD_NAME,
         inputs={
             "model": settings.ollama_model,
-            "n_articles": min(len(story.articles), MAX_INPUT_ARTICLES),
+            "n_articles": input_stats(story)[0],
+            "n_full_text": input_stats(story)[2],
             "locale": locale,
             "input": "titoli+estratti+testo integrale (uso interno, mai mostrato)",
         },

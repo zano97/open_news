@@ -42,6 +42,17 @@ from core.runtime_settings import (
 router = APIRouter(prefix="/impostazioni")
 
 
+def _puo_amministrare(annotator: AnnotatorProfile | None) -> bool:
+    """In modalità personale (istanza privata su 127.0.0.1) le impostazioni
+    sono di chi ha davanti la tastiera: nessun account obbligatorio. Sui
+    server condivisi resta il primo profilo registrato (admin)."""
+    import os
+
+    if os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1":
+        return True
+    return annotator is not None and annotator.is_admin
+
+
 async def _llm_panel(session: AsyncSession) -> dict[str, object]:
     """Diagnosi in diretta del generatore di riassunti, per il pannello."""
     status = None
@@ -145,7 +156,7 @@ async def impostazioni(
     salvate: int = 0,
     riassunti: int | None = None,
 ) -> HTMLResponse:
-    if annotator is None or not annotator.is_admin:
+    if not _puo_amministrare(annotator):
         return _forbidden(request, annotator)
     return await _render(
         request, session, errors={}, saved=bool(salvate), esito_riassunti=riassunti
@@ -159,7 +170,7 @@ async def riassunti_prova(
     annotator: Annotated[AnnotatorProfile | None, Depends(current_annotator)],
 ) -> HTMLResponse | RedirectResponse:
     """Genera subito fino a 3 riassunti, senza aspettare il worker."""
-    if annotator is None or not annotator.is_admin:
+    if not _puo_amministrare(annotator):
         return _forbidden(request, annotator)
     done = 0
     if get_settings().enable_llm:
@@ -187,7 +198,7 @@ async def prova_generatore(
     pronto" anche quando la generazione poi fallisce. Questa prova fa
     esattamente ciò che fa il pulsante del lettore, e mostra la risposta.
     """
-    if annotator is None or not annotator.is_admin:
+    if not _puo_amministrare(annotator):
         return _forbidden(request, annotator)
     t = make_translator(request_locale(request))
     settings = get_settings()
@@ -239,10 +250,12 @@ async def salva_impostazioni(
     session: Annotated[AsyncSession, Depends(get_session)],
     annotator: Annotated[AnnotatorProfile | None, Depends(current_annotator)],
 ) -> HTMLResponse | RedirectResponse:
-    if annotator is None or not annotator.is_admin:
+    if not _puo_amministrare(annotator):
         return _forbidden(request, annotator)
     form = {str(k): str(v) for k, v in (await request.form()).items()}
-    raw_errors = await save_overrides(session, form, updated_by=annotator.username)
+    # In modalità personale non c'è un account: firma "locale".
+    chi = annotator.username if annotator is not None else "locale"
+    raw_errors = await save_overrides(session, form, updated_by=chi)
     await session.commit()
     if raw_errors:
         t = make_translator(request_locale(request))

@@ -115,10 +115,19 @@ indicata sotto la mappa.
 ### Gli angoli ciechi (blind spot)
 
 Per ogni testata: le story coperte da **almeno il 50% delle altre testate
-attive dello stesso paese** ma non da lei. Per ogni story: i paesi con
-almeno 3 fonti attive in cui **nessuna** testata l'ha coperta (mostrato con
-il badge "angolo cieco"). Il conteggio non dice *perché* una testata ha
-ignorato una notizia: registra soltanto che l'ha ignorata.
+attive dello stesso paese** ma non da lei.
+
+Per ogni story il badge "angolo cieco" segue un **test di significatività**
+(metodo `blindspot-country-v2`): non coprire NON basta — per un paese
+piccolo è la norma, non una scelta. Per ogni testata stimiamo la
+*propensione* a coprire le grandi story (quota delle story con ≥5 testate
+coperte nella finestra); un paese viene marcato solo se la probabilità che
+NESSUNA delle sue testate attive coprisse la story per puro caso —
+Π(1−propensione) — è **sotto il 5%**, e solo per story mature (≥6 ore),
+internazionali (≥3 paesi), con gruppi di ≥3 testate attive. Si mostrano al
+massimo i 3 paesi più significativi, con la probabilità registrata nel
+dato. Il test non dice *perché* un paese ha ignorato una notizia: registra
+che l'assenza è statisticamente improbabile.
 
 ## Livello 3 — Il framing: come la racconta (lessicale)
 

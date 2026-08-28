@@ -77,14 +77,13 @@ if [ -z "$UV" ]; then
 fi
 cd "$APP"
 "$UV" venv --quiet --allow-existing --python 3.12 .venv
-# Su macOS anche l'extra [mac]: finestra nativa con l'icona nel Dock
-# (se non si installa, si ripiega sull'installazione base senza finestra).
-if [ "$(uname -s)" = "Darwin" ]; then
-  "$UV" pip install --quiet --python .venv/bin/python -e ".[mac]" \
-    || "$UV" pip install --quiet --python .venv/bin/python -e .
-else
-  "$UV" pip install --quiet --python .venv/bin/python -e .
-fi
+# Extra [translate]: sottotitoli tradotti sotto i titoli (Argos, offline;
+# i modelli di coppia si scaricano da soli alla prima occorrenza).
+# Su macOS anche [mac]: finestra nativa con l'icona nel Dock.
+# Se gli extra non si installano, si ripiega sull'installazione base.
+if [ "$(uname -s)" = "Darwin" ]; then EXTRAS="[mac,translate]"; else EXTRAS="[translate]"; fi
+"$UV" pip install --quiet --python .venv/bin/python -e ".$EXTRAS" \
+  || "$UV" pip install --quiet --python .venv/bin/python -e .
 
 say "Creo il comando «opennews» e l'icona"
 mkdir -p "$BIN_DIR"

@@ -116,10 +116,19 @@ period. The variance explained by each dimension is stated below the map.
 ### Blind spots
 
 For each outlet: the stories covered by **at least 50% of the other active
-outlets from the same country** but not by it. For each story: the
-countries with at least 3 active sources where **no** outlet covered it
-(shown with the "blind spot" badge). The count does not say *why* an outlet
-ignored a piece of news: it only records that it ignored it.
+outlets from the same country** but not by it.
+
+For each story, the "blind spot" badge follows a **significance test**
+(method `blindspot-country-v2`): not covering is NOT enough — for a small
+country it is the norm, not a choice. For every outlet we estimate its
+*propensity* to cover big stories (share of the window's stories with ≥5
+outlets it covered); a country is flagged only when the probability that
+NONE of its active outlets would cover the story by pure chance —
+Π(1−propensity) — is **below 5%**, and only for mature stories (≥6 hours),
+international ones (≥3 countries), with groups of ≥3 active outlets. At
+most the 3 most significant countries are shown, with the probability
+recorded in the data. The test does not say *why* a country ignored a
+piece of news: it records that the absence is statistically unlikely.
 
 ## Level 3 — Framing: how it tells the news (lexical)
 

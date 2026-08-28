@@ -28,7 +28,18 @@ log = logging.getLogger(__name__)
 
 AGENDA_METHOD = "agenda-deviation-v1"
 COCOVERAGE_METHOD = "cocoverage-pca-v1"
-BLINDSPOT_METHOD = "blindspot-country-v1"
+BLINDSPOT_METHOD = "blindspot-country-v2"
+
+# Angoli ciechi a livello di story (v2, test di significatività):
+# un paese viene marcato SOLO se la sua assenza è statisticamente
+# improbabile, non per il semplice fatto di non aver coperto.
+BLINDSPOT_STORY_MIN_SOURCES = 5  # copertura forte: almeno 5 testate
+BLINDSPOT_MIN_COUNTRIES = 3  # rilevanza internazionale: almeno 3 paesi
+BLINDSPOT_MIN_GROUP = 3  # gruppi con almeno 3 testate attive
+BLINDSPOT_MATURITY_HOURS = 6  # tempo di coprire, prima di giudicare
+BLINDSPOT_ALPHA = 0.05  # P(nessuna copertura per caso) sotto cui si marca
+BLINDSPOT_MIN_BIG_STORIES = 10  # storico minimo per stimare le propensioni
+BLINDSPOT_MAX_GROUPS = 3  # al lettore i (max) 3 gruppi più significativi
 
 MIN_ARTICLES_FOR_AGENDA = 10
 BOOTSTRAP_SAMPLES = 200
@@ -367,25 +378,80 @@ async def compute_blindspots(
         )
         written += 1
 
-    # Blind spot a livello di story: fasce/paesi che l'hanno ignorata.
-    for story_id, covering in story_sources.items():
-        if len(covering) < 5:
-            continue
-        ignored_by: list[dict[str, object]] = []
-        covering_countries = {sources[sid].country for sid in covering}
-        for country, active in active_by_country.items():
-            if len(active) >= 3 and country not in covering_countries:
-                ignored_by.append(
-                    {"group": country, "kind": "country", "threshold": threshold}
+    # ------- Blind spot a livello di story (v2: test di significatività) ----
+    # "Non coperta dal paese X" è un ANGOLO CIECO solo se è improbabile che
+    # sia un caso. Per ogni testata stimiamo la propensione p_i a coprire le
+    # story "grandi" (>= BLINDSPOT_STORY_MIN_SOURCES testate) nella finestra;
+    # per un gruppo che non ha coperto, P(nessuna per caso) = Π(1 - p_i).
+    # Si marca solo sotto BLINDSPOT_ALPHA, su story mature (>= 6 ore) e
+    # internazionali (>= BLINDSPOT_MIN_COUNTRIES paesi), per gruppi con
+    # almeno BLINDSPOT_MIN_GROUP testate attive. Un paese piccolo, che di
+    # suo copre poco, non raggiunge mai la significatività: niente rumore.
+    big_stories = {
+        story_id: covering
+        for story_id, covering in story_sources.items()
+        if len(covering) >= BLINDSPOT_STORY_MIN_SOURCES
+    }
+    propensity: dict[int, float] = {}
+    if len(big_stories) >= BLINDSPOT_MIN_BIG_STORIES:
+        for sid in sources:
+            covered = sum(1 for cov in big_stories.values() if sid in cov)
+            propensity[sid] = covered / len(big_stories)
+
+    first_seen_by_story: dict[int, datetime] = {
+        row[0]: row[1]
+        for row in (
+            await session.execute(
+                select(Story.id, Story.first_seen).where(
+                    Story.id.in_(list(story_sources))
                 )
-        if not ignored_by:
-            continue
+            )
+        ).all()
+    }
+    mature_before = until - timedelta(hours=BLINDSPOT_MATURITY_HOURS)
+
+    # Si aggiorna OGNI coverage della finestra: anche per azzerare i flag
+    # rimasti da esecuzioni precedenti quando le condizioni non valgono più.
+    for story_id, covering in story_sources.items():
         coverage = (
             await session.execute(
                 select(Coverage).where(Coverage.story_id == story_id)
             )
         ).scalar_one_or_none()
-        if coverage is not None:
+        if coverage is None:
+            continue
+        ignored_by: list[dict[str, object]] = []
+        first_seen = first_seen_by_story.get(story_id)
+        covering_countries = {sources[sid].country for sid in covering}
+        if (
+            propensity
+            and story_id in big_stories
+            and first_seen is not None
+            and first_seen <= mature_before
+            and len(covering_countries) >= BLINDSPOT_MIN_COUNTRIES
+        ):
+            for country, active in active_by_country.items():
+                if country in covering_countries:
+                    continue
+                if len(active) < BLINDSPOT_MIN_GROUP:
+                    continue
+                p_null = 1.0
+                for sid in active:
+                    p_null *= 1.0 - propensity.get(sid, 0.0)
+                if p_null < BLINDSPOT_ALPHA:
+                    ignored_by.append(
+                        {
+                            "group": country,
+                            "kind": "country",
+                            "p_null": round(p_null, 4),
+                            "active": len(active),
+                            "covering_sources": len(covering),
+                            "covering_countries": len(covering_countries),
+                        }
+                    )
+            ignored_by.sort(key=lambda d: float(d["p_null"]))  # type: ignore[arg-type]
+            ignored_by = ignored_by[:BLINDSPOT_MAX_GROUPS]
+        if list(coverage.blindspot_for or []) != ignored_by:
             coverage.blindspot_for = ignored_by
             coverage.computed_at = datetime.now(UTC)
     await session.flush()

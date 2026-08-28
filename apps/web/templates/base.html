@@ -32,7 +32,7 @@
            {% if code == locale %}aria-current="true" class="lingua-attiva"{% endif %}>{{ code | upper }}</a>
         {% endfor %}
       </nav>
-      {% if current_user and current_user.is_admin %}
+      {% if personal_mode or (current_user and current_user.is_admin) %}
       <a class="tema-toggle" href="/impostazioni">{{ t('imp.titolo') }}</a>
       {% endif %}
       <button type="button" class="tema-toggle" data-tema-toggle
@@ -51,7 +51,7 @@
     <a href="/fonti">{{ t('nav.testate') }}</a>
     <a href="/metodo">{{ t('nav.metodo') }}</a>
     <a href="/dati">{{ t('nav.dati') }}</a>
-    <a href="/annota">{{ t('nav.annota') }}</a>
+    {% if not personal_mode %}<a href="/annota">{{ t('nav.annota') }}</a>{% endif %}
   </nav>
   <div class="masthead-stato">
     {{ t('masthead.fonti_attive') }}: {{ source_count | default("—") }}

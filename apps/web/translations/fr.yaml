@@ -21,6 +21,7 @@ nav.testate: "Les médias"
 nav.metodo: "Comment nous le calculons"
 nav.dati: "Données ouvertes"
 nav.annota: "Annoter"
+annota.nota_personale: "Sur une installation personnelle, le jugement humain (niveau 4) ne peut pas vraiment être recueilli : il faut plusieurs annotateurs d'orientations différentes sur une instance partagée. Cette page reste pour la complétude et pour essayer le protocole."
 footer.licenza: "{app} est un logiciel libre (<a href=\"https://www.gnu.org/licenses/agpl-3.0.html\">AGPL-3.0</a>) ; les données dérivées sont publiées sous <a href=\"https://creativecommons.org/licenses/by-sa/4.0/deed.fr\">CC BY-SA 4.0</a>. Les titres et les extraits restent la propriété de leurs médias respectifs et sont affichés dans les limites du droit de citation, avec un lien vers la source."
 footer.note: "Contient des données du <a href=\"https://www.gdeltproject.org/\">GDELT Project</a> · faits d'entreprise issus de <a href=\"https://www.wikidata.org/\">Wikidata</a> (CC0), d'<a href=\"https://media-ownership.eu/\">EurOMo</a> (CC BY 4.0) et de registres publics (<a href=\"https://www.agcom.it/registro-degli-operatori-di-comunicazione\">ROC AGCOM</a>, <a href=\"https://informazioneeditoria.gov.it/\">DIE</a>). Chaque chiffre affiché a sa <a href=\"/metodo\">provenance déclarée</a>."
 
@@ -50,7 +51,7 @@ storia.titolo_centroide: "Titre neutre : le plus proche du centroïde du groupe"
 storia.titolo_llm: "Titre neutre : résumé automatique (LLM local), signalé comme tel"
 storia.apparsa: "première apparition le {data} à {ora}"
 storia.conteggi: "{testate} médias dans {articoli} articles"
-storia.angolo_avviso: "<strong>Angle mort :</strong> aucune source active de {gruppi} n'a couvert cette story (seuil {soglia} %, pays comptant ≥3 sources actives)."
+storia.angolo_avviso: "<strong>Angle mort :</strong> aucun média actif de {gruppi} n'a couvert cet événement, couvert par {testate} médias de {paesi} pays. La probabilité que cette absence soit un hasard est inférieure à 5 % (méthode sur /metodo)."
 storia.come_raccontano: "Comment les médias la racontent"
 storia.leggi_fonte: "lire à la source →"
 storia.prima_pubblicata: "Qui l'a publiée en premier"
@@ -219,6 +220,8 @@ filtro.nota: "Vous voyez les stories couvertes par au moins un journal de : {pae
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "L’essentiel en bref"
 storia.riassunto_nota: "Résumé généré automatiquement par un modèle ouvert exécuté en local : il lit les titres, extraits et textes des articles collectés (usage interne) et réécrit les faits avec ses propres mots, dans votre langue. Il est marqué comme automatique et peut contenir des imprécisions : les articles originaux liés ci-dessous font foi."
+storia.riassunto_base: "Base du résumé : {articoli} articles de {testate} médias, {testo} avec texte intégral (usage interne)."
+storia.riassunto_altra_lingua: "Un résumé existe en {lingua} ; le bouton ci-dessous le génère dans votre langue."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Paramètres"

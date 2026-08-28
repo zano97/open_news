@@ -42,7 +42,9 @@ if (-not $Uv) {
 }
 Set-Location $App
 & $Uv venv --quiet --allow-existing --python 3.12 .venv
-& $Uv pip install --quiet --python .venv\Scripts\python.exe -e .
+# Extra [translate]: sottotitoli tradotti (Argos, offline). Fallback su base.
+& $Uv pip install --quiet --python .venv\Scripts\python.exe -e ".[translate]"
+if ($LASTEXITCODE -ne 0) { & $Uv pip install --quiet --python .venv\Scripts\python.exe -e . }
 
 Say "Creo il comando «opennews» e la voce nel menu Start"
 $BinDir = Join-Path $env:USERPROFILE ".local\bin"

@@ -334,3 +334,16 @@ async def test_altro_processo_vede_le_impostazioni_salvate(
         assert story.summary_neutral is not None
     finally:
         settings.enable_llm = originale
+
+
+async def test_modalita_personale_senza_account(
+    client: AsyncClient, monkeypatch,
+) -> None:
+    """Istanza personale (127.0.0.1): le impostazioni si aprono senza account."""
+    monkeypatch.setenv("OPENNEWS_EMBEDDED_WORKER", "1")
+    pagina = await client.get("/impostazioni")
+    assert pagina.status_code == 200
+    assert 'name="ollama_model"' in pagina.text
+    # E il link /annota sparisce dalla testata (livello 4 = istanze condivise).
+    prima = await client.get("/")
+    assert 'href="/annota"' not in prima.text

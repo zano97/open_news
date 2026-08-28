@@ -245,3 +245,24 @@ ferma tutto: dopo 2 gruppi consecutivi senza connessione i rimanenti si
 saltano subito — li recupera il ciclo di raccolta successivo (feed ogni 10
 minuti, GDELT ogni 30). Anche robots.txt ha un timeout corto (8 s): un
 robots che non arriva non deve trattenere il feed per 20.
+
+## ADR-0020 — Angoli ciechi v2: significatività, non semplice assenza
+
+**Contesto.** La v1 marcava come "angolo cieco" ogni paese con ≥3 fonti
+attive che non aveva coperto una story con ≥5 testate. Con un catalogo di
+~60 paesi quasi ogni story risultava "cieca" per decine di paesi: rumore
+sistematico, e la sensazione (fondata) di inaffidabilità.
+
+**Decisione.** La v2 (`blindspot-country-v2`) marca solo l'assenza
+IMPROBABILE: per ogni testata si stima la propensione a coprire le grandi
+story nella finestra; un paese è marcato solo se Π(1−propensione) delle sue
+testate attive è < 5%, su story mature (≥6 h), internazionali (≥3 paesi),
+con gruppi ≥3 testate; al lettore i 3 paesi più significativi, con la
+probabilità nel dato. I flag vecchi vengono azzerati quando le condizioni
+non valgono più. Le soglie sono costanti di metodo (non modificabili dal
+pannello), documentate su /metodo.
+
+**Conseguenze.** Un paese piccolo, che copre poco di suo, non raggiunge mai
+la significatività: sparisce il rumore. Il badge torna a voler dire
+qualcosa: "questa assenza non è spiegabile col caso". Il segnale per-fonte
+(confronto coi pari dello stesso paese) resta invariato.

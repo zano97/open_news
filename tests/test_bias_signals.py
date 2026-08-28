@@ -45,9 +45,11 @@ async def _story_con_articoli(
     fonti: list[Source],
     *,
     topic: str | None = None,
+    first_seen: datetime | None = None,
 ) -> Story:
     story = Story(
-        title_neutral=titolo, first_seen=utcnow(), last_seen=utcnow(), topic=topic,
+        title_neutral=titolo, first_seen=first_seen or utcnow(),
+        last_seen=utcnow(), topic=topic,
         article_count=len(fonti), source_count=len(fonti),
     )
     session.add(story)
@@ -165,22 +167,57 @@ async def test_blind_spot(session: AsyncSession) -> None:
     assert ignorata.id in segnale_c.value["story_ids"]
 
 
-async def test_blindspot_di_paese_su_coverage(session: AsyncSession) -> None:
-    # 5 fonti gb coprono la story; 3 fonti it attive la ignorano.
-    gb = [await _fonte(session, f"gb-{i}", country="gb") for i in range(5)]
-    it = [await _fonte(session, f"it-{i}", country="it") for i in range(3)]
-    story = await _story_con_articoli(session, "vertice internazionale", gb)
-    session.add(Coverage(story_id=story.id, method_version="test"))
-    for fonte in it:
-        await _story_con_articoli(session, f"cronaca {fonte.slug}", [fonte])
+async def test_blindspot_di_paese_v2_significativo(session: AsyncSession) -> None:
+    """v2: si marca solo l'assenza IMPROBABILE. L'Italia (6 testate che
+    coprono quasi tutte le grandi story) che ignora una story internazionale
+    matura è un angolo cieco; il Portogallo (3 testate che coprono poco)
+    no — la sua assenza è attesa, non significativa."""
+    from datetime import timedelta
+
+    it = [await _fonte(session, f"it-{i}", country="it") for i in range(6)]
+    pt = [await _fonte(session, f"pt-{i}", country="pt") for i in range(3)]
+    gb = [await _fonte(session, f"gb-{i}", country="gb") for i in range(3)]
+    fr = [await _fonte(session, f"fr-{i}", country="fr") for i in range(2)]
+    de = [await _fonte(session, f"de-{i}", country="de") for i in range(2)]
+
+    # Storico: 12 grandi story; le italiane le coprono (propensione alta),
+    # le portoghesi quasi mai (propensione bassa).
+    for i in range(12):
+        extra = [pt[0]] if i == 0 else []
+        await _story_con_articoli(
+            session, f"grande story {i}", it + gb[:1] + extra,
+            first_seen=utcnow() - timedelta(hours=30),
+        )
+
+    # La story in esame: matura, 3 paesi, 7 testate — e zero italiane.
+    ignorata = await _story_con_articoli(
+        session, "vertice internazionale ignorato", gb + fr + de,
+        first_seen=utcnow() - timedelta(hours=12),
+    )
+    session.add(Coverage(story_id=ignorata.id, method_version="test"))
+    # Una story FRESCA con le stesse assenze non va marcata: c'è ancora tempo.
+    fresca = await _story_con_articoli(
+        session, "vertice appena battuto", gb + fr + de,
+        first_seen=utcnow() - timedelta(hours=1),
+    )
+    session.add(Coverage(story_id=fresca.id, method_version="test"))
     await session.flush()
 
     await compute_blindspots(session, window_days=30)
+
     coverage = (
-        await session.execute(select(Coverage).where(Coverage.story_id == story.id))
+        await session.execute(select(Coverage).where(Coverage.story_id == ignorata.id))
     ).scalar_one()
     gruppi = {b["group"] for b in coverage.blindspot_for}
-    assert "it" in gruppi
+    assert "it" in gruppi  # assenza altamente improbabile: marcata
+    assert "pt" not in gruppi  # assenza attesa (propensione bassa): niente rumore
+    marcato = next(b for b in coverage.blindspot_for if b["group"] == "it")
+    assert marcato["p_null"] < 0.05  # la soglia è dichiarata nel dato stesso
+
+    fresca_cov = (
+        await session.execute(select(Coverage).where(Coverage.story_id == fresca.id))
+    ).scalar_one()
+    assert fresca_cov.blindspot_for == []  # troppo presto per giudicare
 
 
 async def test_pipeline_settimanale_completa(session: AsyncSession) -> None:

@@ -22,7 +22,8 @@
     <p class="avviso-cieco">
       {{ t('storia.angolo_avviso',
            gruppi=coverage.blindspot_for | map(attribute="group") | join(", ") | upper,
-           soglia=(coverage.blindspot_for[0].threshold * 100) | round | int) | safe }}
+           testate=coverage.blindspot_for[0].covering_sources,
+           paesi=coverage.blindspot_for[0].covering_countries) | safe }}
     </p>
     {% endif %}
   </header>
@@ -32,8 +33,14 @@
     <h3>{{ t('storia.riassunto_titolo') }}</h3>
     {% if riassunto_locale %}
     <p class="riassunto-testo">{{ riassunto_locale }}</p>
+    <p class="fonte-meta">{{ t('storia.riassunto_base', articoli=riassunto_base[0], testate=riassunto_base[1], testo=riassunto_base[2]) }}</p>
     <p class="fonte-meta">{{ t('storia.riassunto_nota') }}</p>
     {% else %}
+    {% if riassunto_altro %}
+    <p class="riassunto-testo">{{ riassunto_altro[1] }}</p>
+    <p class="fonte-meta">{{ t('storia.riassunto_altra_lingua', lingua=riassunto_altro[0] | upper) }}</p>
+    {% endif %}
+    <p class="fonte-meta">{{ t('storia.riassunto_base', articoli=riassunto_base[0], testate=riassunto_base[1], testo=riassunto_base[2]) }}</p>
     <p class="riassunto-testo" data-riassunto-testo hidden></p>
     <button type="button" class="bottone" data-riassunto-btn
             data-url="/storia/{{ story.id }}/riassunto"

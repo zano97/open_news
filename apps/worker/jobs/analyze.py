@@ -82,16 +82,23 @@ async def refresh_settings_job() -> None:
 
 
 async def translate_titles_job() -> None:
-    """Traduce i titoli neutri delle story recenti (solo se Argos è installato)."""
+    """Traduce i titoli neutri delle story recenti, in TUTTE le lingue UI.
+
+    Catena: Argos (se installato; scarica da solo le coppie mancanti) e
+    LLM locale come riserva quando il generatore è acceso. Senza nessuno
+    dei due motori il giro è un no-op.
+    """
     from datetime import timedelta
 
+    from core.config import get_settings
     from core.models import utcnow
     from core.nlp.translate import get_translator, translate_story_title
 
-    if get_translator() is None:
+    llm_fallback = get_settings().enable_llm
+    if get_translator() is None and not llm_fallback:
         return
     maker = get_sessionmaker()
-    since = utcnow() - timedelta(hours=48)
+    since = utcnow() - timedelta(hours=72)
     async with maker() as session:
         stories = (
             (
@@ -107,7 +114,11 @@ async def translate_titles_job() -> None:
         )
         added = 0
         for story in stories:
-            added += await translate_story_title(session, story)
+            added += await translate_story_title(
+                session, story, llm_fallback=llm_fallback
+            )
+            if added >= 60:  # il resto al prossimo giro (ogni 15 minuti)
+                break
         await session.commit()
     if added:
         log.info("titoli neutri tradotti: %d", added)

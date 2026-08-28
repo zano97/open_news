@@ -273,3 +273,21 @@ async def test_tutto_fallisce_ma_niente_crash(maker: async_sessionmaker) -> None
 
     assert creati_feed == {"a": 0, "b": 0}
     assert creati_gdelt == {}
+
+
+def test_i_job_di_raccolta_partono_subito_all_avvio() -> None:
+    """Chi apre l'app per pochi minuti deve vedere notizie fresche: i job
+    di raccolta hanno un next_run_time entro pochi minuti dall'avvio, non
+    dopo il primo intervallo pieno."""
+    from datetime import datetime, timedelta
+
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+    from apps.worker.jobs import register_jobs
+
+    scheduler = AsyncIOScheduler(timezone="UTC")
+    register_jobs(scheduler)
+    limite = datetime.now(scheduler.timezone) + timedelta(minutes=6)
+    for job_id in ("ingest_feeds", "ingest_gdelt", "cluster"):
+        job = next(j for j in scheduler.get_jobs() if j.id == job_id)
+        assert job.next_run_time is not None and job.next_run_time <= limite, job_id

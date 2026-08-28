@@ -67,9 +67,12 @@ def test_prompt_include_articoli_e_lingua_del_lettore() -> None:
 
     class ArticoloFinto:
         source = FonteFinta()
+        source_id = 1
         title = "Titolo pubblico"
         snippet = "Estratto pubblico."
         language = "it"
+        published_at = None
+        fetched_at = None
         full_text = "Corpo dell'articolo. " * 300  # ben oltre il limite
 
     class StoryFinta:

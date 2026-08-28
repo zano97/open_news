@@ -3,6 +3,7 @@
 import json
 import logging
 import math
+import os
 from collections.abc import AsyncIterator
 from datetime import timedelta
 from typing import Annotated, Any
@@ -112,6 +113,9 @@ async def page_context(
         ],
         "current_path": request.url.path,
         "current_user": await _session_user(request, session),
+        # Istanza personale (un solo utente, legata a 127.0.0.1): niente
+        # account obbligatorio per le impostazioni, livello 4 ridimensionato.
+        "personal_mode": os.environ.get("OPENNEWS_EMBEDDED_WORKER") == "1",
     }
 
 
@@ -389,8 +393,28 @@ async def storia(
             "topic_labels": topic_labels,
             "llm_on": _gs().enable_llm,
             "riassunto_locale": _riassunto_per(story, locale, _gs().enable_llm),
+            "riassunto_altro": _riassunto_altro(story, locale, _gs().enable_llm),
+            "riassunto_base": _input_stats(story),
         },
     )
+
+
+def _input_stats(story: Story) -> tuple[int, int, int]:
+    from core.nlp.summarize import input_stats
+
+    return input_stats(story)
+
+
+def _riassunto_altro(story: Story, locale: str, llm_on: bool) -> tuple[str, str] | None:
+    """(lingua, testo) di un riassunto già generato in un'altra lingua,
+    mostrato accanto al pulsante «genera nella tua lingua»."""
+    if _riassunto_per(story, locale, llm_on) is not None:
+        return None
+    summaries = story.summaries or {}
+    for lang, testo in summaries.items():
+        if lang != locale and testo:
+            return lang, testo
+    return None
 
 
 def _riassunto_per(story: Story, locale: str, llm_on: bool) -> str | None:
@@ -450,6 +474,7 @@ async def genera_riassunto(
         ThinkFilter,
         build_prompt,
         generation_payload,
+        input_stats,
         record_generation,
         think_rejected,
     )
@@ -477,7 +502,7 @@ async def genera_riassunto(
         )
 
     prompt = build_prompt(story, locale)
-    n_articles = len(story.articles)
+    n_articles, _n_testate, n_full = input_stats(story)
 
     # Pre-flight: la connessione a Ollama viene aperta PRIMA di rispondere,
     # così "non raggiungibile", "modello mancante" (404) o un errore del
@@ -577,6 +602,7 @@ async def genera_riassunto(
                     inputs={
                         "model": settings.ollama_model,
                         "n_articles": n_articles,
+                        "n_full_text": n_full,
                         "locale": locale,
                         "trigger": "richiesta del lettore",
                         "input": "titoli+estratti+testo integrale (uso interno, mai mostrato)",

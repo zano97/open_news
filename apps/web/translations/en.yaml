@@ -18,6 +18,7 @@ nav.testate: "The outlets"
 nav.metodo: "How we compute it"
 nav.dati: "Open data"
 nav.annota: "Annotate"
+annota.nota_personale: "On a personal installation, human judgement (level 4) cannot really be collected: it takes several annotators of different orientations on a shared instance. This page remains for completeness and to try the protocol."
 footer.licenza: "{app} is free software (<a href=\"https://www.gnu.org/licenses/agpl-3.0.html\">AGPL-3.0</a>); derived data is published under <a href=\"https://creativecommons.org/licenses/by-sa/4.0/\">CC BY-SA 4.0</a>. Headlines and snippets remain the property of their outlets and are shown within the limits of quotation with a link to the source."
 footer.note: "Contains data from the <a href=\"https://www.gdeltproject.org/\">GDELT Project</a> · corporate facts from <a href=\"https://www.wikidata.org/\">Wikidata</a> (CC0), <a href=\"https://media-ownership.eu/\">EurOMo</a> (CC BY 4.0) and public registers (<a href=\"https://www.agcom.it/registro-degli-operatori-di-comunicazione\">ROC AGCOM</a>, <a href=\"https://informazioneeditoria.gov.it/\">DIE</a>). Every number shown has its <a href=\"/metodo\">declared provenance</a>."
 
@@ -44,7 +45,7 @@ storia.titolo_centroide: "Neutral headline: the one closest to the cluster centr
 storia.titolo_llm: "Neutral headline: automatic summary (local LLM), marked as such"
 storia.apparsa: "first seen {data} at {ora}"
 storia.conteggi: "{testate} outlets across {articoli} articles"
-storia.angolo_avviso: "<strong>Blind spot:</strong> no active source from {gruppi} covered this story (threshold {soglia}%, countries with ≥3 active sources)."
+storia.angolo_avviso: "<strong>Blind spot:</strong> no active outlet from {gruppi} covered this story, while {testate} outlets from {paesi} countries did. The probability that this absence is chance is below 5% (method at /metodo)."
 storia.come_raccontano: "How the outlets tell it"
 storia.leggi_fonte: "read at the source →"
 storia.prima_pubblicata: "Who published it first"
@@ -205,6 +206,8 @@ filtro.nota: "You are seeing stories covered by at least one outlet from: {paese
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "The story in brief"
 storia.riassunto_nota: "Summary generated automatically by an open model running locally: it reads the headlines, excerpts and text of the collected articles (internal use) and rewrites the facts in its own words, in your language. It is marked as automatic and may contain inaccuracies: the original articles linked below are authoritative."
+storia.riassunto_base: "Summary base: {articoli} articles from {testate} outlets, {testo} with full text (internal use)."
+storia.riassunto_altra_lingua: "A summary exists in {lingua}; use the button below to generate it in your language."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Settings"

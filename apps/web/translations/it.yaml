@@ -22,6 +22,7 @@ nav.testate: "Le testate"
 nav.metodo: "Come lo calcoliamo"
 nav.dati: "Dati aperti"
 nav.annota: "Annota"
+annota.nota_personale: "Su un'installazione personale il giudizio umano (livello 4) non si può raccogliere davvero: servono più annotatori, di orientamenti diversi, su un'istanza condivisa. La pagina resta per completezza e per provare il protocollo."
 footer.licenza: "{app} è software libero (<a href=\"https://www.gnu.org/licenses/agpl-3.0.html\">AGPL-3.0</a>); i dati derivati sono pubblicati in <a href=\"https://creativecommons.org/licenses/by-sa/4.0/deed.it\">CC BY-SA 4.0</a>. I titoli e gli snippet restano delle rispettive testate e sono mostrati nei limiti della citazione con link alla fonte."
 footer.note: "Contiene dati del <a href=\"https://www.gdeltproject.org/\">GDELT Project</a> · fatti societari da <a href=\"https://www.wikidata.org/\">Wikidata</a> (CC0), <a href=\"https://media-ownership.eu/\">EurOMo</a> (CC BY 4.0) e registri pubblici (<a href=\"https://www.agcom.it/registro-degli-operatori-di-comunicazione\">ROC AGCOM</a>, <a href=\"https://informazioneeditoria.gov.it/\">DIE</a>). Ogni numero mostrato ha la sua <a href=\"/metodo\">provenienza dichiarata</a>."
 
@@ -51,7 +52,7 @@ storia.titolo_centroide: "Titolo neutro: il più vicino al centroide del gruppo"
 storia.titolo_llm: "Titolo neutro: riassunto automatico (LLM locale), marcato"
 storia.apparsa: "prima apparizione {data} alle {ora}"
 storia.conteggi: "{testate} testate in {articoli} articoli"
-storia.angolo_avviso: "<strong>Angolo cieco:</strong> nessuna fonte attiva di {gruppi} ha coperto questa story (soglia {soglia}%, paesi con ≥3 fonti attive)."
+storia.angolo_avviso: "<strong>Angolo cieco:</strong> nessuna testata attiva di {gruppi} ha coperto questa story, mentre la coprono {testate} testate di {paesi} paesi. La probabilità che l'assenza sia un caso è sotto il 5% (metodo su /metodo)."
 storia.come_raccontano: "Come la raccontano le testate"
 storia.leggi_fonte: "leggi alla fonte →"
 storia.prima_pubblicata: "Chi l'ha pubblicata per prima"
@@ -220,6 +221,8 @@ filtro.nota: "Stai vedendo le story coperte da almeno una testata di: {paese}. L
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "Il fatto in breve"
 storia.riassunto_nota: "Riassunto generato automaticamente da un modello aperto eseguito in locale, che legge titoli, estratti e il testo degli articoli raccolti (uso interno) e riscrive i fatti in parole proprie, nella tua lingua. È marcato come automatico e può contenere imprecisioni: fanno fede gli articoli originali, linkati qui sotto."
+storia.riassunto_base: "Base del riassunto: {articoli} articoli di {testate} testate, {testo} con testo integrale (uso interno)."
+storia.riassunto_altra_lingua: "Riassunto disponibile in {lingua}; col pulsante qui sotto lo generi nella tua lingua."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Impostazioni"

@@ -21,6 +21,7 @@ nav.testate: "Die Medien"
 nav.metodo: "Wie wir es berechnen"
 nav.dati: "Offene Daten"
 nav.annota: "Annotieren"
+annota.nota_personale: "Auf einer persönlichen Installation lässt sich das menschliche Urteil (Ebene 4) nicht wirklich sammeln: Es braucht mehrere Annotatoren unterschiedlicher Ausrichtung auf einer geteilten Instanz. Die Seite bleibt der Vollständigkeit halber und zum Ausprobieren des Protokolls."
 footer.licenza: "{app} ist freie Software (<a href=\"https://www.gnu.org/licenses/agpl-3.0.html\">AGPL-3.0</a>); die abgeleiteten Daten werden unter <a href=\"https://creativecommons.org/licenses/by-sa/4.0/deed.de\">CC BY-SA 4.0</a> veröffentlicht. Schlagzeilen und Textauszüge bleiben Eigentum der jeweiligen Medien und werden im Rahmen des Zitatrechts mit Link zur Quelle gezeigt."
 footer.note: "Enthält Daten des <a href=\"https://www.gdeltproject.org/\">GDELT Project</a> · Unternehmensdaten von <a href=\"https://www.wikidata.org/\">Wikidata</a> (CC0), <a href=\"https://media-ownership.eu/\">EurOMo</a> (CC BY 4.0) und aus öffentlichen Registern (<a href=\"https://www.agcom.it/registro-degli-operatori-di-comunicazione\">ROC AGCOM</a>, <a href=\"https://informazioneeditoria.gov.it/\">DIE</a>). Jede gezeigte Zahl hat ihre <a href=\"/metodo\">deklarierte Herkunft</a>."
 
@@ -50,7 +51,7 @@ storia.titolo_centroide: "Neutrale Schlagzeile: die dem Zentroid der Gruppe am n
 storia.titolo_llm: "Neutrale Schlagzeile: automatische Zusammenfassung (lokales LLM), als solche gekennzeichnet"
 storia.apparsa: "zuerst erschienen am {data} um {ora}"
 storia.conteggi: "{testate} Medien in {articoli} Artikeln"
-storia.angolo_avviso: "<strong>Blinder Fleck:</strong> keine aktive Quelle aus {gruppi} hat diese Story aufgegriffen (Schwelle {soglia} %, Länder mit ≥3 aktiven Quellen)."
+storia.angolo_avviso: "<strong>Blinder Fleck:</strong> kein aktives Medium aus {gruppi} hat diese Meldung aufgegriffen, während {testate} Medien aus {paesi} Ländern berichteten. Die Wahrscheinlichkeit, dass dieses Fehlen Zufall ist, liegt unter 5 % (Methode auf /metodo)."
 storia.come_raccontano: "Wie die Medien darüber berichten"
 storia.leggi_fonte: "im Original lesen →"
 storia.prima_pubblicata: "Wer sie zuerst veröffentlicht hat"
@@ -219,6 +220,8 @@ filtro.nota: "Sie sehen Storys, die von mindestens einer Zeitung aus {paese} abg
 # Riassunto neutro (LLM locale, marcato)
 storia.riassunto_titolo: "Das Wichtigste in Kürze"
 storia.riassunto_nota: "Automatisch erstellte Zusammenfassung eines lokal laufenden offenen Modells: Es liest Titel, Auszüge und Texte der gesammelten Artikel (interne Nutzung) und gibt die Fakten in eigenen Worten in Ihrer Sprache wieder. Sie ist als automatisch gekennzeichnet und kann Ungenauigkeiten enthalten: Maßgeblich sind die unten verlinkten Originalartikel."
+storia.riassunto_base: "Grundlage der Zusammenfassung: {articoli} Artikel aus {testate} Medien, {testo} mit Volltext (interne Nutzung)."
+storia.riassunto_altra_lingua: "Eine Zusammenfassung liegt auf {lingua} vor; der Knopf unten erzeugt sie in Ihrer Sprache."
 
 # Pannello impostazioni (admin)
 imp.titolo: "Einstellungen"

@@ -97,8 +97,9 @@ di tutto, il browser predefinito. Da lì in poi:
 - **avvii** con un clic sull'icona, oppure con `opennews` nel terminale
   (`opennews --port 8100` per un'altra porta, `--tab` per aprire nel
   browser normale, `--no-browser` per non aprire niente);
-- **fermi** con Ctrl+C nel terminale (o chiudendo la finestra): alla
-  prossima apertura riparte da dov'era;
+- **fermi** con Ctrl+C nel terminale (o, su macOS, chiudendo la finestra:
+  spegne tutto); alla prossima apertura **recupera subito** le notizie
+  perse e poi riprende la cadenza normale;
 - i **dati** (notizie, impostazioni, annotazioni) vivono in `~/.opennews`
   e sopravvivono ad aggiornamenti e reinstallazioni;
 - `opennews seed` riscarica le ultime 24 ore quando vuoi.
@@ -182,7 +183,9 @@ sulle testate di un paese (di default vedi il mondo intero). Le pagine:
 
 ## Amministrazione
 
-Il **primo profilo che si registra** su `/annota` diventa l'amministratore
+In **modalità personale** le Impostazioni sono aperte direttamente, senza
+account: l'app è tua. Su un **server condiviso** il **primo profilo che si
+registra** su `/annota` diventa l'amministratore
 dell'istanza: vede il link «Impostazioni» in testata e il pannello
 `/impostazioni`, dove regola — con la spiegazione accanto a ogni campo —
 modello e URL di Ollama, motore di embedding, soglie del clustering e delle

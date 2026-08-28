@@ -2,6 +2,9 @@
 {% block title %}{{ t('nav.annota') }} — {{ app_name }}{% endblock %}
 
 {% block content %}
+{% if personal_mode %}
+<p class="avviso-cieco">{{ t('annota.nota_personale') }}</p>
+{% endif %}
 <section class="modulo">
   <h2 class="titolo-sezione">{{ t('annota.titolo') }}</h2>
   <p class="occhiello">

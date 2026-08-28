@@ -27,6 +27,16 @@ async def heartbeat() -> None:
 
 
 def register_jobs(scheduler: AsyncIOScheduler) -> None:
+    # RECUPERO ALL'AVVIO: i job a intervallo, da soli, partirebbero solo
+    # DOPO il primo intervallo — chi apre l'app per pochi minuti non
+    # vedrebbe mai un aggiornamento. `next_run_time` scaglionato fa partire
+    # la raccolta subito dopo l'avvio (dedup e cache condizionale rendono
+    # il recupero economico anche quando non c'è nulla di nuovo).
+    from datetime import datetime, timedelta
+
+    def tra(secondi: int) -> datetime:
+        return datetime.now(scheduler.timezone) + timedelta(seconds=secondi)
+
     scheduler.add_job(heartbeat, "interval", minutes=15, id="heartbeat")
     # Gli override del pannello admin: subito all'avvio e poi ogni 5 minuti.
     scheduler.add_job(refresh_settings_job, id="refresh_settings")
@@ -37,19 +47,24 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(sync_catalog_job, id="sync_catalog")
     scheduler.add_job(sync_catalog_job, "interval", hours=6, id="sync_catalog_periodic")
     scheduler.add_job(
-        ingest_feeds_job, "interval", minutes=10, id="ingest_feeds", max_instances=1
+        ingest_feeds_job, "interval", minutes=10, id="ingest_feeds",
+        max_instances=1, next_run_time=tra(10),
     )
     scheduler.add_job(
-        ingest_gdelt_job, "interval", minutes=30, id="ingest_gdelt", max_instances=1
+        ingest_gdelt_job, "interval", minutes=30, id="ingest_gdelt",
+        max_instances=1, next_run_time=tra(40),
     )
     scheduler.add_job(
-        fetch_fulltext_job, "interval", minutes=15, id="fetch_fulltext", max_instances=1
+        fetch_fulltext_job, "interval", minutes=15, id="fetch_fulltext",
+        max_instances=1, next_run_time=tra(240),
     )
     scheduler.add_job(
-        cluster_job, "interval", minutes=10, id="cluster", max_instances=1
+        cluster_job, "interval", minutes=10, id="cluster",
+        max_instances=1, next_run_time=tra(120),
     )
     scheduler.add_job(
-        link_entities_job, "interval", minutes=30, id="link_entities", max_instances=1
+        link_entities_job, "interval", minutes=30, id="link_entities",
+        max_instances=1, next_run_time=tra(300),
     )
     # Fatti Wikidata sui proprietari con QID confermato: una volta al giorno.
     scheduler.add_job(
