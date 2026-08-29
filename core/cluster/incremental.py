@@ -266,18 +266,27 @@ async def cluster_pending(
     """
     embedder = embedder or get_embedder()
     stats = ClusterStats()
-    articles = (
+    # PRIMA LE NOTIZIE FRESCHE: si prendono gli articoli più RECENTI in
+    # coda, non i più vecchi. Con un arretrato (dopo il primo seed, o dopo
+    # ore di app spenta) la coda cronologica teneva le notizie di oggi in
+    # fondo: la prima pagina restava ferma al mattino mentre il giro
+    # macinava l'archivio. L'arretrato si smaltisce comunque, giro dopo
+    # giro, dal più recente al più vecchio.
+    recenti = (
         (
             await session.execute(
                 select(Article)
                 .where(Article.story_id.is_(None))
-                .order_by(Article.published_at.asc().nulls_last(), Article.id.asc())
+                .order_by(Article.published_at.desc().nulls_last(), Article.id.desc())
                 .limit(batch)
             )
         )
         .scalars()
         .all()
     )
+    # Dentro il lotto l'ordine resta CRONOLOGICO: una story si forma dal
+    # suo articolo più antico, e il titolo neutro non cambia significato.
+    articles = sorted(recenti, key=lambda a: (_article_time(a), a.id))
     if not articles:
         return stats
     settings = get_settings()

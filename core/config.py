@@ -80,6 +80,9 @@ class Settings(BaseSettings):
     # La prima pagina è ATTUALITÀ: solo story viste (last_seen) entro questa
     # finestra; le più vecchie restano raggiungibili da filtri e archivio.
     front_page_window_hours: int = 48
+    # Fascia «ultima ora» in cima alla prima pagina: le notizie arrivate
+    # entro queste ore, in ordine di orario, comunque poco coperte siano.
+    front_page_breaking_hours: int = 3
 
     # Bias / segnali
     signal_window_days: int = 30

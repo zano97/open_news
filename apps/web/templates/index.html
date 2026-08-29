@@ -77,6 +77,20 @@
 <p class="filtro-nota">{{ t('filtro.nota', paese=paese | upper) }}
   <strong>{{ t('filtro.risultati', n=n_story) }}</strong></p>
 {% endif %}
+{% if ultima_ora and not paese %}
+<section class="ultima-ora" aria-label="{{ t('ultima_ora.aria') }}">
+  <h2 class="ultima-ora-titolo">{{ t('ultima_ora.titolo') }}</h2>
+  <ul class="ultima-ora-elenco">
+    {% for s in ultima_ora %}
+    <li>
+      <time class="ultima-ora-orario" datetime="{{ s.last_seen.isoformat() }}">{{ s.last_seen | ora_breve }}</time>
+      <a href="/storia/{{ s.id }}">{{ titolo_story(s, locale) }}</a>
+      <span class="ultima-ora-testate">{{ s.source_count }} {{ t('comune.testata') if s.source_count == 1 else t('comune.testate') }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 {% if stories %}
 {% set apertura = stories[0] %}
 {{ card(apertura, coverages.get(apertura.id), lead=true) }}

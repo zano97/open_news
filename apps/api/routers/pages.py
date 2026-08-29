@@ -48,7 +48,11 @@ from core.models import (
 )
 from core.nlp.topics import load_topics
 from core.provenance import for_entity
-from core.ranking import finestra_attualita, peso_attualita
+from core.ranking import (
+    finestra_attualita,
+    finestra_ultima_ora,
+    peso_attualita,
+)
 
 log = logging.getLogger(__name__)
 
@@ -195,6 +199,25 @@ async def stato_aggiornamento(
         "fase": fase,
         # Ora LOCALE dell'ultimo articolo raccolto: la testata la mostra viva.
         "ultimo": ultimo.astimezone().strftime("%H:%M") if ultimo else None,
+    }
+
+
+@router.get("/api/osint/{slug}")
+async def stato_osint(
+    slug: str, session: Annotated[AsyncSession, Depends(get_session)]
+) -> dict[str, bool]:
+    """Per la scheda testata: il profilo pubblico è pronto? (sonda leggera)"""
+    from core.osint.profile import profilo_in_corso, profilo_vuoto
+
+    source = (
+        await session.execute(select(Source).where(Source.slug == slug))
+    ).scalar_one_or_none()
+    if source is None:
+        raise HTTPException(status_code=404, detail="fonte sconosciuta")
+    dati = source.osint or {}
+    return {
+        "pronto": bool(dati) and not profilo_vuoto(dati),
+        "in_corso": profilo_in_corso(slug),
     }
 
 
@@ -470,6 +493,21 @@ async def index(
             candidate,
             key=lambda s: -peso_attualita(s.source_count, s.last_seen),
         )[:36]
+    # «Ultima ora»: le notizie appena arrivate, in ordine di orario. Nella
+    # griglia sotto contano copertura e peso — qui conta solo essere nuove,
+    # così una notizia di venti minuti fa non aspetta di essere ripresa da
+    # dieci testate per comparire.
+    ultima_ora = list(
+        (
+            await session.execute(
+                select(Story)
+                .where(Story.last_seen >= finestra_ultima_ora())
+                .order_by(Story.last_seen.desc())
+                .limit(6)
+            )
+        ).scalars()
+    )
+
     coverages = await _coverages_for(session, [s.id for s in stories])
     versions_map = {
         s.id: order_versions(s.articles, paese, locale) for s in stories
@@ -495,6 +533,7 @@ async def index(
         {
             **await page_context(request, session),
             "stories": stories,
+            "ultima_ora": ultima_ora,
             "coverages": coverages,
             "versions_map": versions_map,
             "topic_labels": topic_labels,

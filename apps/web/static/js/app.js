@@ -167,19 +167,35 @@
     }, 3000);
   }
 
-  // Profilo pubblico di una testata in raccolta: la pagina si ricarica UNA
-  // volta, così i dati compaiono senza che il lettore debba pensarci. Il
-  // marcatore in sessionStorage evita di ricaricare all'infinito quando la
-  // raccolta non riesce (sito irraggiungibile).
+  // Profilo pubblico di una testata in raccolta: una sonda leggera chiede
+  // ogni 3 secondi se è pronto e ricarica APPENA lo è — niente attese
+  // cieche. Se la raccolta fallisce (sito irraggiungibile), la sonda si
+  // ferma e la barra di attesa si spegne: nessun loop infinito.
   var attesaOsint = document.querySelector("[data-osint-in-corso]");
-  if (attesaOsint) {
-    var chiave = "opennews-osint-" + (attesaOsint.getAttribute("data-slug") || "");
-    var giaAtteso = false;
-    try { giaAtteso = sessionStorage.getItem(chiave) === "1"; } catch (e) { /* niente */ }
-    if (!giaAtteso) {
-      try { sessionStorage.setItem(chiave, "1"); } catch (e) { /* pazienza */ }
-      setTimeout(function () { location.reload(); }, 12000);
-    }
+  if (attesaOsint && window.fetch) {
+    var slugOsint = attesaOsint.getAttribute("data-slug") || "";
+    var barraOsint = document.querySelector(".barra-attesa");
+    var tentativiOsint = 0;
+    var sondaOsint = setInterval(function () {
+      tentativiOsint += 1;
+      if (tentativiOsint > 30) {  // ~90 secondi, poi basta
+        clearInterval(sondaOsint);
+        if (barraOsint) barraOsint.hidden = true;
+        return;
+      }
+      fetch("/api/osint/" + encodeURIComponent(slugOsint))
+        .then(function (r) { return r.json(); })
+        .then(function (stato) {
+          if (stato.pronto) {
+            clearInterval(sondaOsint);
+            location.reload();
+          } else if (!stato.in_corso && tentativiOsint > 2) {
+            clearInterval(sondaOsint);
+            if (barraOsint) barraOsint.hidden = true;
+          }
+        })
+        .catch(function () { /* server in riavvio: al prossimo giro */ });
+    }, 3000);
   }
 
   // I link alle testate escono dall'app: si aprono nel browser (nuova

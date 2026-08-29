@@ -1185,3 +1185,93 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .mappa-elenco { margin-top: 0.5rem; }
 .mappa-credito { margin-top: 1.2rem; }
 .chip-mappa { border-style: dashed; }
+
+
+/* «Ultima ora»: striscia compatta in cima alla prima pagina. Le notizie
+   appena arrivate hanno poche testate e non reggerebbero il confronto
+   nella griglia: qui contano solo perché sono nuove. */
+.ultima-ora {
+  border-top: 2px solid var(--inchiostro);
+  border-bottom: 1px solid var(--filetto);
+  padding: 0.6rem 0 0.7rem;
+  margin-bottom: 1.2rem;
+}
+.ultima-ora-titolo {
+  font-family: var(--font-titoli, inherit);
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 0.45rem;
+}
+.ultima-ora-elenco { list-style: none; margin: 0; padding: 0; }
+.ultima-ora-elenco li {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.22rem 0;
+  border-bottom: 1px dotted var(--filetto);
+  font-size: 0.95rem;
+}
+.ultima-ora-elenco li:last-child { border-bottom: none; }
+.ultima-ora-orario {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  color: var(--accento);
+  flex: 0 0 auto;
+}
+.ultima-ora-testate {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--inchiostro-tenue);
+  flex: 0 0 auto;
+}
+@media (max-width: 640px) {
+  .ultima-ora-testate { display: none; }
+}
+
+/* Barra di attesa dentro una scheda (profilo pubblico in raccolta). */
+.barra-attesa {
+  height: 3px;
+  margin: 0.5rem 0 0.2rem;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accento) 18%, transparent);
+  overflow: hidden;
+  position: relative;
+}
+.barra-attesa::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  background: var(--accento);
+  border-radius: 3px;
+  animation: scorre-attesa 1.4s ease-in-out infinite;
+}
+@keyframes scorre-attesa {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-attesa::before { animation: none; left: 0; width: 100%; opacity: 0.5; }
+}
+
+
+/* Mappa di co-copertura interattiva: punti-link, nomi al passaggio. */
+.mappa-gruppo { cursor: pointer; }
+.mappa-etichetta {
+  opacity: 0;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--carta);
+  stroke-width: 3px;
+}
+.mappa-gruppo:hover .mappa-etichetta,
+.mappa-gruppo:focus .mappa-etichetta,
+.mappa-gruppo:focus-visible .mappa-etichetta,
+.mappa-etichetta-evidenza { opacity: 1; }
+.mappa-gruppo:hover circle { r: 7; }
+.mappa-suggerimento { opacity: 0.75; }
+@media (prefers-reduced-motion: reduce) {
+  .mappa-etichetta { transition: none; }
+}

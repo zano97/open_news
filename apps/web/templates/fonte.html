@@ -298,10 +298,12 @@
     {% endif %}
     {% if osint and osint_in_corso %}
     <p class="dato-mancante" data-osint-in-corso data-slug="{{ profile.source.slug }}">{{ t('osint.riprova') }}</p>
+    <div class="barra-attesa" role="status" aria-label="{{ t('osint.in_corso') }}"></div>
     {% endif %}
     {% if not osint %}
     {% if osint_in_corso %}
     <p class="dato-mancante" data-osint-in-corso data-slug="{{ profile.source.slug }}">{{ t('osint.in_corso') }}</p>
+    <div class="barra-attesa" role="status" aria-label="{{ t('osint.in_corso') }}"></div>
     {% else %}
     <p class="dato-mancante">{{ t('osint.non_ancora') }}</p>
     {% endif %}

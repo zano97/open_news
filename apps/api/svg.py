@@ -131,16 +131,33 @@ def cocoverage_scatter_svg(
         f'transform="rotate(-90 14 {height / 2})" '
         f'class="grafo-etichetta-piccola">{escape(translate(locale, "svg.dim2"))}</text>',
     ]
+    # Suggerimento di lettura: la mappa è interattiva.
+    parts.append(
+        f'<text x="{width - pad}" y="{pad - 14}" text-anchor="end" '
+        f'class="grafo-etichetta-piccola mappa-suggerimento">'
+        f'{escape(translate(locale, "svg.mappa_suggerimento"))}</text>'
+    )
+    # INTERATTIVA, senza librerie: ogni punto è un LINK alla scheda della
+    # testata, col nome che compare al passaggio (o al focus da tastiera).
+    # Con 150+ testate le etichette sempre accese erano una nuvola
+    # illeggibile: ora la mappa è pulita e i nomi arrivano a richiesta.
     for slug, (x, y) in sorted(positions.items()):
         cx, cy = sx(x), sy(y)
         evidenziata = slug == highlight
         cls = "mappa-punto-evidenza" if evidenziata else "mappa-punto"
-        r = 7 if evidenziata else 4
+        r = 7 if evidenziata else 5
         label = escape((names or {}).get(slug, slug))
-        parts.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r}" class="{cls}" />')
+        # L'etichetta non deve mai uscire dal riquadro.
+        ancora = "start" if cx < width - 170 else "end"
+        tx = cx + 9 if ancora == "start" else cx - 9
         parts.append(
-            f'<text x="{cx + 8:.1f}" y="{cy - 6:.1f}" class="grafo-etichetta-piccola'
+            f'<a href="/fonte/{escape(slug)}" class="mappa-gruppo">'
+            f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r}" class="{cls}">'
+            f"<title>{label}</title></circle>"
+            f'<text x="{tx:.1f}" y="{cy - 8:.1f}" text-anchor="{ancora}" '
+            f'class="grafo-etichetta-piccola mappa-etichetta'
             f'{" mappa-etichetta-evidenza" if evidenziata else ""}">{label}</text>'
+            "</a>"
         )
     parts.append("</svg>")
     return "".join(parts)
@@ -169,8 +186,17 @@ def coverage_bar_svg(
             f'<rect x="{x:.1f}" y="0" width="{w:.1f}" height="18" class="{cls}" />'
         )
         if w > 28:
+            # L'etichetta resta DENTRO il riquadro: centrata sul segmento,
+            # ma mai oltre i bordi (l'ultimo segmento la tagliava).
+            centro = x + w / 2
+            if centro < 34:
+                ancora, cx = "start", 2.0
+            elif centro > width - 34:
+                ancora, cx = "end", float(width - 2)
+            else:
+                ancora, cx = "middle", centro
             parts.append(
-                f'<text x="{x + w / 2:.1f}" y="34" text-anchor="middle" '
+                f'<text x="{cx:.1f}" y="34" text-anchor="{ancora}" '
                 f'class="grafo-etichetta-piccola">{escape(group)} ({count})</text>'
             )
         x += w

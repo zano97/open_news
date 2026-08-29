@@ -17,6 +17,12 @@ from core.models import utcnow
 # dimezza ogni PESO_DIMEZZAMENTO_ORE. Così una story enorme di ieri non
 # copre per sempre una story nata oggi, ma una ancora viva resta in alto.
 PESO_DIMEZZAMENTO_ORE = 12.0
+# Spinta alle notizie appena arrivate: nelle prime ore una story ha poche
+# testate e la sola copertura non basterebbe MAI a farla entrare tra le
+# 36 mostrate. Il bonus vale come qualche testata e si spegne in fretta
+# (dimezza ogni due ore), così apre la strada senza falsare la classifica.
+BONUS_NOVITA = 6.0
+BONUS_DIMEZZAMENTO_ORE = 2.0
 
 
 def finestra_attualita() -> datetime:
@@ -24,6 +30,17 @@ def finestra_attualita() -> datetime:
     return utcnow() - timedelta(hours=get_settings().front_page_window_hours)
 
 
+def finestra_ultima_ora() -> datetime:
+    """Inizio della fascia «ultima ora» (le notizie appena arrivate)."""
+    return utcnow() - timedelta(hours=get_settings().front_page_breaking_hours)
+
+
+def _ore_da(last_seen: datetime) -> float:
+    return max((utcnow() - last_seen).total_seconds() / 3600.0, 0.0)
+
+
 def peso_attualita(copertura: int, last_seen: datetime) -> float:
-    ore = max((utcnow() - last_seen).total_seconds() / 3600.0, 0.0)
-    return max(int(copertura), 1) * math.pow(0.5, ore / PESO_DIMEZZAMENTO_ORE)
+    ore = _ore_da(last_seen)
+    coperta = max(int(copertura), 1) * math.pow(0.5, ore / PESO_DIMEZZAMENTO_ORE)
+    novita = BONUS_NOVITA * math.pow(0.5, ore / BONUS_DIMEZZAMENTO_ORE)
+    return coperta + novita

@@ -301,3 +301,72 @@ async def test_prima_pagina_mai_vuota(
     await session.commit()
     resp = await client.get("/")
     assert "Unica storia rimasta" in resp.text
+
+
+async def test_fascia_ultima_ora(client: AsyncClient, session: AsyncSession) -> None:
+    """Le notizie appena arrivate compaiono nella fascia «Ultima ora» anche
+    con una sola testata: il lettore non deve aspettare che il mondo le
+    riprenda per sapere che esistono."""
+    adesso = datetime.now(UTC)
+    fresca = Story(
+        title_neutral="Notizia appena battuta da una sola agenzia",
+        first_seen=adesso - timedelta(minutes=30),
+        last_seen=adesso - timedelta(minutes=30),
+        article_count=1, source_count=1,
+    )
+    vecchia = Story(
+        title_neutral="Notizia di stamattina ormai assestata",
+        first_seen=adesso - timedelta(hours=8),
+        last_seen=adesso - timedelta(hours=8),
+        article_count=10, source_count=6,
+    )
+    session.add_all([fresca, vecchia])
+    await session.commit()
+
+    testo = (await client.get("/")).text
+    assert "Ultima ora" in testo
+    fascia = testo.split("ultima-ora-elenco")[1].split("</section>")[0]
+    assert "Notizia appena battuta" in fascia
+    assert "Notizia di stamattina" not in fascia  # oltre le 3 ore: solo griglia
+
+
+async def test_coda_di_raggruppamento_privilegia_le_notizie_nuove(
+    session: AsyncSession,
+) -> None:
+    """Con un arretrato più grande del lotto, si raggruppano PRIMA gli
+    articoli recenti: le notizie di oggi non aspettano l'archivio."""
+    from sqlalchemy import select
+
+    from core.cluster.incremental import cluster_pending
+    from core.models import Article, Source
+
+    fonte = Source(
+        slug="coda-src", name="Coda", domain="coda.test", country="it",
+        language="it", region="italy", feed_urls=[], terms_note="",
+    )
+    session.add(fonte)
+    await session.flush()
+    adesso = datetime.now(UTC)
+    for i in range(6):
+        session.add(Article(
+            source_id=fonte.id, url=f"https://coda.test/{i}",
+            title=f"Vecchia notizia numero {i} di ieri mattina presto",
+            snippet="", language="it",
+            published_at=adesso - timedelta(hours=30) + timedelta(minutes=i),
+        ))
+    session.add(Article(
+        source_id=fonte.id, url="https://coda.test/fresca",
+        title="Notizia freschissima di pochi minuti fa sull'ultima ora",
+        snippet="", language="it",
+        published_at=adesso - timedelta(minutes=5),
+    ))
+    await session.flush()
+
+    stats = await cluster_pending(session, batch=3)  # lotto < arretrato
+    assert stats.processed == 3
+    fresca = (
+        await session.execute(
+            select(Article).where(Article.url == "https://coda.test/fresca")
+        )
+    ).scalar_one()
+    assert fresca.story_id is not None  # la più nuova è già in pagina

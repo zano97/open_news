@@ -71,8 +71,14 @@ async def profila_fonte(
     client: httpx.AsyncClient,
     limiter: DomainRateLimiter,
     robots: RobotsCache,
+    rendi: bool = True,
 ) -> dict[str, Any]:
-    """Raccoglie i segnali pubblici di una testata e li salva. Idempotente."""
+    """Raccoglie i segnali pubblici di una testata e li salva. Idempotente.
+
+    Con ``rendi=False`` niente rendering browser (Scrapling): è la via
+    rapida per la raccolta su richiesta dalla scheda — il giro di sfondo
+    ripassa con calma e con il browser dove serve.
+    """
     dominio = source.domain
     profilo: dict[str, Any] = {"aggiornato_il": utcnow().isoformat()}
 
@@ -88,7 +94,8 @@ async def profila_fonte(
     }
 
     home = await scarica_pagina(
-        f"https://{dominio}/", client=client, limiter=limiter, robots=robots
+        f"https://{dominio}/", client=client, limiter=limiter, robots=robots,
+        rendi=rendi,
     )
     if home.ok:
         trust = parse_trust_markup(home.html)
@@ -239,6 +246,7 @@ def kick_profilo(slug: str) -> object | None:
                     client=client,
                     limiter=DomainRateLimiter(),
                     robots=RobotsCache(client),
+                    rendi=False,  # via rapida: il lettore sta aspettando
                 )
                 await session.commit()
             log.info("profilo pubblico raccolto su richiesta: %s", slug)

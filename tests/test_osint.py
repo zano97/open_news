@@ -329,3 +329,25 @@ def test_profilo_vuoto_si_ritenta_presto() -> None:
     assert not profilo_vuoto(riuscito)  # "assente" è un esito, non un errore
     fonte.osint = riuscito
     assert not _da_rinfrescare(fonte, adesso)
+
+
+async def test_sonda_stato_profilo(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    """L'endpoint della sonda: pronto solo con un profilo RIUSCITO."""
+    fonte = _fonte(slug="sonda", domain="sonda.test")
+    session.add(fonte)
+    await session.commit()
+
+    stato = (await client.get("/api/osint/sonda")).json()
+    assert stato == {"pronto": False, "in_corso": False}
+
+    fonte.osint = {
+        "aggiornato_il": "2026-08-29T10:00:00+00:00",
+        "pubblicita": {"stato": "letto", "reti": ["google.com"]},
+    }
+    await session.commit()
+    stato = (await client.get("/api/osint/sonda")).json()
+    assert stato["pronto"] is True
+
+    assert (await client.get("/api/osint/inesistente")).status_code == 404

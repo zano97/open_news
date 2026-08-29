@@ -26,8 +26,11 @@ async def prima_copia(
     """Data (AAAA-MM-GG) della prima copia archiviata del dominio, se c'è."""
     await limiter.wait(CDX_HOST)
     try:
+        # Il CDX dell'Archive sa essere LENTO: meglio rinunciare in fretta
+        # (ritenterà il giro) che tenere il profilo in ostaggio.
         resp = await client.get(
             CDX_URL,
+            timeout=8.0,
             params={
                 "url": domain,
                 "output": "json",
