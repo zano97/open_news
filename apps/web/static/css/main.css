@@ -1275,3 +1275,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .mappa-etichetta { transition: none; }
 }
+
+/* Traduzione nella striscia «Ultima ora»: sotto il titolo, discreta. */
+.ultima-ora-testo { min-width: 0; }
+.ultima-ora-trad {
+  display: block;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--inchiostro-tenue);
+  margin-top: 0.1rem;
+}

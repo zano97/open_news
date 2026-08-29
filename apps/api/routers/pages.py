@@ -508,6 +508,22 @@ async def index(
         ).scalars()
     )
 
+    # Le breaking con copertura VERA (più testate) meritano una scheda nel
+    # feed principale anche quando il peso da solo non le farebbe entrare
+    # tra le 36: si rimpiazza la coda della classifica e si riordina per
+    # peso, così ognuna siede dove la porta la sua importanza.
+    if not paese:
+        garantite = [
+            s
+            for s in ultima_ora
+            if s.source_count >= 3 and s.id not in {v.id for v in stories}
+        ]
+        if garantite:
+            stories = sorted(
+                stories[: max(len(stories) - len(garantite), 0)] + garantite,
+                key=lambda s: -peso_attualita(s.source_count, s.last_seen),
+            )
+
     coverages = await _coverages_for(session, [s.id for s in stories])
     versions_map = {
         s.id: order_versions(s.articles, paese, locale) for s in stories
@@ -518,9 +534,12 @@ async def index(
     # tra parentesi c'è, senza aspettare il giro dei 15 minuti.
     from core.nlp.translate import kick_translations, neutral_title_language
 
+    # Anche la fascia «Ultima ora»: sono le story più nuove, cioè quelle
+    # che quasi mai hanno già la traduzione pronta.
+    visibili = {s.id: s for s in [*ultima_ora, *stories]}.values()
     mancanti = [
         s.id
-        for s in stories
+        for s in visibili
         if s.title_translations is not None
         and locale not in (s.title_translations or {})
         and neutral_title_language(s) not in (None, locale)

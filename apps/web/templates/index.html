@@ -84,7 +84,13 @@
     {% for s in ultima_ora %}
     <li>
       <time class="ultima-ora-orario" datetime="{{ s.last_seen.isoformat() }}">{{ s.last_seen | ora_breve }}</time>
-      <a href="/storia/{{ s.id }}">{{ titolo_story(s, locale) }}</a>
+      <span class="ultima-ora-testo">
+        <a href="/storia/{{ s.id }}">{{ titolo_story(s, locale) }}</a>
+        {% set sotto_uo = sottotitolo_story(s, locale) %}
+        {% if sotto_uo %}
+        <span class="ultima-ora-trad">({{ sotto_uo[0] }}){% if sotto_uo[1] %} <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span>{% endif %}</span>
+        {% endif %}
+      </span>
       <span class="ultima-ora-testate">{{ s.source_count }} {{ t('comune.testata') if s.source_count == 1 else t('comune.testate') }}</span>
     </li>
     {% endfor %}

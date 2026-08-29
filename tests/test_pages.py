@@ -370,3 +370,70 @@ async def test_coda_di_raggruppamento_privilegia_le_notizie_nuove(
         )
     ).scalar_one()
     assert fresca.story_id is not None  # la più nuova è già in pagina
+
+
+async def test_ultima_ora_tradotta_e_garantita_nel_feed(
+    client: AsyncClient, session: AsyncSession, monkeypatch
+) -> None:
+    """La fascia «Ultima ora» mostra la traduzione tra parentesi; le sue
+    story con copertura vera entrano tra le schede del feed anche quando
+    il peso da solo non basterebbe; e le story della fascia entrano nel
+    giro di traduzione on-demand."""
+    adesso = datetime.now(UTC)
+    # 40 story pesanti dentro la finestra: riempiono le 36 schede.
+    for i in range(40):
+        session.add(Story(
+            title_neutral=f"Storia pesante numero {i} che riempie la griglia",
+            first_seen=adesso - timedelta(hours=30),
+            last_seen=adesso - timedelta(hours=26),
+            article_count=60, source_count=30,
+        ))
+    fresca = Story(
+        title_neutral="Breaking well covered by outlets",
+        title_translations={"it": "Breaking ben coperta dalle testate"},
+        first_seen=adesso - timedelta(hours=2, minutes=30),
+        last_seen=adesso - timedelta(hours=2, minutes=20),
+        article_count=4, source_count=3,
+    )
+    senza_traduzione = Story(
+        title_neutral="Fresh story still untranslated",
+        first_seen=adesso - timedelta(minutes=30),
+        last_seen=adesso - timedelta(minutes=10),
+        article_count=1, source_count=1,
+    )
+    fonte = Source(
+        slug="uo-src", name="UO", domain="uo.test", country="gb",
+        language="en", region="europe", feed_urls=[], terms_note="",
+    )
+    session.add_all([fresca, senza_traduzione, fonte])
+    await session.flush()
+    session.add(Article(
+        source_id=fonte.id, url="https://uo.test/1",
+        title="Fresh story still untranslated", language="en",
+        story_id=senza_traduzione.id,
+    ))
+    session.add(Article(
+        source_id=fonte.id, url="https://uo.test/2",
+        title="Breaking well covered by outlets", language="en",
+        story_id=fresca.id,
+    ))
+    await session.commit()
+
+    # Il kick on-demand deve ricevere anche le story della fascia.
+    from core.nlp import translate as modulo
+
+    richieste: list[list[int]] = []
+    monkeypatch.setattr(
+        modulo, "kick_translations",
+        lambda ids, locale: richieste.append(list(ids)),
+    )
+    resp = await client.get("/")
+    testo = resp.text
+
+    # Traduzione tra parentesi nella fascia.
+    assert "(Breaking ben coperta dalle testate)" in testo
+    # La breaking coperta (3 testate) ha ANCHE la sua scheda nel feed:
+    # il titolo compare una volta nella fascia e una nella griglia.
+    assert testo.count("Breaking well covered by outlets") >= 2
+    # La story nuova senza traduzione è stata mandata a tradurre.
+    assert richieste and senza_traduzione.id in richieste[0]
