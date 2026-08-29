@@ -296,8 +296,15 @@
     <p class="fonte-meta">{{ t('osint.archivio', data=osint.prima_copia_archiviata) }}
       <a href="https://web.archive.org/web/*/{{ profile.source.domain }}" rel="noopener">{{ t('osint.archivio_link') }}</a></p>
     {% endif %}
+    {% if osint and osint_in_corso %}
+    <p class="dato-mancante" data-osint-in-corso data-slug="{{ profile.source.slug }}">{{ t('osint.riprova') }}</p>
+    {% endif %}
     {% if not osint %}
+    {% if osint_in_corso %}
+    <p class="dato-mancante" data-osint-in-corso data-slug="{{ profile.source.slug }}">{{ t('osint.in_corso') }}</p>
+    {% else %}
     <p class="dato-mancante">{{ t('osint.non_ancora') }}</p>
+    {% endif %}
     {% endif %}
   </section>
 

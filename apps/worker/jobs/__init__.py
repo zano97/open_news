@@ -76,10 +76,11 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
         max_instances=1, next_run_time=tra(300),
     )
     # Profilo pubblico delle testate (ads.txt, trasparenza dichiarata,
-    # archivio): una volta al giorno, poche testate per giro.
+    # archivio): giro fitto finché il catalogo non è coperto — con 170
+    # testate un giro quotidiano da venti avrebbe richiesto giorni.
     scheduler.add_job(
-        osint_job, "interval", hours=24, id="osint",
-        max_instances=1, next_run_time=tra(600),
+        osint_job, "interval", hours=2, id="osint",
+        max_instances=1, next_run_time=tra(60),
     )
     # Fatti Wikidata sui proprietari con QID confermato: una volta al giorno.
     scheduler.add_job(

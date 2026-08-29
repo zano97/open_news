@@ -99,6 +99,9 @@
     <p class="fonte-meta">{{ t('imp.diag_trad_ferme') }}
       {% for coppia, motivo in trad_coppie_ferme.items() %}{{ coppia }} ({{ motivo }}){{ " · " if not loop.last }}{% endfor %}</p>
     {% endif %}
+    {% if osint_totale %}
+    <p class="fonte-meta">{{ t('imp.diag_osint', fatte=osint_fatte, totale=osint_totale) }}</p>
+    {% endif %}
     {% if cicli %}
     <p class="fonte-meta">{{ t('imp.diag_cicli') }}
       {% for nome, info in cicli.items() %}{{ nome }}: {{ info.quando }} ({{ info.esito }}, {{ info.durata }}){{ " · " if not loop.last }}{% endfor %}

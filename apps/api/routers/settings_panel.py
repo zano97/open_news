@@ -122,6 +122,15 @@ def _diagnostics() -> dict[str, object]:
     }
 
 
+async def _conteggio_osint(session: AsyncSession) -> tuple[int, int]:
+    from core.osint.profile import conteggio_profili
+
+    try:
+        return await conteggio_profili(session)
+    except Exception:  # tabella non pronta al primo avvio
+        return (0, 0)
+
+
 async def _render(
     request: Request,
     session: AsyncSession,
@@ -144,6 +153,8 @@ async def _render(
             "esito_riassunti": esito_riassunti,
             **await _llm_panel(session),
             **_diagnostics(),
+            "osint_fatte": (await _conteggio_osint(session))[0],
+            "osint_totale": (await _conteggio_osint(session))[1],
         },
         status_code=status_code,
     )

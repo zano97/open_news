@@ -245,3 +245,87 @@ def test_internet_archive_in_allowlist_ma_non_il_resto() -> None:
     assert host_allowed("web.archive.org")
     assert not host_allowed("api.opencorporates.com")  # servizio a chiave
     reset_allowlist_cache()
+
+
+async def test_scheda_fonte_avvia_la_raccolta_su_richiesta(
+    client: httpx.AsyncClient, session: AsyncSession, monkeypatch
+) -> None:
+    """Aprire la scheda di una testata senza profilo avvia SUBITO la
+    raccolta: con 170 testate, aspettare il giro di sfondo significava
+    vedere «non ancora raccolto» per giorni."""
+    from core.osint import profile as modulo
+
+    fonte = _fonte(slug="on-demand", domain="ondemand.test")
+    session.add(fonte)
+    await session.commit()
+
+    chiamate: list[str] = []
+
+    def finto_kick(slug: str) -> None:
+        chiamate.append(slug)
+        modulo._KICK_IN_CORSO.add(slug)  # come il vero: segna «in corso»
+
+    monkeypatch.setattr(modulo, "kick_profilo", finto_kick)
+    try:
+        pagina = await client.get("/fonte/on-demand")
+        assert pagina.status_code == 200
+        assert chiamate == ["on-demand"]
+        # In pagina il lettore legge «in corso», non «non ancora raccolto».
+        assert "data-osint-in-corso" in pagina.text
+    finally:
+        modulo._KICK_IN_CORSO.discard("on-demand")
+
+    # Con un profilo già RIUSCITO non si richiede nulla.
+    fonte.osint = {
+        "aggiornato_il": "2026-08-28T10:00:00+00:00",
+        "pubblicita": {"stato": "letto", "reti": ["google.com"]},
+    }
+    await session.commit()
+    chiamate.clear()
+    pagina = await client.get("/fonte/on-demand")
+    assert chiamate == []
+    assert "data-osint-in-corso" not in pagina.text
+
+
+async def test_conteggio_profili(session: AsyncSession) -> None:
+    from core.osint.profile import conteggio_profili
+
+    con = _fonte(slug="con-profilo", domain="a.test")
+    con.osint = {"aggiornato_il": "2026-08-28T10:00:00+00:00"}
+    senza = _fonte(slug="senza-profilo", domain="b.test")
+    session.add_all([con, senza])
+    await session.flush()
+    assert await conteggio_profili(session) == (1, 2)
+
+
+def test_profilo_vuoto_si_ritenta_presto() -> None:
+    """Un tentativo andato a vuoto (rete assente) non deve bloccare la
+    testata per due settimane; un ads.txt semplicemente ASSENTE, invece,
+    è un esito valido e non va rimartellato."""
+    from datetime import timedelta
+
+    from core.models import utcnow
+    from core.osint.profile import _da_rinfrescare, profilo_vuoto
+
+    adesso = utcnow()
+    fallito = {
+        "aggiornato_il": (adesso - timedelta(hours=7)).isoformat(),
+        "pubblicita": {"stato": "ProxyError", "reti": []},
+        "trasparenza": {"errore": "ProxyError"},
+    }
+    assert profilo_vuoto(fallito)
+    fonte = _fonte()
+    fonte.osint = fallito
+    assert _da_rinfrescare(fonte, adesso)  # dopo 6 ore si riprova
+
+    fonte.osint = {**fallito, "aggiornato_il": (adesso - timedelta(hours=2)).isoformat()}
+    assert not _da_rinfrescare(fonte, adesso)  # ma non subito
+
+    riuscito = {
+        "aggiornato_il": (adesso - timedelta(days=2)).isoformat(),
+        "pubblicita": {"stato": "assente", "reti": []},
+        "trasparenza": {"errore": "nessun dato strutturato"},
+    }
+    assert not profilo_vuoto(riuscito)  # "assente" è un esito, non un errore
+    fonte.osint = riuscito
+    assert not _da_rinfrescare(fonte, adesso)

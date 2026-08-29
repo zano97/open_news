@@ -159,7 +159,7 @@ async def osint_job() -> None:
         async with maker() as session:
             fatte = await profila_fonti(
                 session, client=client, limiter=limiter, robots=robots,
-                limite=20, scadenza=time.monotonic() + 300,
+                limite=40, scadenza=time.monotonic() + 420,
             )
             await session.commit()
     if fatte:

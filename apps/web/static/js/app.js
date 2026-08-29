@@ -167,6 +167,21 @@
     }, 3000);
   }
 
+  // Profilo pubblico di una testata in raccolta: la pagina si ricarica UNA
+  // volta, così i dati compaiono senza che il lettore debba pensarci. Il
+  // marcatore in sessionStorage evita di ricaricare all'infinito quando la
+  // raccolta non riesce (sito irraggiungibile).
+  var attesaOsint = document.querySelector("[data-osint-in-corso]");
+  if (attesaOsint) {
+    var chiave = "opennews-osint-" + (attesaOsint.getAttribute("data-slug") || "");
+    var giaAtteso = false;
+    try { giaAtteso = sessionStorage.getItem(chiave) === "1"; } catch (e) { /* niente */ }
+    if (!giaAtteso) {
+      try { sessionStorage.setItem(chiave, "1"); } catch (e) { /* pazienza */ }
+      setTimeout(function () { location.reload(); }, 12000);
+    }
+  }
+
   // I link alle testate escono dall'app: si aprono nel browser (nuova
   // scheda/finestra), mai DENTRO la finestra del giornale, che non ha
   // una barra degli indirizzi per tornare indietro.

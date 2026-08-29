@@ -926,8 +926,19 @@ async def fonte(
             locale=locale,
         )
 
-    # Indizi OSINT: solo i gruppi che riguardano QUESTA testata.
-    from core.osint.profile import rete_di_conti
+    # Profilo pubblico: se manca, si raccoglie SUBITO in sottofondo — chi
+    # apre una scheda dice quale testata gli interessa (vedi ADR-0028).
+    from core.osint.profile import (
+        kick_profilo,
+        profilo_in_corso,
+        profilo_vuoto,
+        rete_di_conti,
+    )
+
+    osint_in_corso = False
+    if not profile.source.osint or profilo_vuoto(profile.source.osint):
+        kick_profilo(profile.source.slug)
+        osint_in_corso = profilo_in_corso(profile.source.slug)
 
     conti_condivisi = [
         gruppo
@@ -942,6 +953,7 @@ async def fonte(
             **await page_context(request, session),
             "profile": profile,
             "osint": profile.source.osint or {},
+            "osint_in_corso": osint_in_corso,
             "conti_condivisi": conti_condivisi,
             "article_count": article_count,
             "grafo_svg": ownership_graph_svg(profile, locale),
