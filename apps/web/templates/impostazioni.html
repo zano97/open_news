@@ -99,6 +99,8 @@
     <p class="fonte-meta">{{ t('imp.diag_trad_ferme') }}
       {% for coppia, motivo in trad_coppie_ferme.items() %}{{ coppia }} ({{ motivo }}){{ " · " if not loop.last }}{% endfor %}</p>
     {% endif %}
+    <p class="fonte-meta">{{ t('imp.diag_coda', n=coda_articoli,
+        articolo=coda_ultimo_articolo | ora_breve, story=coda_ultima_story | ora_breve) }}</p>
     {% if osint_totale %}
     <p class="fonte-meta">{{ t('imp.diag_osint', fatte=osint_fatte, totale=osint_totale) }}</p>
     {% endif %}

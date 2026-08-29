@@ -131,6 +131,34 @@ async def _conteggio_osint(session: AsyncSession) -> tuple[int, int]:
         return (0, 0)
 
 
+async def _stato_raggruppamento(session: AsyncSession) -> dict[str, object]:
+    """La catena raccolta→raggruppamento in tre numeri: se le notizie in
+    pagina sembrano vecchie, qui si vede subito se la coda è intasata."""
+    from core.models import Article
+
+    try:
+        in_coda = (
+            await session.execute(
+                select(func.count())
+                .select_from(Article)
+                .where(Article.story_id.is_(None))
+            )
+        ).scalar_one()
+        ultimo_articolo = (
+            await session.execute(select(func.max(Article.fetched_at)))
+        ).scalar_one_or_none()
+        ultima_story = (
+            await session.execute(select(func.max(Story.last_seen)))
+        ).scalar_one_or_none()
+    except Exception:  # tabelle non pronte al primo avvio
+        return {"coda_articoli": 0, "coda_ultimo_articolo": None, "coda_ultima_story": None}
+    return {
+        "coda_articoli": int(in_coda),
+        "coda_ultimo_articolo": ultimo_articolo,
+        "coda_ultima_story": ultima_story,
+    }
+
+
 async def _render(
     request: Request,
     session: AsyncSession,
@@ -153,6 +181,7 @@ async def _render(
             "esito_riassunti": esito_riassunti,
             **await _llm_panel(session),
             **_diagnostics(),
+            **await _stato_raggruppamento(session),
             "osint_fatte": (await _conteggio_osint(session))[0],
             "osint_totale": (await _conteggio_osint(session))[1],
         },
