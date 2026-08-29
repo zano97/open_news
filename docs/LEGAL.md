@@ -62,6 +62,17 @@ Reuters e Associated Press non offrono feed RSS pubblici: la loro copertura
 è rilevata tramite i metadati di **GDELT** (titolo e link; con citazione del
 GDELT Project come richiesto), senza ripubblicare alcun contenuto.
 
+## Tracce pubbliche delle testate (OSINT)
+
+Del profilo pubblico di una testata leggiamo solo risorse che essa
+**pubblica apposta per essere lette da macchine** — `/ads.txt`
+(standard IAB) e i dati strutturati schema.org della homepage — più la
+data della prima copia nell'Internet Archive. Nessun dato personale,
+nessun servizio a pagamento, nessuna chiave; le pagine si visitano nel
+rispetto di robots.txt e col nostro User-Agent. Gli indizi che ne
+derivano (per esempio un conto pubblicitario condiviso) sono mostrati
+**come indizi, con il link all'evidenza**, mai come accertamenti.
+
 ## Canali social delle testate
 
 Per alcune testate il catalogo dichiara il profilo **Bluesky** o

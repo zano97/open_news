@@ -43,6 +43,10 @@ ml = [
     "scikit-learn>=1.4",
     "joblib>=1.4",
 ]
+# OSINT sulle testate e pagine renderizzate via JavaScript: Scrapling
+# (BSD-3). Senza questo extra il sistema funziona lo stesso — le pagine
+# che esistono solo in JS restano fuori portata (vedi ADR-0027).
+osint = ["scrapling>=0.3"]
 icons = ["pillow", "icnsutil", "fonttools"]  # rigenerare logo/icone (scripts/make_icons.py)
 # Finestra nativa macOS con icona nel Dock (apps/mac_window.py); senza,
 # si ripiega sulla finestra --app del browser.
@@ -99,6 +103,7 @@ module = [
     "trafilatura.*",
     "apscheduler.*",
     "pgvector.*",
+    "scrapling.*",
 ]
 ignore_missing_imports = true
 

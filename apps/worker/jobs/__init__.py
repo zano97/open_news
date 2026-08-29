@@ -18,6 +18,7 @@ from apps.worker.jobs.ingest import (
     ingest_feeds_job,
     ingest_gdelt_job,
     ingest_social_job,
+    osint_job,
     sync_catalog_job,
 )
 
@@ -73,6 +74,12 @@ def register_jobs(scheduler: AsyncIOScheduler) -> None:
     scheduler.add_job(
         link_entities_job, "interval", minutes=30, id="link_entities",
         max_instances=1, next_run_time=tra(300),
+    )
+    # Profilo pubblico delle testate (ads.txt, trasparenza dichiarata,
+    # archivio): una volta al giorno, poche testate per giro.
+    scheduler.add_job(
+        osint_job, "interval", hours=24, id="osint",
+        max_instances=1, next_run_time=tra(600),
     )
     # Fatti Wikidata sui proprietari con QID confermato: una volta al giorno.
     scheduler.add_job(

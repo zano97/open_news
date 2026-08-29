@@ -31,6 +31,18 @@ Attribuzioni di dati e servizi di terze parti usati dal progetto:
   pubblici dei profili ufficiali delle testate, via AppView pubblica
   (public.api.bsky.app), gratuita e senza chiave (protocollo AT).
 
+- Internet Archive (https://archive.org/) — API CDX pubblica: data della
+  prima copia archiviata di un sito (età reale del dominio).
+
+- Scrapling (https://github.com/D4Vinci/Scrapling) — libreria BSD-3-Clause
+  usata, quando installato l'extra [osint], per RENDERIZZARE pagine
+  pubbliche che esistono solo dopo l'esecuzione di JavaScript. Le sue
+  funzioni di elusione anti-bot restano disattivate (vedi ADR-0027).
+
+- IAB Tech Lab — specifica ads.txt (https://iabtechlab.com/ads-txt/):
+  file pubblicato dagli editori sul proprio dominio, letto per capire
+  chi è autorizzato a vendere la loro pubblicità.
+
 - Mastodon (https://joinmastodon.org/) — metadati delle schede-link dei
   post pubblici dei profili ufficiali delle testate, via API pubblica
   delle rispettive istanze (software libero AGPL).

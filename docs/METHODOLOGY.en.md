@@ -38,6 +38,31 @@ recorded. When we do not know a shareholding or an amount, the field says
 lives in public files in the repository and is corrected via pull request,
 so every change stays tracked and signed.
 
+### Public traces: what the outlet publishes about itself
+
+Beyond registries we read three signals the outlet itself exposes (or
+the web does), all free and key-less:
+
+- **`ads.txt`** — the ad-industry standard file in which a publisher
+  declares who may sell its inventory and under which account number.
+  It tells us **who funds it**; and when two "independent" outlets
+  declare the **same direct account** with the same network, their
+  revenue lands in the same place: a public clue of common management
+  (never proof of ownership — we say so on the page, with a link to
+  the file).
+- **Transparency structured data** (schema.org
+  `NewsMediaOrganization`, a vocabulary born from the Trust Project) —
+  which commitments the outlet declares machine-readably: ownership and
+  funding, ethics policy, corrections, diversity, masthead. We **count
+  the declared commitments and show the links**: we do not judge what
+  those pages say, which anyone can read.
+- **First copy in web archives** (Internet Archive) — the site's real
+  age, to compare with the declared one.
+
+Missing data is not a demerit: `ads.txt` is not mandatory and
+schema.org commitments are more common in the anglophone world. These
+are tiles, not scores.
+
 ## Level 2 — Selection: what it covers and what it ignores (statistics)
 
 There is no label decided by us here: these are counts over what the

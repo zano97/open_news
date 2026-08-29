@@ -453,3 +453,74 @@ migliaia di articoli; un arretrato enorme si smaltisce in più giri da
 10 minuti invece di accavallare i job; su PostgreSQL l'indice sostituisce
 pgvector solo dentro il giro a lotti (finestra temporale, centinaia di
 story: il matvec è comunque immediato).
+
+## ADR-0027 — Scrapling per RENDERIZZARE, mai per aggirare
+
+**Contesto.** Molte pagine informative delle testate (e alcuni
+articoli) esistono solo dopo l'esecuzione di JavaScript: con la sola
+HTTP non le vediamo. Scrapling (BSD-3, software libero) risolve
+esattamente questo, ma nasce come strumento di elusione anti-bot:
+risoluzione automatica di Cloudflare/Turnstile, impronte falsificate
+per farsi passare per un utente umano.
+
+**Decisione.** Adottiamo Scrapling come extra OPZIONALE (`[osint]`) e
+solo per il rendering di pagine pubbliche: `DynamicFetcher` headless,
+User-Agent nostro, robots.txt rispettato prima di ogni pagina (le
+PAGINE sono crawling: qui robots vale in pieno, a differenza dei feed
+— ADR-0025). Restano spente, per scelta esplicita e verificata da un
+test, le funzioni di elusione: niente `StealthyFetcher`, niente
+risoluzione di captcha, nessuna impronta falsificata. La costante
+`BYPASS_ANTIBOT = False` esiste perché la scelta sia leggibile nel
+codice, non implicita.
+
+**Perché questa linea.** Un sito che ci nega l'accesso ci sta dicendo
+qualcosa, e un progetto che misura la trasparanza altrui non può
+travestirsi per entrare: la risposta a un blocco resta la copertura via
+GDELT, non il camuffamento. Renderizzare una pagina pubblica con un
+browser vero, presentandosi col proprio nome, è invece esattamente ciò
+che fa un lettore.
+
+**Conseguenze.** Senza l'extra installato tutto continua a funzionare
+(le pagine solo-JS restano fuori portata); col browser reale il testo
+integrale copre anche i siti moderni e l'OSINT legge le homepage che
+prima risultavano vuote.
+
+## ADR-0028 — OSINT sulle testate: quello che pubblicano di sé
+
+**Contesto.** Il livello 1 della metodologia (proprietà e
+finanziamenti) si fermava a Wikidata, EurOMo, ROC AGCOM e ai contributi
+pubblici italiani: dati solidi ma sbilanciati sull'Europa e fermi
+all'assetto societario formale.
+
+**Decisione.** Tre segnali pubblici, raccolti dalle fonti stesse e da
+archivi liberi — nessun servizio a pagamento, nessuna chiave, nessun
+dato personale:
+
+1. **ads.txt** (standard IAB, pubblicato dall'editore sul proprio
+   dominio): quali reti pubblicitarie sono autorizzate a vendere i suoi
+   spazi e con quale id di conto. Serve a due cose che riguardano il
+   nostro scopo — capire chi la finanzia, e far emergere **reti di siti
+   con lo stesso conto DIRETTO**, cioè lo stesso conto economico. La
+   letteratura sull'ecosistema pubblicitario usa proprio ads.txt e
+   sellers.json per ricostruire chi c'è dietro un sito.
+2. **Dati strutturati schema.org `NewsMediaOrganization`** (vocabolario
+   nato dal Trust Project): quali impegni di trasparenza la testata
+   dichiara in modo leggibile da una macchina — proprietà e
+   finanziamenti, codice etico, rettifiche, diversità, redazione,
+   fonti anonime. Contiamo gli impegni dichiarati e mostriamo i link:
+   non giudichiamo il contenuto di quelle pagine.
+3. **Internet Archive (CDX)**: prima copia archiviata del sito, cioè
+   l'età reale del dominio, da confrontare con quella dichiarata.
+
+Un conto condiviso o una data discordante sono **indizi con
+l'evidenza a fianco**, mai verdetti: l'interfaccia scrive «secondo
+ads.txt di X» e linka il file. Ogni raccolta lascia provenance; il
+giro è quotidiano, venti testate per volta, con budget di tempo e
+ripetizione ogni due settimane (dati che cambiano di rado).
+
+**Conseguenze.** Nuova colonna `sources.osint` (migrazione 0008),
+`web.archive.org` in allowlist, sezione «Trasparenza e tracce
+pubbliche» nella scheda di ogni testata in cinque lingue. Limite
+dichiarato: ads.txt manca su molti siti (e non è obbligatorio), gli
+impegni schema.org sono più diffusi nel mondo anglosassone: l'assenza
+di un dato non è un demerito e va letta come tale.

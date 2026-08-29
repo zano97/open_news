@@ -34,6 +34,10 @@ class Source(Base):
     founded: Mapped[int | None] = mapped_column(Integer)
     # {"quote": str, "url": str} — citazione testuale della linea auto-dichiarata.
     self_declared_line: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant)
+    # Segnali pubblici raccolti dalla testata stessa e da archivi liberi
+    # (core/osint/): ads.txt, impegni di trasparenza dichiarati in
+    # schema.org, prima copia archiviata. Sempre con provenance.
+    osint: Mapped[dict[str, Any]] = mapped_column(JSONVariant, default=dict)
     last_checked_at: Mapped[datetime | None] = mapped_column(TZDateTime())
     created_at: Mapped[datetime] = mapped_column(TZDateTime(), default=utcnow)
 

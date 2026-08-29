@@ -253,6 +253,54 @@
     {% endif %}
   </section>
 
+  <section class="scheda-sezione">
+    <h3>{{ t('osint.titolo') }}</h3>
+    <p class="fonte-meta">{{ t('osint.intro') | safe }}</p>
+    {% set trasp = osint.get('trasparenza') or {} %}
+    {% if trasp.get('impegni') %}
+    <p>{{ t('osint.impegni', n=trasp.punteggio) }}</p>
+    <ul class="elenco-impegni">
+      {% for nome, url in trasp.impegni.items() %}
+      <li><a href="{{ url }}" rel="noopener">{{ t('osint.impegno_' ~ nome) }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if trasp.get('editore_dichiarato') %}
+    <p class="fonte-meta">{{ t('osint.editore', nome=trasp.editore_dichiarato) }}</p>
+    {% endif %}
+    {% elif trasp %}
+    <p class="dato-mancante">{{ t('osint.nessun_impegno') }}</p>
+    {% endif %}
+
+    {% set pub = osint.get('pubblicita') or {} %}
+    {% if pub.get('reti') %}
+    <p>{{ t('osint.reti', n=pub.reti | length) }}
+      <a href="{{ pub.url }}" rel="noopener">ads.txt</a>:
+      <span class="fonte-meta">{{ pub.reti[:8] | join(' · ') }}{% if pub.reti | length > 8 %} …{% endif %}</span>
+    </p>
+    {% elif pub %}
+    <p class="dato-mancante">{{ t('osint.niente_ads') }}</p>
+    {% endif %}
+
+    {% if conti_condivisi %}
+    <p class="indizio-rete">{{ t('osint.rete_titolo') }}</p>
+    <ul class="elenco-impegni">
+      {% for gruppo in conti_condivisi[:5] %}
+      <li>{{ t('osint.rete_riga', rete=gruppo.rete, id=gruppo.id,
+                testate=gruppo.testate | reject('equalto', profile.source.slug) | join(', ')) }}</li>
+      {% endfor %}
+    </ul>
+    <p class="fonte-meta">{{ t('osint.rete_nota') }}</p>
+    {% endif %}
+
+    {% if osint.get('prima_copia_archiviata') %}
+    <p class="fonte-meta">{{ t('osint.archivio', data=osint.prima_copia_archiviata) }}
+      <a href="https://web.archive.org/web/*/{{ profile.source.domain }}" rel="noopener">{{ t('osint.archivio_link') }}</a></p>
+    {% endif %}
+    {% if not osint %}
+    <p class="dato-mancante">{{ t('osint.non_ancora') }}</p>
+    {% endif %}
+  </section>
+
   <footer class="scheda-piede">
     <h4>{{ t('provenienza.titolo') }}</h4>
     <ul class="elenco-provenienze">

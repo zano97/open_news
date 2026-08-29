@@ -37,6 +37,31 @@ dice "dato non disponibile" con una nota su dove verificarlo. I dati di
 partenza vivono in file pubblici del repository e si correggono via pull
 request, così ogni modifica resta tracciata e firmata.
 
+### Tracce pubbliche: quello che la testata pubblica di sé
+
+Oltre ai registri, leggiamo tre segnali che la testata stessa espone
+(o che espone il web), tutti gratuiti e senza chiavi:
+
+- **`ads.txt`** — il file, standard del settore pubblicitario, con cui
+  un editore dichiara chi è autorizzato a vendere i suoi spazi e con
+  quale numero di conto. Dice **chi la finanzia**; e quando due testate
+  «indipendenti» dichiarano lo **stesso conto diretto** presso la stessa
+  rete, i loro incassi finiscono nello stesso posto: è un indizio
+  pubblico di gestione comune (mai una prova di proprietà — lo diciamo
+  in pagina, con il link al file).
+- **Dati strutturati di trasparenza** (`NewsMediaOrganization` di
+  schema.org, vocabolario nato dal Trust Project) — quali impegni la
+  testata dichiara in modo leggibile da una macchina: proprietà e
+  finanziamenti, codice etico, rettifiche, diversità, redazione. Noi
+  **contiamo gli impegni dichiarati e mostriamo i link**: non valutiamo
+  il contenuto di quelle pagine, che ognuno può leggere.
+- **Prima copia negli archivi del web** (Internet Archive) — l'età reale
+  del sito, da confrontare con quella dichiarata.
+
+L'assenza di questi dati non è un demerito: `ads.txt` non è
+obbligatorio e gli impegni schema.org sono più diffusi nel mondo
+anglosassone. Sono tessere, non voti.
+
 ## Livello 2 — La selezione: che cosa copre e che cosa ignora (statistica)
 
 Qui non c'è nessuna etichetta decisa da noi: sono conteggi su quello che le

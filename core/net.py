@@ -29,6 +29,7 @@ STATIC_ALLOWED_SUFFIXES: frozenset[str] = frozenset(
         "raw.githubusercontent.com",  # font OFL e asset vendorizzati (solo script di setup)
         "argosopentech.com",  # modelli di traduzione Argos (solo script di setup)
         "public.api.bsky.app",  # AppView pubblica Bluesky, senza chiave (vedi NOTICE)
+        "web.archive.org",  # Internet Archive: CDX API pubblica (età dei siti)
         "test",  # dominio riservato RFC 2606: usato solo nei test
     }
 )

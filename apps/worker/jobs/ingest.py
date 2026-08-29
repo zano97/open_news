@@ -143,6 +143,29 @@ async def ingest_social_job() -> None:
                     log.info("%s: +%d articoli dai canali social", entry.slug, created)
 
 
+async def osint_job() -> None:
+    """Profilo pubblico delle testate: ads.txt, impegni di trasparenza
+    dichiarati, prima copia archiviata. Poche testate per giro, con
+    budget: sono dati che cambiano di rado e il rispetto viene prima."""
+    import time
+
+    from core.osint.profile import profila_fonti
+    from core.refresh_state import tracking
+
+    maker = get_sessionmaker()
+    async with tracking("osint"), build_client() as client:
+        limiter = DomainRateLimiter()
+        robots = RobotsCache(client)
+        async with maker() as session:
+            fatte = await profila_fonti(
+                session, client=client, limiter=limiter, robots=robots,
+                limite=20, scadenza=time.monotonic() + 300,
+            )
+            await session.commit()
+    if fatte:
+        log.info("profilo pubblico aggiornato per %d testate", fatte)
+
+
 async def fetch_fulltext_job(limit: int = 60) -> None:
     from core.refresh_state import tracking
 

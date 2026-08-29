@@ -59,7 +59,23 @@ async def fetch_fulltext(
         return False
     text = extract_text(resp.text, url=article.url)
     if text is None:
-        return False
+        # Pagina disegnata in JavaScript: con l'extra [osint] la si guarda
+        # con un browser vero (Scrapling). Senza, l'articolo resta
+        # analizzabile da titolo e snippet, come sempre.
+        from core.osint.fetch import scrapling_disponibile
+
+        if not scrapling_disponibile():
+            return False
+        import asyncio
+
+        from core.osint.fetch import _rendi_con_scrapling
+
+        resa = await asyncio.to_thread(_rendi_con_scrapling, article.url, 20_000)
+        if not resa.ok:
+            return False
+        text = extract_text(resa.html, url=article.url)
+        if text is None:
+            return False
     article.full_text = text
     await session.flush()
     return True

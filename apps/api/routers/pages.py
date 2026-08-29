@@ -926,12 +926,23 @@ async def fonte(
             locale=locale,
         )
 
+    # Indizi OSINT: solo i gruppi che riguardano QUESTA testata.
+    from core.osint.profile import rete_di_conti
+
+    conti_condivisi = [
+        gruppo
+        for gruppo in await rete_di_conti(session)
+        if slug in gruppo["testate"]
+    ]
+
     return templates.TemplateResponse(
         request,
         "fonte.html",
         {
             **await page_context(request, session),
             "profile": profile,
+            "osint": profile.source.osint or {},
+            "conti_condivisi": conti_condivisi,
             "article_count": article_count,
             "grafo_svg": ownership_graph_svg(profile, locale),
             "provenances": provenances,
