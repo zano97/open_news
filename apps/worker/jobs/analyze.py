@@ -38,6 +38,9 @@ async def cluster_job() -> None:
         stats = await cluster_pending(
             session, deadline=time.monotonic() + 480
         )
+        # Gli agganci sono al sicuro SUBITO: coperture ed entità arrivano
+        # dopo, in transazioni corte.
+        await session.commit()
         refresh_state.set_progress("clustering", 0, len(stats.touched_story_ids) or 1)
         for indice, story_id in enumerate(stats.touched_story_ids, start=1):
             refresh_state.set_progress(
@@ -48,6 +51,8 @@ async def cluster_job() -> None:
             ).scalar_one()
             await compute_coverage(session, story)
             await assign_story_entities(session, story)
+            if indice % 25 == 0:
+                await session.commit()
         if stats.processed:
             # Notizie nuove = copertura cambiata: gli angoli ciechi si
             # ricalcolano SUBITO, a ogni aggiornamento (anche quello del
@@ -152,8 +157,14 @@ async def translate_titles_job() -> None:
             if time.monotonic() > scadenza:
                 break
             try:
-                added += await translate_story_title(session, story, targets=targets)
+                fatte = await translate_story_title(session, story, targets=targets)
+                if fatte:
+                    # Commit PER STORY: ogni traduzione è al sicuro subito,
+                    # e la transazione resta corta (SQLite ringrazia).
+                    await session.commit()
+                added += fatte
             except Exception as exc:  # una story indigesta non ferma il giro
+                await session.rollback()
                 log.warning("titolo della story %s non tradotto: %s", story.id, exc)
             refresh_state.set_progress("traduzioni", indice, len(stories))
         await session.commit()

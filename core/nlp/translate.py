@@ -318,10 +318,14 @@ async def translate_missing(
         if story is None:
             continue
         try:
-            fatte += await translate_story_title(
+            nuove = await translate_story_title(
                 session, story, targets=(locale,), translator=translator
             )
+            if nuove:
+                await session.commit()  # al sicuro subito, transazioni corte
+            fatte += nuove
         except Exception as exc:  # una story indigesta non ferma le altre
+            await session.rollback()
             log.warning("titolo della story %s non tradotto: %s", story_id, exc)
     return fatte
 

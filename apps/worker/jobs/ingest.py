@@ -185,6 +185,8 @@ async def fetch_fulltext_job(limit: int = 60) -> None:
                     session, article, client=client, limiter=limiter, robots=robots
                 ):
                     done += 1
+                    # Ogni testo al sicuro subito: transazioni corte.
+                    await session.commit()
             await session.commit()
     if done:
         log.info("testo integrale scaricato per %d articoli", done)

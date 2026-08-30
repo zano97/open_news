@@ -188,6 +188,8 @@ async def run_pipeline() -> None:
             ).scalar_one()
             await compute_coverage(session, story)
             await assign_story_entities(session, story)
+            if indice % 100 == 0:
+                await session.commit()
         await session.commit()
         print(
             f"clustering: {stats.processed} articoli -> {stats.created} story nuove, "

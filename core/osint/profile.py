@@ -170,8 +170,11 @@ async def profila_fonti(
             await profila_fonte(
                 session, source, client=client, limiter=limiter, robots=robots
             )
+            # Ogni profilo al sicuro subito: transazioni corte.
+            await session.commit()
             fatte += 1
         except Exception as exc:  # una testata ostile non ferma le altre
+            await session.rollback()
             log.warning("profilo OSINT di %s rimandato: %s", source.slug, exc)
     return fatte
 
