@@ -120,19 +120,39 @@ async def ingest_all_feeds(
     from core import refresh_state
 
     refresh_state.set_progress("feed", 0, len(jobs))
-    for fatti, task in enumerate(
-        asyncio.as_completed([run(*job) for job in jobs]), start=1
-    ):
-        src, url, fetch = await task
-        async with lock, maker() as session:
-            merged = await session.get(Source, src.id)
-            assert merged is not None
-            stats = await store_feed(session, merged, url, fetch)
-            await session.commit()
-        created[src.slug] = created.get(src.slug, 0) + stats.created
-        refresh_state.set_progress("feed", fatti, len(jobs))
-        if progress is not None:
-            progress(src.slug, url, stats)
+    # Task ESPLICITI e riassorbiti nel finally: prima, un'eccezione
+    # inattesa su UN feed usciva dal ciclo, il chiamante chiudeva il
+    # client HTTP e tutti i task ancora in volo morivano con «client has
+    # been closed» — gli articoli di quelle testate andavano persi a ogni
+    # giro. Ora un feed che esplode si logga e si salta; la flotta arriva
+    # sempre in fondo e nessun task resta mai orfano.
+    tasks = [asyncio.create_task(run(*job)) for job in jobs]
+    try:
+        for fatti, futuro in enumerate(asyncio.as_completed(tasks), start=1):
+            try:
+                src, url, fetch = await futuro
+            except Exception as exc:  # feed indigesto: non ferma la flotta
+                log.warning("un feed è saltato in questo giro: %s", exc)
+                refresh_state.set_progress("feed", fatti, len(jobs))
+                continue
+            try:
+                async with lock, maker() as session:
+                    merged = await session.get(Source, src.id)
+                    assert merged is not None
+                    stats = await store_feed(session, merged, url, fetch)
+                    await session.commit()
+            except Exception as exc:  # scrittura rimandata: riprova il giro dopo
+                log.warning("%s %s: scrittura rimandata: %s", src.slug, url, exc)
+                refresh_state.set_progress("feed", fatti, len(jobs))
+                continue
+            created[src.slug] = created.get(src.slug, 0) + stats.created
+            refresh_state.set_progress("feed", fatti, len(jobs))
+            if progress is not None:
+                progress(src.slug, url, stats)
+    finally:
+        for pendente in tasks:
+            pendente.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
     return created
 
 
@@ -207,7 +227,10 @@ async def ingest_gdelt_all(
             if matched is not None:
                 by_source.setdefault(matched.id, []).append(item)
         for source in gruppo:
-            await store(source, by_source.get(source.id, []), query)
+            try:
+                await store(source, by_source.get(source.id, []), query)
+            except Exception as exc:  # scrittura rimandata: non ferma il gruppo
+                log.warning("GDELT %s: scrittura rimandata: %s", source.slug, exc)
         return "ok"
 
     async def run_groups(gruppi: list[list[Source]]) -> tuple[list[list[Source]], bool]:

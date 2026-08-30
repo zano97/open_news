@@ -291,3 +291,49 @@ def test_i_job_di_raccolta_partono_subito_all_avvio() -> None:
     for job_id in ("ingest_feeds", "ingest_gdelt", "cluster"):
         job = next(j for j in scheduler.get_jobs() if j.id == job_id)
         assert job.next_run_time is not None and job.next_run_time <= limite, job_id
+
+
+@respx.mock
+async def test_un_feed_avvelenato_non_ammazza_la_flotta(
+    maker: async_sessionmaker,
+) -> None:
+    """Un'eccezione INATTESA su un feed non deve far uscire dal giro: prima
+    il client veniva chiuso sotto i task ancora in volo («Cannot send a
+    request, as the client has been closed») e gli articoli delle altre
+    testate andavano persi. Ora il feed rotto si salta, la flotta finisce,
+    e nessun task resta orfano."""
+    async with maker() as session:
+        session.add(_fonte("sana-a", "sana-a.test", ["https://sana-a.test/rss.xml"]))
+        session.add(_fonte("rotta", "rotta.test", ["https://rotta.test/rss.xml"]))
+        session.add(_fonte("sana-b", "sana-b.test", ["https://sana-b.test/rss.xml"]))
+        await session.commit()
+
+    for host in ("sana-a", "rotta", "sana-b"):
+        respx.get(f"https://{host}.test/robots.txt").mock(
+            return_value=httpx.Response(404)
+        )
+    for host in ("sana-a", "sana-b"):
+        contenuto = FIXTURE_RSS.replace(b"esempio.test", f"{host}.test".encode())
+        respx.get(f"https://{host}.test/rss.xml").mock(
+            return_value=httpx.Response(200, content=contenuto)
+        )
+
+    def esplode(request: httpx.Request) -> httpx.Response:
+        raise ValueError("feed avvelenato: eccezione inattesa")
+
+    respx.get("https://rotta.test/rss.xml").mock(side_effect=esplode)
+
+    async with httpx.AsyncClient() as client:
+        creati = await ingest_all_feeds(
+            maker,
+            client=client,
+            limiter=_limiter(),
+            robots=RobotsCache(client),
+        )
+
+    # Le testate sane sono arrivate in fondo nonostante l'esplosione.
+    assert creati.get("sana-a") == 2
+    assert creati.get("sana-b") == 2
+    async with maker() as session:
+        articoli = list((await session.execute(select(Article))).scalars())
+    assert len(articoli) == 4
