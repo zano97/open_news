@@ -32,7 +32,9 @@
   <ul class="story-versioni">
     {% for a in versioni %}
     <li><span class="versione-testata">{{ a.source.name }}</span>
-      <a href="{{ a.url }}" rel="noopener">{{ a.title }}</a></li>
+      <a href="{{ a.url }}" rel="noopener">{{ a.title }}</a>
+      {% set vt = versione_tradotta(a, locale) %}
+      {% if vt %}<span class="versione-trad">({{ vt }}) <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span></span>{% endif %}</li>
     {% endfor %}
   </ul>
   {% endif %}

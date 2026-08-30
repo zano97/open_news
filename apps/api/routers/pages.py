@@ -564,6 +564,19 @@ async def index(
     ]
     if mancanti:
         kick_translations(mancanti, locale)
+    # Anche i TITOLI DELLE VERSIONI mostrate: si traducono in background
+    # solo quelli visibili (cache per articolo, sentinella inclusa).
+    from core.nlp.translate import _lingua_versione, kick_article_translations
+
+    versioni_da_tradurre = [
+        a.id
+        for versioni in versions_map.values()
+        for a in versioni[:4]
+        if _lingua_versione(a) not in (None, locale)
+        and locale not in (a.title_translations or {})
+    ]
+    if versioni_da_tradurre:
+        kick_article_translations(versioni_da_tradurre, locale)
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -609,6 +622,18 @@ async def storia(
         )
     provenances = await for_entity(session, "story", story.id)
     topic_labels = topic_labels_for(locale)
+    # Le versioni di questa pagina senza traduzione si mandano a tradurre
+    # subito in background (la pastiglia avvisa quando sono pronte).
+    from core.nlp.translate import _lingua_versione, kick_article_translations
+
+    da_tradurre = [
+        a.id
+        for a in story.articles
+        if _lingua_versione(a) not in (None, locale)
+        and locale not in (a.title_translations or {})
+    ]
+    if da_tradurre:
+        kick_article_translations(da_tradurre, locale)
     from core.config import get_settings as _gs
 
     return templates.TemplateResponse(

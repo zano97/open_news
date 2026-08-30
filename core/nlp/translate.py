@@ -377,6 +377,130 @@ def kick_translations(story_ids: list[int], locale: str) -> object | None:
     return asyncio.create_task(_run())
 
 
+def article_translation(article: object, locale: str) -> str | None:
+    """La traduzione VISIBILE del titolo di una versione, se in cache.
+
+    Aiuto di lettura, mai il dato: il titolo originale resta protagonista
+    in pagina. La sentinella vuota ("" = uscita identica) resta nascosta.
+    """
+    lingua = getattr(article, "language", None)
+    fonte = getattr(article, "source", None)
+    if lingua == locale or (fonte is not None and fonte.language == locale):
+        return None
+    cache = getattr(article, "title_translations", None) or {}
+    testo = cache.get(locale)
+    return testo or None
+
+
+def _lingua_versione(article: object) -> str | None:
+    """Sorgente per tradurre una versione: solo con la DOPPIA conferma
+    (lingua rilevata == lingua dichiarata della testata), come per i
+    sottotitoli: il rilevatore sui titoli brevi sbaglia, la testata no."""
+    lingua = getattr(article, "language", None)
+    fonte = getattr(article, "source", None)
+    if lingua and fonte is not None and fonte.language == lingua:
+        return str(lingua)
+    return None
+
+
+async def translate_articles(
+    session: AsyncSession,
+    article_ids: list[int],
+    locale: str,
+    *,
+    translator: Translator | None = None,
+) -> int:
+    """Traduce i titoli delle VERSIONI elencate, nella sola lingua data.
+
+    Cache per articolo con sentinella (mai lo stesso testo all'infinito),
+    commit per articolo (transazioni corte), LAST_TRANSLATION_AT avanzato
+    così la pastiglia «nuove notizie» avvisa quando sono pronte.
+    """
+    import asyncio
+
+    from sqlalchemy import select as sql_select
+
+    from core.models import Article
+
+    translator = translator or get_translator()
+    if translator is None:
+        return 0
+    fatte = 0
+    for article_id in article_ids:
+        article = (
+            await session.execute(
+                sql_select(Article).where(Article.id == article_id)
+            )
+        ).scalar_one_or_none()
+        if article is None:
+            continue
+        source = _lingua_versione(article)
+        if source is None or source == locale:
+            continue
+        cache = dict(article.title_translations or {})
+        if locale in cache:
+            continue
+        try:
+            translated = await asyncio.to_thread(
+                translator.translate, article.title, source, locale
+            )
+        except Exception as exc:  # un titolo indigesto non ferma gli altri
+            log.warning("versione %s non tradotta: %s", article_id, exc)
+            continue
+        if not translated:
+            _registra_esito(None, source, locale, "coppia non disponibile")
+            continue
+        if translated.strip() == article.title.strip():
+            cache[locale] = ""  # sentinella: tentata, uscita identica
+        else:
+            cache[locale] = translated
+            fatte += 1
+        article.title_translations = cache
+        global LAST_TRANSLATION_AT
+        LAST_TRANSLATION_AT = time.time()
+        await session.commit()  # al sicuro subito, transazioni corte
+    return fatte
+
+
+# Versioni già in lavorazione on-demand: mai due volte lo stesso lavoro.
+_KICK_VERSIONI: set[tuple[int, str]] = set()
+
+
+def kick_article_translations(
+    article_ids: list[int], locale: str
+) -> object | None:
+    """Fuoco-e-dimentica dalle pagine: le versioni VISIBILI senza
+    traduzione si traducono subito in background (limite per giro)."""
+    import asyncio
+
+    if get_translator() is None:
+        return None
+    nuovi = [a for a in article_ids if (a, locale) not in _KICK_VERSIONI][:20]
+    if not nuovi:
+        return None
+    for article_id in nuovi:
+        _KICK_VERSIONI.add((article_id, locale))
+
+    async def _run() -> None:
+        try:
+            from core.db import get_sessionmaker
+
+            maker = get_sessionmaker()
+            async with maker() as session:
+                fatte = await translate_articles(session, nuovi, locale)
+            if fatte:
+                log.info(
+                    "tradotte on-demand %d versioni in %s", fatte, locale
+                )
+        except Exception as exc:  # DB occupato o Argos in download: riproverà
+            log.info("traduzioni delle versioni rimandate: %s", exc)
+        finally:
+            for article_id in nuovi:
+                _KICK_VERSIONI.discard((article_id, locale))
+
+    return asyncio.create_task(_run())
+
+
 def display_title(story: Story, locale: str) -> tuple[str, bool]:
     """(titolo da mostrare, è_una_traduzione) per la lingua dell'interfaccia."""
     translations = story.title_translations or {}

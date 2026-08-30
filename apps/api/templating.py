@@ -116,6 +116,11 @@ def build_templates() -> Jinja2Templates:
         lambda story, locale: story.title_neutral
     )
     templates.env.globals["sottotitolo_story"] = headline_subtitle
+    # Traduzione (in cache) del titolo di una VERSIONE: aiuto di lettura,
+    # marcato come automatico; l'originale resta il dato.
+    from core.nlp.translate import article_translation
+
+    templates.env.globals["versione_tradotta"] = article_translation
     return templates
 
 

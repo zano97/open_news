@@ -36,6 +36,12 @@ class Article(Base):
     published_at: Mapped[datetime | None] = mapped_column(TZDateTime())
     fetched_at: Mapped[datetime] = mapped_column(TZDateTime(), default=utcnow)
     language: Mapped[str | None] = mapped_column(String(8))
+    # Traduzioni del titolo per lingua UI: SOLO un aiuto di lettura, il
+    # titolo originale resta il dato misurato. Stessa semantica delle
+    # story ("" = tentata, uscita identica: non si ritenta).
+    title_translations: Mapped[dict[str, str]] = mapped_column(
+        JSONVariant, default=dict
+    )
     authors: Mapped[list[str]] = mapped_column(JSONVariant, default=list)
     # Interna: mai esposta via API né UI. Serve solo all'analisi locale.
     full_text: Mapped[str | None] = mapped_column(Text)

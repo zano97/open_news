@@ -65,6 +65,8 @@
             {%- if owners.get(a.source_id) %} · {{ owners[a.source_id] }}{% endif %}</span>
         </p>
         <h4 class="versione-titolo"><a href="{{ a.url }}" rel="noopener">{{ a.title }}</a></h4>
+        {% set vt = versione_tradotta(a, locale) %}
+        {% if vt %}<p class="versione-trad">({{ vt }}) <span class="badge badge-trad" title="{{ t('trad.automatica') }}">{{ t('trad.badge') }}</span></p>{% endif %}
         {% if a.snippet %}<p class="versione-snippet">{{ a.snippet }}</p>{% endif %}
         {% if a.image_url %}<img class="versione-immagine" src="{{ a.image_url }}" alt="" loading="lazy">{% endif %}
         <p class="versione-meta">{{ a.published_at | data_breve }} {{ a.published_at | ora_breve }}

@@ -493,3 +493,61 @@ async def test_traduzione_salvata_aggiorna_il_segnale_per_il_client(
     ) == 1
     assert modulo.LAST_TRANSLATION_AT is not None
     modulo.LAST_TRANSLATION_AT = None
+
+
+async def test_versioni_tradotte_in_cache_e_mostrate(
+    client: AsyncClient, session: AsyncSession,
+) -> None:
+    """I titoli delle VERSIONI si traducono on-demand con cache per
+    articolo (sentinella inclusa) e compaiono sotto l'originale, marcati.
+    La sorgente vale solo con la doppia conferma lingua articolo/testata."""
+    from core.nlp.translate import article_translation, translate_articles
+
+    story = await _story_italiana(session)
+    fonte_en = Source(
+        slug="ver-en", name="Version Daily", domain="ver.test", country="gb",
+        language="en", region="europe", feed_urls=[], terms_note="",
+    )
+    session.add(fonte_en)
+    await session.flush()
+    versione = Article(
+        source_id=fonte_en.id, url="https://ver.test/1",
+        title="Pension reform approved by government", language="en",
+        story_id=story.id,
+    )
+    sospetta = Article(  # lingua rilevata ≠ lingua testata: non si traduce
+        source_id=fonte_en.id, url="https://ver.test/2",
+        title="Dødstallene stiger", language="no",
+        story_id=story.id,
+    )
+    session.add_all([versione, sospetta])
+    await session.commit()
+
+    finto = TraduttoreRegistratore(
+        {("en", "it"): "Riforma delle pensioni approvata dal governo"}
+    )
+    fatte = await translate_articles(
+        session, [versione.id, sospetta.id], "it", translator=finto
+    )
+    assert fatte == 1
+    await session.refresh(versione)
+    assert versione.title_translations["it"] == (
+        "Riforma delle pensioni approvata dal governo"
+    )
+    assert article_translation(versione, "it") == (
+        "Riforma delle pensioni approvata dal governo"
+    )
+    # La sospetta non è stata toccata (doppia conferma mancante).
+    await session.refresh(sospetta)
+    assert sospetta.title_translations == {}
+    # In cache: nessuna nuova chiamata al traduttore al secondo giro.
+    prima = len(finto.chiamate)
+    assert await translate_articles(
+        session, [versione.id], "it", translator=finto
+    ) == 0
+    assert len(finto.chiamate) == prima
+
+    # E la pagina della story la mostra sotto l'originale, marcata.
+    pagina = await client.get(f"/storia/{story.id}")
+    assert "Pension reform approved by government" in pagina.text
+    assert "(Riforma delle pensioni approvata dal governo)" in pagina.text

@@ -63,6 +63,12 @@ Missing data is not a demerit: `ads.txt` is not mandatory and
 schema.org commitments are more common in the anglophone world. These
 are tiles, not scores.
 
+**A note on translations.** Throughout the interface, automatic
+translations (neutral headlines and version headlines) are a **reading
+aid**, always marked: the datum remains the original headline, which is
+always shown, and every framing measure is computed ONLY on the
+originals — never on translations.
+
 ## Level 2 — Selection: what it covers and what it ignores (statistics)
 
 There is no label decided by us here: these are counts over what the

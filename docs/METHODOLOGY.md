@@ -62,6 +62,12 @@ L'assenza di questi dati non è un demerito: `ads.txt` non è
 obbligatorio e gli impegni schema.org sono più diffusi nel mondo
 anglosassone. Sono tessere, non voti.
 
+**Una nota sulle traduzioni.** In tutta l'interfaccia le traduzioni
+automatiche (titoli neutri e titoli delle versioni) sono un **aiuto di
+lettura**, sempre marcato: il dato resta il titolo originale, che è
+sempre mostrato, e ogni misura sul framing è calcolata SOLO sugli
+originali — mai sulle traduzioni.
+
 ## Livello 2 — La selezione: che cosa copre e che cosa ignora (statistica)
 
 Qui non c'è nessuna etichetta decisa da noi: sono conteggi su quello che le
