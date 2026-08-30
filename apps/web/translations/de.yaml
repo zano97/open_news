@@ -364,4 +364,5 @@ osint.in_corso: "Öffentliches Profil wird erhoben: die Seite aktualisiert sich 
 osint.riprova: "Die vorherige Erhebung schlug fehl (Seite nicht erreichbar): neuer Versuch läuft."
 ultima_ora.titolo: "Letzte Meldungen"
 ultima_ora.aria: "Soeben eingetroffene Nachrichten"
+nav.notizie_nuove: "Neue Nachrichten — zum Aktualisieren tippen"
 svg.mappa_suggerimento: "Punkt berühren für den Namen · Klick für das Profil"

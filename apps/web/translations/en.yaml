@@ -350,4 +350,5 @@ osint.in_corso: "Collecting the public profile: this page refreshes in a few sec
 osint.riprova: "The previous collection failed (site unreachable): trying again now."
 ultima_ora.titolo: "Breaking"
 ultima_ora.aria: "Newly arrived stories"
+nav.notizie_nuove: "Fresh news — tap to refresh"
 svg.mappa_suggerimento: "hover a dot for the name · click for the profile"

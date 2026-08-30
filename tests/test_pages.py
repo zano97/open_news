@@ -437,3 +437,47 @@ async def test_ultima_ora_tradotta_e_garantita_nel_feed(
     assert testo.count("Breaking well covered by outlets") >= 2
     # La story nuova senza traduzione è stata mandata a tradurre.
     assert richieste and senza_traduzione.id in richieste[0]
+
+
+async def test_ultima_ora_solo_storie_nate_da_poco(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Una story di ieri che riceve un articolo di rinforzo NON è
+    «ultima ora»: resta nella griglia (con la data di oggi). Nella fascia
+    stanno solo le storie NATE nelle ultime ore."""
+    adesso = datetime.now(UTC)
+    vecchia_aggiornata = Story(
+        title_neutral="Vecchia storia ancora viva e aggiornata",
+        first_seen=adesso - timedelta(hours=30),
+        last_seen=adesso - timedelta(minutes=5),  # aggiornata ORA
+        article_count=50, source_count=25,
+    )
+    appena_nata = Story(
+        title_neutral="Evento appena successo davvero",
+        first_seen=adesso - timedelta(minutes=40),
+        last_seen=adesso - timedelta(minutes=20),
+        article_count=2, source_count=2,
+    )
+    session.add_all([vecchia_aggiornata, appena_nata])
+    await session.commit()
+
+    testo = (await client.get("/")).text
+    fascia = testo.split("ultima-ora-elenco")[1].split("</section>")[0]
+    assert "Evento appena successo davvero" in fascia
+    assert "Vecchia storia ancora viva" not in fascia
+    # La vecchia resta nella griglia, col suo peso.
+    assert "Vecchia storia ancora viva" in testo
+
+
+async def test_api_aggiornamento_espone_story_recente(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    adesso = datetime.now(UTC)
+    session.add(Story(
+        title_neutral="Segnale per il client",
+        first_seen=adesso, last_seen=adesso,
+        article_count=1, source_count=1,
+    ))
+    await session.commit()
+    dati = (await client.get("/api/aggiornamento")).json()
+    assert dati["story_recente"] is not None

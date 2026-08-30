@@ -118,6 +118,7 @@
     }
     var eraInCorso = !barra.hidden;
     var eraManuale = false;
+    var storyIniziale = null;
     var bottoneAgg = document.querySelector(".aggiorna-bottone");
     var etichettaAgg = bottoneAgg ? bottoneAgg.textContent : "";
     function applicaStato(stato) {
@@ -148,6 +149,16 @@
       }
       var ultimo = document.querySelector("[data-ultimo]");
       if (ultimo && stato.ultimo) ultimo.textContent = stato.ultimo;
+      // Notizie nuove a pagina aperta: quando la story più recente cambia
+      // rispetto al caricamento e il giro è finito, compare l'avviso.
+      if (stato.story_recente) {
+        if (storyIniziale === null) {
+          storyIniziale = stato.story_recente;
+        } else if (stato.story_recente !== storyIniziale && !stato.in_corso) {
+          var avviso = document.querySelector("[data-notizie-nuove]");
+          if (avviso) avviso.hidden = false;
+        }
+      }
       // La ricarica segue SOLO il giro chiesto dal lettore: i cicli
       // automatici che si accodano non la trattengono all'infinito.
       var richiesto = false;
@@ -197,6 +208,16 @@
         .catch(function () { /* server in riavvio: al prossimo giro */ });
     }, 3000);
   }
+
+  // L'avviso «notizie nuove»: un tocco ricarica; al ritorno sulla
+  // finestra (se l'avviso è già comparso) la pagina si rinnova da sola.
+  document.addEventListener("click", function (ev) {
+    if (ev.target.closest("[data-notizie-nuove]")) location.reload();
+  });
+  document.addEventListener("visibilitychange", function () {
+    var avviso = document.querySelector("[data-notizie-nuove]");
+    if (!document.hidden && avviso && !avviso.hidden) location.reload();
+  });
 
   // I link alle testate escono dall'app: si aprono nel browser (nuova
   // scheda/finestra), mai DENTRO la finestra del giornale, che non ha

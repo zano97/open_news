@@ -364,4 +364,5 @@ osint.in_corso: "Collecte du profil public en cours : la page se rafraîchit dan
 osint.riprova: "La collecte précédente a échoué (site injoignable) : nouvelle tentative en cours."
 ultima_ora.titolo: "Dernière heure"
 ultima_ora.aria: "Nouvelles à peine arrivées"
+nav.notizie_nuove: "Nouvelles fraîches — touchez pour actualiser"
 svg.mappa_suggerimento: "survolez un point pour le nom · cliquez pour la fiche"

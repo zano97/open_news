@@ -1285,3 +1285,23 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   color: var(--inchiostro-tenue);
   margin-top: 0.1rem;
 }
+
+
+/* Avviso «notizie nuove»: pastiglia discreta, fissa sotto la testata. */
+.avviso-notizie {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 40;
+  display: block;
+  margin: 0.4rem auto;
+  padding: 0.35rem 1rem;
+  border: 1px solid var(--accento);
+  border-radius: 999px;
+  background: var(--carta);
+  color: var(--accento);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--ombra-morbida, 0 2px 8px rgba(0,0,0,0.12));
+}
+.avviso-notizie:hover { background: var(--accento); color: var(--carta); }

@@ -192,6 +192,9 @@ async def stato_aggiornamento(
     ultimo = (
         await session.execute(select(func.max(Article.fetched_at)))
     ).scalar_one_or_none()
+    story_recente = (
+        await session.execute(select(func.max(Story.last_seen)))
+    ).scalar_one_or_none()
     return {
         "in_corso": bool(_aggiornamento["in_corso"]) or refresh_state.is_running(),
         "giro_manuale": bool(_aggiornamento["in_corso"]),
@@ -199,6 +202,11 @@ async def stato_aggiornamento(
         "fase": fase,
         # Ora LOCALE dell'ultimo articolo raccolto: la testata la mostra viva.
         "ultimo": ultimo.astimezone().strftime("%H:%M") if ultimo else None,
+        # Cambia quando il raggruppamento produce/aggiorna una story: è il
+        # segnale che in pagina c'è qualcosa di nuovo da mostrare.
+        "story_recente": (
+            story_recente.isoformat() if story_recente else None
+        ),
     }
 
 
@@ -493,16 +501,17 @@ async def index(
             candidate,
             key=lambda s: -peso_attualita(s.source_count, s.last_seen),
         )[:36]
-    # «Ultima ora»: le notizie appena arrivate, in ordine di orario. Nella
-    # griglia sotto contano copertura e peso — qui conta solo essere nuove,
-    # così una notizia di venti minuti fa non aspetta di essere ripresa da
-    # dieci testate per comparire.
+    # «Ultima ora»: le notizie NATE da poco (first_seen), in ordine di
+    # nascita. Il criterio non è «aggiornata da poco»: una story di ieri
+    # che riceve un articolo di rinforzo resta nella griglia (dove la sua
+    # scheda porta già la data di oggi), non tra le ultim'ora — lì stanno
+    # solo gli eventi appena successi, per quanto poco coperti.
     ultima_ora = list(
         (
             await session.execute(
                 select(Story)
-                .where(Story.last_seen >= finestra_ultima_ora())
-                .order_by(Story.last_seen.desc())
+                .where(Story.first_seen >= finestra_ultima_ora())
+                .order_by(Story.first_seen.desc())
                 .limit(6)
             )
         ).scalars()

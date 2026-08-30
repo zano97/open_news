@@ -365,4 +365,5 @@ osint.in_corso: "Raccolta del profilo pubblico in corso: la pagina si aggiorna t
 osint.riprova: "La raccolta precedente non è riuscita (sito irraggiungibile): nuovo tentativo in corso."
 ultima_ora.titolo: "Ultima ora"
 ultima_ora.aria: "Notizie appena arrivate"
+nav.notizie_nuove: "Nuove notizie — tocca per aggiornare"
 svg.mappa_suggerimento: "passa sopra un punto per il nome · clic per la scheda"

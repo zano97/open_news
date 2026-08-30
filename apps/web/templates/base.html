@@ -77,6 +77,14 @@
   </div>
 </div>
 
+{% if current_path == '/' %}
+{# Compare quando, a pagina aperta, un giro di raccolta porta story nuove:
+   un tocco e la prima pagina si rinnova (al ritorno sulla finestra lo fa
+   da sola). #}
+<button type="button" class="avviso-notizie" data-notizie-nuove hidden>
+  {{ t('nav.notizie_nuove') }}
+</button>
+{% endif %}
 {% if demo_mode %}
 <p class="banner-demo" role="status">{{ t('demo.banner') | safe }}</p>
 {% endif %}

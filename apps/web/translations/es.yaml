@@ -364,4 +364,5 @@ osint.in_corso: "Recopilando el perfil público: la página se actualiza en unos
 osint.riprova: "La recopilación anterior falló (sitio inaccesible): nuevo intento en curso."
 ultima_ora.titolo: "Última hora"
 ultima_ora.aria: "Noticias recién llegadas"
+nav.notizie_nuove: "Noticias nuevas — toca para actualizar"
 svg.mappa_suggerimento: "pasa sobre un punto para el nombre · clic para la ficha"
