@@ -183,6 +183,12 @@ async def aggiorna_ora(
     return RedirectResponse(ritorno, status_code=303)
 
 
+def _ultima_traduzione() -> float | None:
+    from core.nlp.translate import LAST_TRANSLATION_AT
+
+    return LAST_TRANSLATION_AT
+
+
 @router.get("/api/aggiornamento")
 async def stato_aggiornamento(
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -207,6 +213,9 @@ async def stato_aggiornamento(
         "story_recente": (
             story_recente.isoformat() if story_recente else None
         ),
+        # Cambia quando una traduzione viene salvata (anche dal kick in
+        # background): i sottotitoli nuovi meritano la stessa pastiglia.
+        "traduzioni_al": _ultima_traduzione(),
     }
 
 

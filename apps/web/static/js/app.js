@@ -119,6 +119,7 @@
     var eraInCorso = !barra.hidden;
     var eraManuale = false;
     var storyIniziale = null;
+    var traduzioniIniziali = null;
     var bottoneAgg = document.querySelector(".aggiorna-bottone");
     var etichettaAgg = bottoneAgg ? bottoneAgg.textContent : "";
     function applicaStato(stato) {
@@ -151,13 +152,20 @@
       if (ultimo && stato.ultimo) ultimo.textContent = stato.ultimo;
       // Notizie nuove a pagina aperta: quando la story più recente cambia
       // rispetto al caricamento e il giro è finito, compare l'avviso.
+      var novita = false;
       if (stato.story_recente) {
-        if (storyIniziale === null) {
-          storyIniziale = stato.story_recente;
-        } else if (stato.story_recente !== storyIniziale && !stato.in_corso) {
-          var avviso = document.querySelector("[data-notizie-nuove]");
-          if (avviso) avviso.hidden = false;
-        }
+        if (storyIniziale === null) storyIniziale = stato.story_recente;
+        else if (stato.story_recente !== storyIniziale && !stato.in_corso) novita = true;
+      }
+      // Anche le TRADUZIONI appena salvate (kick in background) contano:
+      // i sottotitoli sono pronti, la pagina merita la pastiglia.
+      if (typeof stato.traduzioni_al === "number") {
+        if (traduzioniIniziali === null) traduzioniIniziali = stato.traduzioni_al;
+        else if (stato.traduzioni_al > traduzioniIniziali) novita = true;
+      }
+      if (novita) {
+        var avviso = document.querySelector("[data-notizie-nuove]");
+        if (avviso) avviso.hidden = false;
       }
       // La ricarica segue SOLO il giro chiesto dal lettore: i cicli
       // automatici che si accodano non la trattengono all'infinito.

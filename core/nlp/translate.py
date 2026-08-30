@@ -38,6 +38,10 @@ PAIR_RETRY_COOLDOWN_SECONDS = 6 * 3600.0
 # non tradotto, qui si legge il PERCHÉ (coppia mancante, testo identico…).
 LAST_ESITI: deque[dict[str, object]] = deque(maxlen=60)
 
+# Epoch dell'ultima traduzione SALVATA: il client la usa per accorgersi
+# che i sottotitoli appena tradotti in background sono pronti da mostrare.
+LAST_TRANSLATION_AT: float | None = None
+
 
 def _registra_esito(story_id: int | None, source: str, target: str, esito: str) -> None:
     LAST_ESITI.appendleft(
@@ -249,6 +253,8 @@ async def translate_story_title(
         added += 1
         _registra_esito(story.id, source, target, "ok")
     if added:
+        global LAST_TRANSLATION_AT
+        LAST_TRANSLATION_AT = time.time()
         story.title_translations = translations
         metodo = translator.name
         await record(

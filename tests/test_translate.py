@@ -475,3 +475,21 @@ async def test_kick_traduzioni_dalla_prima_pagina(
     # A lavoro finito si può richiedere di nuovo (ma non serve più).
     set_translator(None)
     assert kick_translations([story.id], "en") is None  # traduttore assente
+
+
+async def test_traduzione_salvata_aggiorna_il_segnale_per_il_client(
+    session: AsyncSession,
+) -> None:
+    """Quando una traduzione viene salvata (anche dal kick in background),
+    il client deve potersene accorgere: LAST_TRANSLATION_AT avanza e la
+    pastiglia «nuove notizie» compare."""
+    from core.nlp import translate as modulo
+
+    modulo.LAST_TRANSLATION_AT = None
+    story = await _story_italiana(session)
+    finto = TraduttoreRegistratore({("it", "en"): "[EN] segnale"})
+    assert await translate_story_title(
+        session, story, targets=("en",), translator=finto
+    ) == 1
+    assert modulo.LAST_TRANSLATION_AT is not None
+    modulo.LAST_TRANSLATION_AT = None
