@@ -1315,3 +1315,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   color: var(--inchiostro-tenue);
   margin-top: 0.1rem;
 }
+
+
+/* Stato del giro di raccolta, scritto chiaro sotto la testata. */
+.stato-aggiornamento {
+  text-align: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  color: var(--inchiostro-tenue);
+  margin: 0.3rem 0 0.1rem;
+}

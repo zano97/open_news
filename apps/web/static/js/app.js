@@ -167,6 +167,21 @@
         var avviso = document.querySelector("[data-notizie-nuove]");
         if (avviso) avviso.hidden = false;
       }
+      // Stato del giro scritto chiaro sotto la testata (solo prima pagina):
+      // «Aggiornamento in corso… 45% · feed». Quando il giro finisce, la
+      // riga sparisce (e se c'è qualcosa di nuovo arriva la pastiglia).
+      var statoRiga = document.querySelector("[data-stato-aggiornamento]");
+      if (statoRiga) {
+        if (stato.in_corso) {
+          var testo = statoRiga.getAttribute("data-label") || "";
+          if (typeof stato.percento === "number") testo += " " + stato.percento + "%";
+          if (stato.fase) testo += " · " + stato.fase;
+          statoRiga.textContent = testo;
+          statoRiga.hidden = false;
+        } else {
+          statoRiga.hidden = true;
+        }
+      }
       // La ricarica segue SOLO il giro chiesto dal lettore: i cicli
       // automatici che si accodano non la trattengono all'infinito.
       var richiesto = false;

@@ -262,8 +262,11 @@ giudice del bias: impara dal protocollo umano e ne eredita i limiti.
 ## Le regole di presentazione
 
 - La prima pagina è **attualità**: mostra solo story viste nelle ultime
-  **48 ore**, ordinate per copertura **scontata del tempo trascorso**
-  dall'ultimo aggiornamento (la copertura dimezza ogni 12 ore). Una story
+  **48 ore**, ordinate per **copertura recente** (le testate che hanno
+  pubblicato nelle ultime 24 ore) **scontata del tempo trascorso**
+  dall'ultimo aggiornamento (dimezza ogni 12 ore): l'importanza si
+  misura su OGGI, così una story enorme ma ormai a rilento non resta
+  in apertura per sempre. Una story
   enorme di ieri non copre per sempre una story nata oggi; una ancora
   viva resta in alto. La data sulla scheda è quella dell'**ultimo
   articolo**, non della prima apparizione. Se la finestra è vuota (nessun

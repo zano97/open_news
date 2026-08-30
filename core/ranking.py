@@ -10,6 +10,9 @@ il job lavorava su story che nessuno guardava.
 import math
 from datetime import datetime, timedelta
 
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.config import get_settings
 from core.models import utcnow
 
@@ -44,3 +47,31 @@ def peso_attualita(copertura: int, last_seen: datetime) -> float:
     coperta = max(int(copertura), 1) * math.pow(0.5, ore / PESO_DIMEZZAMENTO_ORE)
     novita = BONUS_NOVITA * math.pow(0.5, ore / BONUS_DIMEZZAMENTO_ORE)
     return coperta + novita
+
+
+# L'importanza di OGGI si misura sulla copertura di OGGI: le testate che
+# hanno pubblicato nelle ultime FINESTRA_COPERTURA_ORE. Con la copertura
+# della vita intera, una story-monstre (42 testate accumulate in tre
+# giorni) restava apertura per sempre: nessun evento del giorno, per
+# quanto coperto, poteva batterla.
+FINESTRA_COPERTURA_ORE = 24
+
+
+async def copertura_recente(
+    session: AsyncSession, story_ids: list[int]
+) -> dict[int, int]:
+    """Testate DISTINTE con almeno un articolo recente, per story."""
+    if not story_ids:
+        return {}
+    from core.models import Article
+
+    since = utcnow() - timedelta(hours=FINESTRA_COPERTURA_ORE)
+    rows = await session.execute(
+        select(Article.story_id, func.count(func.distinct(Article.source_id)))
+        .where(
+            Article.story_id.in_(story_ids),
+            func.coalesce(Article.published_at, Article.fetched_at) >= since,
+        )
+        .group_by(Article.story_id)
+    )
+    return {int(sid): int(n) for sid, n in rows if sid is not None}

@@ -282,7 +282,7 @@ async def stories_to_translate(
     """
     from sqlalchemy import select as sql_select
 
-    from core.ranking import finestra_attualita, peso_attualita
+    from core.ranking import copertura_recente, finestra_attualita, peso_attualita
 
     candidate = list(
         (
@@ -302,7 +302,10 @@ async def stories_to_translate(
                 )
             ).scalars()
         )
-    candidate.sort(key=lambda s: -peso_attualita(s.source_count, s.last_seen))
+    recenti = await copertura_recente(session, [s.id for s in candidate])
+    candidate.sort(
+        key=lambda s: -peso_attualita(recenti.get(s.id, 1), s.last_seen)
+    )
     return candidate[:limit]
 
 

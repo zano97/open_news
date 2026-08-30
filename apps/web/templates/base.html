@@ -84,6 +84,10 @@
 <button type="button" class="avviso-notizie" data-notizie-nuove hidden>
   {{ t('nav.notizie_nuove') }}
 </button>
+{# Mentre un giro di raccolta lavora, lo stato è scritto CHIARO, non solo
+   nella barretta: il lettore deve vedere che le notizie stanno arrivando. #}
+<p class="stato-aggiornamento" data-stato-aggiornamento hidden
+   data-label="{{ t('nav.aggiornando') }}"></p>
 {% endif %}
 {% if demo_mode %}
 <p class="banner-demo" role="status">{{ t('demo.banner') | safe }}</p>

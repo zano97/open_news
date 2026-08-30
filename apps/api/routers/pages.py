@@ -506,9 +506,15 @@ async def index(
                     )
                 ).scalars()
             )
+        # L'importanza di OGGI: copertura delle ultime 24 ore (core.ranking),
+        # non della vita intera — una story-monstre di tre giorni non resta
+        # apertura per sempre davanti agli eventi del giorno.
+        from core.ranking import copertura_recente
+
+        recenti = await copertura_recente(session, [s.id for s in candidate])
         stories = sorted(
             candidate,
-            key=lambda s: -peso_attualita(s.source_count, s.last_seen),
+            key=lambda s: -peso_attualita(recenti.get(s.id, 1), s.last_seen),
         )[:36]
     # «Ultima ora»: le notizie NATE da poco (first_seen), in ordine di
     # nascita. Il criterio non è «aggiornata da poco»: una story di ieri
@@ -537,9 +543,14 @@ async def index(
             if s.source_count >= 3 and s.id not in {v.id for v in stories}
         ]
         if garantite:
+            from core.ranking import copertura_recente as _cr
+
+            pesi = await _cr(
+                session, [s.id for s in stories] + [s.id for s in garantite]
+            )
             stories = sorted(
                 stories[: max(len(stories) - len(garantite), 0)] + garantite,
-                key=lambda s: -peso_attualita(s.source_count, s.last_seen),
+                key=lambda s: -peso_attualita(pesi.get(s.id, 1), s.last_seen),
             )
 
     coverages = await _coverages_for(session, [s.id for s in stories])

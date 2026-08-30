@@ -481,3 +481,54 @@ async def test_api_aggiornamento_espone_story_recente(
     await session.commit()
     dati = (await client.get("/api/aggiornamento")).json()
     assert dati["story_recente"] is not None
+
+
+async def test_apertura_pesata_sulla_copertura_di_oggi(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Una story-monstre (42 testate accumulate in giorni) non resta
+    apertura per sempre: il peso usa la copertura delle ULTIME 24 ORE,
+    così l'evento più coperto di oggi la scavalca."""
+    adesso = datetime.now(UTC)
+    fonti = []
+    for i in range(9):
+        f = Source(
+            slug=f"cr-{i}", name=f"CR{i}", domain=f"cr{i}.test", country="it",
+            language="it", region="italy", feed_urls=[], terms_note="",
+        )
+        session.add(f)
+        fonti.append(f)
+    await session.flush()
+
+    monstre = Story(
+        title_neutral="Story monstre di tre giorni fa ancora viva",
+        first_seen=adesso - timedelta(days=3),
+        last_seen=adesso - timedelta(minutes=30),
+        article_count=300, source_count=42,
+    )
+    di_oggi = Story(
+        title_neutral="Evento piu coperto della giornata di oggi",
+        first_seen=adesso - timedelta(hours=6),
+        last_seen=adesso - timedelta(minutes=40),
+        article_count=8, source_count=8,
+    )
+    session.add_all([monstre, di_oggi])
+    await session.flush()
+    # La monstre OGGI ha una sola testata attiva; l'evento di oggi otto.
+    session.add(Article(
+        source_id=fonti[0].id, url="https://cr0.test/m", title="m",
+        language="it", story_id=monstre.id,
+        published_at=adesso - timedelta(minutes=30),
+    ))
+    for i, f in enumerate(fonti[1:9], start=1):
+        session.add(Article(
+            source_id=f.id, url=f"https://cr{i}.test/o", title=f"o{i}",
+            language="it", story_id=di_oggi.id,
+            published_at=adesso - timedelta(hours=1),
+        ))
+    await session.commit()
+
+    testo = (await client.get("/")).text
+    assert testo.index("Evento piu coperto della giornata") < testo.index(
+        "Story monstre di tre giorni fa"
+    )

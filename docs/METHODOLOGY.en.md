@@ -263,8 +263,11 @@ human protocol and inherits its limits.
 ## Presentation rules
 
 - The front page is **current affairs**: it only shows stories seen in
-  the last **48 hours**, ranked by coverage **discounted by the time
-  elapsed** since their last update (coverage halves every 12 hours). A
+  the last **48 hours**, ranked by **recent coverage** (the outlets that
+  published in the last 24 hours) **discounted by the time elapsed**
+  since the last update (halving every 12 hours): importance is
+  measured on TODAY, so a huge but slowing story does not stay as the
+  lead forever. A
   huge story from yesterday does not bury a story born today forever; one
   still alive stays on top. The date on a card is that of the **latest
   article**, not the first appearance. If the window is empty (no recent
